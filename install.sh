@@ -34,7 +34,7 @@ fi
 # URL is identical across files; the installer string-replaces the install.sh
 # segment with the target filename. If GIST_RAW_BASE is provided, use it
 # directly; otherwise try to recover from the script path.
-GIST_RAW_BASE="${GIST_RAW_BASE:-}"
+GIST_RAW_BASE="${GIST_RAW_BASE:-https://gist.githubusercontent.com/debedb/5f606018eb36a75dc292016268f08e7c/raw}"
 
 fetch_to() {
   local src_name="$1"
