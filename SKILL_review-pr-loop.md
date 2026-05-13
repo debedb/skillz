@@ -194,9 +194,15 @@ iteration:
 
 ### Pacing
 
-- Default poll interval: **30 seconds** (idle and active alike).
+- Target poll interval: **30 seconds** (idle and active alike).
   Frequent polling burns cache but matches user-stated preference
   for tight visibility on PR turnaround.
+- Runtime caveat: Claude Code's `ScheduleWakeup` clamps
+  `delaySeconds` to `[60, 3600]`, so wake-up-based loops bottom out
+  at 60s. To honor the 30s target exactly, drive the loop with an
+  in-process `sleep 30` + re-poll within the same invocation rather
+  than via ScheduleWakeup. Otherwise treat 60s as the effective
+  floor.
 - The user can override by passing an explicit interval to /loop
   or by saying "slow down to <N>s".
 - Stop conditions still take precedence over the cadence — never
