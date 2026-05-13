@@ -2,10 +2,11 @@
 name: work-on-pr
 description: |
   Iteratively work on a specific GitHub pull request as the PR author:
-  poll for new review comments / issue comments / inline review
-  threads, address each one (implement fix in a worktree, run tests,
-  commit, push), post a reply summarizing the fix + commit SHA, then
-  sleep and re-check. Loop exits when the PR is approved
+  watch for new review comments / issue comments / inline review
+  threads. If none exist yet, wait and re-check rather than exiting.
+  Address each one (implement fix in a worktree, run tests, commit,
+  push), post a reply summarizing the fix + commit SHA, then keep
+  waiting. Loop exits when the PR is approved
   (`reviewDecision == APPROVED`, or a reviewer leaves an approval-
   phrase comment), when the PR is merged / closed, or when the user
   stops the cycle. Use when: (1) you opened a PR and are now in a
@@ -17,7 +18,7 @@ description: |
   `pr-review-toolkit:review-pr`: that one reviews; this one is the
   author side and drives the entire iterative cycle.
 author: Claude Code
-version: 1.0.0
+version: 1.0.1
 date: 2026-05-12
 ---
 
@@ -37,6 +38,7 @@ final merge. Without a structured loop the agent forgets to:
 - include the commit SHA in the reply,
 - reuse the existing worktree instead of creating a new one,
 - pace polling against the prompt-cache TTL,
+- keep waiting when the PR is quiet and no comments have landed yet,
 - detect the approval / merge exit conditions.
 
 This skill codifies that loop.
@@ -47,8 +49,8 @@ Invoke when:
 
 - User says "address this comment", "address the next comment",
   "iterate on PR #N", "work on PR #N", "watch PR #N for feedback".
-- A PR is open with at least one review or comment outstanding and
-  the user wants the agent to drive the iteration.
+- A PR is open and either feedback already exists or is expected
+  soon, and the user wants the agent to drive the iteration.
 - After an initial PR has been opened (e.g. by the feature-dev or
   rapid-prototyper flow) and review feedback is starting to arrive.
 
@@ -61,9 +63,11 @@ Do NOT use when:
 
 ## Solution
 
-One invocation runs one iteration end-to-end and schedules the next
-one via `ScheduleWakeup` if the loop hasn't terminated. The user
-interrupts at any time.
+One invocation owns the watch loop until a termination condition is
+reached or the user interrupts it. If there is no actionable
+reviewer activity yet, that is an idle wait state, not success: keep
+waiting and re-checking. Prefer `ScheduleWakeup` when the host
+supports it; otherwise sleep and poll again in the same invocation.
 
 ### Single-iteration flow
 
@@ -104,15 +108,19 @@ interrupts at any time.
    - Approval-only reviews (no body, state=APPROVED) → handled in
      step 2; otherwise treat the body as actionable.
 
-5. **No new actionable items → schedule next wake-up and stop.**
+5. **No new actionable items yet → keep waiting.**
+   - No comments yet is not completion; the reviewer may simply not
+     have responded yet.
    - Recent activity (anchor < 10 min old) → short delay
-     (`ScheduleWakeup delaySeconds=270` to stay inside the 5-minute
-     prompt-cache TTL).
-   - Quiet (anchor > 30 min) → long delay
-     (`delaySeconds=1800` or `3600`).
-   - `prompt` field: pass back the same `/work-on-pr <N>` invocation.
-   - Tell the user briefly what was checked and when the next
-     check fires.
+     (`270s` to stay inside the 5-minute prompt-cache TTL).
+   - Quiet (anchor > 30 min) → long delay (`1800s` or `3600s`).
+   - If the environment exposes `ScheduleWakeup`, schedule the next
+     check with the same `/work-on-pr <N>` prompt and end the current
+     iteration.
+   - Otherwise send a brief user-facing wait update, sleep for the
+     chosen delay, and jump back to step 1 in the same invocation.
+   - Only terminate on approval / merge / user stop / hard-cap
+     escalation.
 
 6. **For each new actionable item:**
 
@@ -154,21 +162,24 @@ interrupts at any time.
    reviewer that approved AND left a final comment is still
    approved.
 
-9. **Schedule next wake-up.** Adaptive delay:
+9. **After each addressed cycle, return to waiting.** Adaptive delay:
    - Just pushed a fix → 270s (cache-warm, expect quick reviewer
      turn).
    - Quiet period → 1800s.
    - User instructed "check daily" → 3600s.
-   - Skip reschedule if the loop has terminated.
+   - If `ScheduleWakeup` exists, use it; otherwise sleep and loop
+     in-process.
+   - Skip further waiting if the loop has terminated.
 
 ### Pacing rules
 
 - Anthropic prompt cache TTL is 5 min. Stay under 270s when
   expecting quick turn; jump to ≥1200s when genuinely idle. Don't
   pick 300s — worst-of-both.
-- One iteration = one wake-up = one re-check.
-- Hard cap suggested: 20 wake-ups without progress → stop and
-  escalate.
+- "No new comments yet" is an idle state, not a success condition.
+- One iteration = one poll / action cycle.
+- Hard cap suggested: 20 idle polls without progress → stop and
+  escalate to the user with the current status.
 
 ### Reply convention
 
@@ -195,12 +206,13 @@ interrupts at any time.
 After invoking, expect to see (per iteration):
 
 - A single short user-facing update: "Iteration N on PR #X. Found M
-  new comment(s). Addressing comment <id>." OR "No new comments
-  since <timestamp>; rechecking in <delay>s."
+  new comment(s). Addressing comment <id>." OR "No new comments yet
+  as of <timestamp>; waiting <delay>s before the next check."
 - One commit pushed per round (only when there were actionable
   comments).
 - One reply posted per addressed comment.
-- A `ScheduleWakeup` call unless the loop exited.
+- Either a `ScheduleWakeup` call or an in-process sleep / poll loop
+  unless the loop exited.
 
 Exit signals:
 
@@ -217,6 +229,12 @@ Iteration 1:
   reviewDecision=`CHANGES_REQUESTED`.
 - Worktree at `<repo>-wt-20` doesn't exist → create.
 - Anchor = head commit committed_at = `2026-05-12T18:00:00Z`.
+- No review activity yet. Wait 270s via `ScheduleWakeup` (or sleep
+  270s and re-poll if no scheduler exists).
+
+Iteration 2:
+- `gh pr view 20` → state=OPEN, headRefName=`feature/foo`,
+  reviewDecision=`CHANGES_REQUESTED`.
 - Reviews since anchor → one new review (id 999, state COMMENTED).
 - Read body: "Annotation calls flagged as destructive — that's
   wrong under PEP 563."
@@ -227,20 +245,23 @@ Iteration 1:
 - `ScheduleWakeup(delaySeconds=270, prompt="/work-on-pr 20",
   reason="just pushed reply to review 999; expect fast turnaround")`
 
-Iteration 2 (270s later):
+Iteration 3 (270s later):
 - Anchor = new head commit committed_at.
 - No new reviews/comments. Bump to `ScheduleWakeup(delaySeconds=1800,
   ...)`
 
-Iteration 7:
+Iteration 8:
 - Latest review state == APPROVED → exit. Final summary:
-  "PR #20 approved by @reviewer in 6 rounds. Ready to merge."
+  "PR #20 approved by @reviewer in 7 rounds. Ready to merge."
 
 ## Notes
 
 - **State derivation, not persistence**: each invocation re-derives
   what's new from GitHub timestamps and the bot's own posted
   comments. No `.claude/work-on-pr-state.json` needed.
+- **Invoking before comments exist is expected.** The skill's job is
+  to watch the PR until feedback arrives, not to treat an empty poll
+  as completion.
 - **Approval phrase detection** is heuristic. A maintainer comment
   with the literal words "I approve" without using the GitHub
   approve button counts here; if false-positive risk is high in a
@@ -255,6 +276,9 @@ Iteration 7:
   drop to `gh api` for the per-thread surfaces and for fields the
   high-level commands don't expose (committed_at, individual review
   bodies by ID).
+- **Scheduler fallback**: if `ScheduleWakeup` is unavailable in the
+  host agent, keep the current turn alive with `sleep` + re-poll
+  instead of returning "nothing to do".
 - **Multiple new comments in one wake-up**: address them in
   submitted_at order; one commit per coherent fix-set is fine, as
   long as each addressed comment gets its own reply with the same

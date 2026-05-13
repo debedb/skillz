@@ -5,9 +5,11 @@ description: |
   read the underlying issue(s) the PR claims to address, read ALL
   prior review comments / issue comments / inline threads so prior
   context is not lost, then review the new diff or the author's
-  latest response, leave structured feedback (REQUEST_CHANGES /
-  COMMENT) or APPROVE, sleep, re-check, repeat. Loop exits when you
-  approve, the PR is merged or closed, or the user stops the cycle.
+  latest response. If the author has not responded yet, wait and
+  re-check rather than exiting. Leave structured feedback
+  (REQUEST_CHANGES / COMMENT) or APPROVE, then keep watching. Loop
+  exits when you approve, the PR is merged or closed, or the user
+  stops the cycle.
   Use when: (1) you are the reviewer on a non-trivial PR and want
   the agent to drive the back-and-forth, (2) the author keeps
   pushing fixes and you want each new commit re-reviewed
@@ -18,7 +20,7 @@ description: |
   this one drives the iterative cycle and pulls issue + comment
   context every round.
 author: Claude Code
-version: 1.0.0
+version: 1.0.1
 date: 2026-05-12
 ---
 
@@ -52,7 +54,8 @@ Invoke when:
 - User says "review PR #N", "watch PR #N for changes and re-review",
   "review this PR loop", "act as reviewer on PR #N".
 - You are the assigned or self-appointed reviewer on a PR and the
-  author is iterating.
+  author is iterating, or you want the agent to keep waiting for the
+  next author response / push.
 
 Do NOT use when:
 
@@ -62,7 +65,11 @@ Do NOT use when:
 
 ## Solution
 
-One invocation runs one iteration. Each iteration:
+One invocation owns the watch loop. If there is no new author
+activity yet, that is an idle wait state, not completion: keep
+waiting and re-checking. Prefer `ScheduleWakeup` when the host
+supports it; otherwise sleep and poll again in the same invocation.
+Each iteration:
 
 1. **Pull full context first — every round.** This is the most
    important rule.
@@ -113,6 +120,8 @@ One invocation runs one iteration. Each iteration:
    - From `gh api repos/:owner/:repo/pulls/<N>/commits`, list
      commits added after `anchor`. These define the new diff scope.
    - From comment surfaces, list author responses since `anchor`.
+   - If there are no new commits and no new author responses since
+     `anchor`, skip the review steps for this pass and go to step 10.
 
 5. **First round (no prior review by you)**:
    - Treat the entire PR diff as in scope.
@@ -167,10 +176,13 @@ One invocation runs one iteration. Each iteration:
      [[gh-git-heredoc-body-file]]).
 
 10. **Schedule next wake-up** unless the loop terminated.
+    - No new author activity yet → idle wait, not exit.
     - Just left a REQUEST_CHANGES → expect fast author turn → 270s
       (cache-warm).
     - Just left COMMENT → 600-1200s.
     - Quiet (no author activity) → 1800-3600s.
+    - If `ScheduleWakeup` exists, use it; otherwise send a brief
+      wait update, sleep, and loop in-process.
 
 ### Pacing
 
@@ -178,6 +190,7 @@ Same prompt-cache-aware rules as `work-on-pr`:
 - Active turn → 270s.
 - Idle → 1200-1800s.
 - Avoid 300s (worst-of-both).
+- "No author activity yet" is an idle state, not completion.
 
 ### Tone
 
@@ -201,9 +214,11 @@ After invoking, expect (per iteration):
 - A short user-facing update: "Reviewing PR #N round R. Read issue
   #X (acceptance criteria: ...), K prior reviews, M issue comments.
   Found F blocking, G non-blocking. Leaving <REQUEST_CHANGES /
-  COMMENT / APPROVE>."
+  COMMENT / APPROVE>." OR "No author activity since <timestamp>;
+  waiting <delay>s before the next check."
 - One `gh pr review` call.
-- Either a `ScheduleWakeup` or termination.
+- Either a `ScheduleWakeup`, an in-process sleep / poll loop, or
+  termination.
 
 Exit signals:
 
@@ -267,6 +282,8 @@ Iteration 7:
   - The issue itself may have been updated by the user mid-cycle.
 - **Diff scope**: review only commits since your last review unless
   this is your first round. Don't re-review approved code.
+- **Invoking before the author responds is expected.** The skill's
+  job is to keep watching until there is something new to review.
 - **In a multi-reviewer PR**, prefer leaving comments addressed to
   the specific author's last response rather than top-level
   comments, so threads stay coherent.
@@ -282,6 +299,9 @@ Iteration 7:
   reflects it.
 - **gh CLI vs API**: `gh pr review` for the event; `gh api` for
   per-thread inline comments and for fetching review bodies by ID.
+- **Scheduler fallback**: if `ScheduleWakeup` is unavailable in the
+  host agent, keep the current turn alive with `sleep` + re-poll
+  instead of returning early on an idle pass.
 
 ## References
 

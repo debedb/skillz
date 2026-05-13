@@ -3,18 +3,18 @@
 Two paired Claude Code skills that drive the iterative back-and-forth
 of a GitHub pull request review cycle:
 
-- **work-on-pr** — author-side loop. Poll for new review comments /
-  issue comments / inline threads, address each in a worktree, run
-  tests, commit, push, post a reply with the commit SHA, sleep,
-  repeat. Exits on approval (`reviewDecision == APPROVED`, or an
-  approval-phrase comment), PR merge / close, or user stop. Uses
-  adaptive `ScheduleWakeup` pacing keyed to the Anthropic prompt-cache
-  TTL (270s after a push, 1200–1800s when idle).
-- **review-pr-loop** — reviewer-side loop. **Every round** re-reads
-  the linked issue(s) AND all prior reviews + issue comments +
-  inline threads, then diffs only the commits since your last review,
-  synthesizes severity-tagged findings, and leaves
-  REQUEST_CHANGES / COMMENT / APPROVE. Same adaptive pacing.
+- **work-on-pr** — author-side loop. Watch for new review comments /
+  issue comments / inline threads, wait when feedback has not landed
+  yet, address each in a worktree, run tests, commit, push, post a
+  reply with the commit SHA, then keep waiting. Exits on approval
+  (`reviewDecision == APPROVED`, or an approval-phrase comment), PR
+  merge / close, or user stop.
+- **review-pr-loop** — reviewer-side loop. Every round re-read the
+  linked issue(s) AND all prior reviews + issue comments + inline
+  threads, then review the new diff or author's latest response. If
+  the author has not responded yet, keep waiting rather than exiting.
+  Leaves REQUEST_CHANGES / COMMENT / APPROVE and keeps watching until
+  approve / merge / close / user stop.
 
 Both use the same `gh` API surfaces and the `--body-file` convention
 to avoid shell-quoting traps.
@@ -77,9 +77,9 @@ Reviewer side, on someone else's PR #N:
 /review-pr-loop N
 ```
 
-Each skill runs one iteration end-to-end (poll, act, reply, schedule)
-and reschedules itself via `ScheduleWakeup`. Interrupt at any time to
-stop the loop.
+Each skill owns the watch loop. If `ScheduleWakeup` is available, it
+uses that between polls; otherwise it sleeps and re-polls in-process.
+Invoking before comments exist is expected.
 
 ## Source
 
