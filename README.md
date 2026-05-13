@@ -17,7 +17,11 @@ of a GitHub pull request review cycle:
   approve / merge / close / user stop.
 
 Both use the same `gh` API surfaces and the `--body-file` convention
-to avoid shell-quoting traps.
+to avoid shell-quoting traps. Both now explicitly keep the watch loop
+alive until a stop condition fires, using `270s` / `1800s`-class
+delays by default rather than ad hoc `30s` polling, and they treat
+approval-gated commands as a preflight concern rather than a reason
+to exit the loop.
 
 ## Install (one-liner)
 
@@ -79,7 +83,8 @@ Reviewer side, on someone else's PR #N:
 
 Each skill owns the watch loop. If `ScheduleWakeup` is available, it
 uses that between polls; otherwise it sleeps and re-polls in-process.
-Invoking before comments exist is expected.
+Invoking before comments exist is expected, and an idle poll is not
+completion.
 
 ## Source
 

@@ -7,9 +7,9 @@ description: |
   context is not lost, then review the new diff or the author's
   latest response. If the author has not responded yet, wait and
   re-check rather than exiting. Leave structured feedback
-  (REQUEST_CHANGES / COMMENT) or APPROVE, then keep watching. Loop
-  exits when you approve, the PR is merged or closed, or the user
-  stops the cycle.
+  (REQUEST_CHANGES / COMMENT) or APPROVE, then keep watching until
+  one of the stop conditions is reached. Loop exits when you approve,
+  the PR is merged or closed, or the user stops the cycle.
   Use when: (1) you are the reviewer on a non-trivial PR and want
   the agent to drive the back-and-forth, (2) the author keeps
   pushing fixes and you want each new commit re-reviewed
@@ -20,7 +20,7 @@ description: |
   this one drives the iterative cycle and pulls issue + comment
   context every round.
 author: Claude Code
-version: 1.0.1
+version: 1.0.2
 date: 2026-05-12
 ---
 
@@ -69,7 +69,8 @@ One invocation owns the watch loop. If there is no new author
 activity yet, that is an idle wait state, not completion: keep
 waiting and re-checking. Prefer `ScheduleWakeup` when the host
 supports it; otherwise sleep and poll again in the same invocation.
-Each iteration:
+Do not return just because one idle poll or sleep completed. Each
+iteration:
 
 1. **Pull full context first — every round.** This is the most
    important rule.
@@ -174,6 +175,10 @@ Each iteration:
      so each blocking finding lands next to the offending line.
    - Use `--body-file`, not `-b`, to dodge shell quoting (see
      [[gh-git-heredoc-body-file]]).
+   - In approval-gated sandboxes, preflight the write operations
+     likely to recur in this loop: `gh pr review` and any inline
+     `gh api .../reviews` posts. Reuse already-approved prefixes when
+     possible, and do not treat "approval needed" as loop completion.
 
 10. **Schedule next wake-up** unless the loop terminated.
     - No new author activity yet → idle wait, not exit.
@@ -183,6 +188,8 @@ Each iteration:
     - Quiet (no author activity) → 1800-3600s.
     - If `ScheduleWakeup` exists, use it; otherwise send a brief
       wait update, sleep, and loop in-process.
+    - Do not substitute ad hoc `30s` sleeps unless the user
+      explicitly asked for aggressive polling.
 
 ### Pacing
 
@@ -191,6 +198,8 @@ Same prompt-cache-aware rules as `work-on-pr`:
 - Idle → 1200-1800s.
 - Avoid 300s (worst-of-both).
 - "No author activity yet" is an idle state, not completion.
+- Sub-minute sleeps are only for explicit user overrides, not the
+  default watch loop.
 
 ### Tone
 
@@ -302,6 +311,10 @@ Iteration 7:
 - **Scheduler fallback**: if `ScheduleWakeup` is unavailable in the
   host agent, keep the current turn alive with `sleep` + re-poll
   instead of returning early on an idle pass.
+- **Approval-aware execution**: in constrained sandboxes, GitHub
+  review submissions and inline review-comment writes may need
+  approval. Ask once with stable command shapes if needed, then keep
+  the loop going until a real stop condition fires.
 
 ## References
 

@@ -6,7 +6,8 @@ description: |
   threads. If none exist yet, wait and re-check rather than exiting.
   Address each one (implement fix in a worktree, run tests, commit,
   push), post a reply summarizing the fix + commit SHA, then keep
-  waiting. Loop exits when the PR is approved
+  waiting until one of the stop conditions is reached. Loop exits
+  when the PR is approved
   (`reviewDecision == APPROVED`, or a reviewer leaves an approval-
   phrase comment), when the PR is merged / closed, or when the user
   stops the cycle. Use when: (1) you opened a PR and are now in a
@@ -18,7 +19,7 @@ description: |
   `pr-review-toolkit:review-pr`: that one reviews; this one is the
   author side and drives the entire iterative cycle.
 author: Claude Code
-version: 1.0.1
+version: 1.0.2
 date: 2026-05-12
 ---
 
@@ -39,6 +40,8 @@ final merge. Without a structured loop the agent forgets to:
 - reuse the existing worktree instead of creating a new one,
 - pace polling against the prompt-cache TTL,
 - keep waiting when the PR is quiet and no comments have landed yet,
+- avoid ad hoc sub-minute polling that burns turns without reaching a
+  stop condition,
 - detect the approval / merge exit conditions.
 
 This skill codifies that loop.
@@ -68,6 +71,9 @@ reached or the user interrupts it. If there is no actionable
 reviewer activity yet, that is an idle wait state, not success: keep
 waiting and re-checking. Prefer `ScheduleWakeup` when the host
 supports it; otherwise sleep and poll again in the same invocation.
+Do not return just because a quiet poll or one sleep interval
+completed. A loop round only ends early if it actually scheduled a
+continuation elsewhere, or if a real stop condition fired.
 
 ### Single-iteration flow
 
@@ -90,6 +96,15 @@ supports it; otherwise sleep and poll again in the same invocation.
    - `git worktree list` to check; if absent, create one at
      `feature/<branch-name>` tracking `origin/<headRefName>`.
    - `cd <worktree>` for all subsequent edits.
+   - If the host uses sandbox approvals, preflight the operations
+     this loop is likely to need: `git add` / `git commit`,
+     `git push origin <branch>`, `gh pr comment`, and inline
+     `gh api .../replies`.
+   - Reuse already-approved command prefixes when possible.
+   - If approvals are likely to recur, request scoped prefix
+     approvals up front rather than waiting until after tests pass.
+   - An approval request is not a stop condition; once granted,
+     continue the loop.
 
 4. **Determine what's new since last addressed.**
    - "Last addressed" anchor = max(committed_at of head commit,
@@ -119,6 +134,8 @@ supports it; otherwise sleep and poll again in the same invocation.
      iteration.
    - Otherwise send a brief user-facing wait update, sleep for the
      chosen delay, and jump back to step 1 in the same invocation.
+   - Do not substitute ad hoc `30s` sleeps unless the user explicitly
+     asked for aggressive polling.
    - Only terminate on approval / merge / user stop / hard-cap
      escalation.
 
@@ -169,6 +186,8 @@ supports it; otherwise sleep and poll again in the same invocation.
    - User instructed "check daily" → 3600s.
    - If `ScheduleWakeup` exists, use it; otherwise sleep and loop
      in-process.
+   - Keep the same delay policy in-process; do not collapse to short
+     ad hoc sleeps just because the loop is already running.
    - Skip further waiting if the loop has terminated.
 
 ### Pacing rules
@@ -177,6 +196,8 @@ supports it; otherwise sleep and poll again in the same invocation.
   expecting quick turn; jump to ≥1200s when genuinely idle. Don't
   pick 300s — worst-of-both.
 - "No new comments yet" is an idle state, not a success condition.
+- Sub-minute sleeps are only for explicit user overrides, not the
+  default watch loop.
 - One iteration = one poll / action cycle.
 - Hard cap suggested: 20 idle polls without progress → stop and
   escalate to the user with the current status.
@@ -279,6 +300,12 @@ Iteration 8:
 - **Scheduler fallback**: if `ScheduleWakeup` is unavailable in the
   host agent, keep the current turn alive with `sleep` + re-poll
   instead of returning "nothing to do".
+- **Approval-aware execution**: in constrained sandboxes, `git add` /
+  `git commit` may need approval for shared git metadata writes, and
+  `git push` / `gh pr comment` / inline `gh api` replies may need
+  approval for network writes. Anticipate those operations, keep the
+  command forms stable so prefix approvals can be reused, and do not
+  treat "approval needed" as loop completion.
 - **Multiple new comments in one wake-up**: address them in
   submitted_at order; one commit per coherent fix-set is fine, as
   long as each addressed comment gets its own reply with the same
