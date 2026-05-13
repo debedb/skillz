@@ -25,15 +25,17 @@ to avoid shell-quoting traps.
 bash <(curl -sL https://gist.githubusercontent.com/debedb/5f606018eb36a75dc292016268f08e7c/raw/install.sh)
 ```
 
-If the process-substitution form can't locate the sibling SKILL files
-(some `curl | bash` setups don't expose them), set `GIST_RAW_BASE`:
+`install.sh` knows the gist raw URL and downloads each SKILL file
+into `~/.claude/skills/<name>/SKILL.md` automatically.
+
+GitHub's raw CDN sometimes serves a stale `install.sh` for a few
+minutes after a gist edit. If the one-liner above fails or doesn't
+have the latest behaviour, pin to the most recent revision SHA:
 
 ```bash
-GIST_RAW_BASE=https://gist.githubusercontent.com/debedb/5f606018eb36a75dc292016268f08e7c/raw \
-  bash <(curl -sL https://gist.githubusercontent.com/debedb/5f606018eb36a75dc292016268f08e7c/raw/install.sh)
+REV=$(gh api gists/5f606018eb36a75dc292016268f08e7c --jq '.history[0].version')
+bash <(curl -sL "https://gist.githubusercontent.com/debedb/5f606018eb36a75dc292016268f08e7c/raw/${REV}/install.sh")
 ```
-
-Replace `debedb/5f606018eb36a75dc292016268f08e7c` with this gist's coordinates.
 
 ## Install (from a clone)
 
