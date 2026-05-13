@@ -20,8 +20,8 @@ description: |
   this one drives the iterative cycle and pulls issue + comment
   context every round.
 author: Claude Code
-version: 1.0.2
-date: 2026-05-12
+version: 1.0.3
+date: 2026-05-13
 ---
 
 # review-pr-loop
@@ -215,6 +215,15 @@ Same prompt-cache-aware rules as `work-on-pr`:
 When approving, include a one-sentence summary of what's done in
 this round (not the whole PR history). The author already has the
 history.
+
+**Reviewing your own PR.** GitHub rejects `--approve` and
+`--request-changes` events when the reviewer is the PR author
+(`GraphQL: Review Can not approve / request changes on your own
+pull request`). On self-review, use `--comment` and include explicit
+LGTM / "blocking" language so the paired `work-on-pr` skill (or a
+later merger) can read intent. This is not a stop condition: keep
+the watch loop alive until merge / close / user stop. Do not retry
+the same `--approve` call expecting a different answer.
 
 ## Verification
 
