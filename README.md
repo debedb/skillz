@@ -22,23 +22,23 @@ to avoid shell-quoting traps.
 ## Install (one-liner)
 
 ```bash
-bash <(curl -sL https://gist.githubusercontent.com/<USER>/<GIST_ID>/raw/install.sh)
+bash <(curl -sL https://gist.githubusercontent.com/debedb/5f606018eb36a75dc292016268f08e7c/raw/install.sh)
 ```
 
 If the process-substitution form can't locate the sibling SKILL files
 (some `curl | bash` setups don't expose them), set `GIST_RAW_BASE`:
 
 ```bash
-GIST_RAW_BASE=https://gist.githubusercontent.com/<USER>/<GIST_ID>/raw \
-  bash <(curl -sL https://gist.githubusercontent.com/<USER>/<GIST_ID>/raw/install.sh)
+GIST_RAW_BASE=https://gist.githubusercontent.com/debedb/5f606018eb36a75dc292016268f08e7c/raw \
+  bash <(curl -sL https://gist.githubusercontent.com/debedb/5f606018eb36a75dc292016268f08e7c/raw/install.sh)
 ```
 
-Replace `<USER>/<GIST_ID>` with this gist's coordinates.
+Replace `debedb/5f606018eb36a75dc292016268f08e7c` with this gist's coordinates.
 
 ## Install (from a clone)
 
 ```bash
-git clone https://gist.github.com/<USER>/<GIST_ID>.git /tmp/skills-gist
+git clone https://gist.github.com/debedb/5f606018eb36a75dc292016268f08e7c.git /tmp/skills-gist
 cd /tmp/skills-gist
 ./install.sh
 ```
