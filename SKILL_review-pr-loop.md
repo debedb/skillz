@@ -20,7 +20,7 @@ description: |
   this one drives the iterative cycle and pulls issue + comment
   context every round.
 author: Claude Code
-version: 1.0.3
+version: 1.1.0
 date: 2026-05-13
 ---
 
@@ -181,25 +181,42 @@ iteration:
      possible, and do not treat "approval needed" as loop completion.
 
 10. **Schedule next wake-up** unless the loop terminated.
-    - No new author activity yet → idle wait, not exit.
-    - Just left a REQUEST_CHANGES → expect fast author turn → 270s
-      (cache-warm).
-    - Just left COMMENT → 600-1200s.
-    - Quiet (no author activity) → 1800-3600s.
-    - If `ScheduleWakeup` exists, use it; otherwise send a brief
-      wait update, sleep, and loop in-process.
-    - Do not substitute ad hoc `30s` sleeps unless the user
-      explicitly asked for aggressive polling.
+    - Default cadence: **30 seconds**, every pass, idle or active.
+    - The loop continues until a stop condition fires (you approved,
+      PR merged/closed, user interrupts). Both branches — goal
+      reached and user-interrupt — terminate; everything else
+      reschedules.
+    - If `ScheduleWakeup` exists, use it; otherwise sleep 30s and
+      loop in-process.
+    - **Surface status every tick.** Each pass emits one short
+      user-facing line so the operator can see what changed (or
+      didn't) without opening GitHub. See "Status line" below.
 
 ### Pacing
 
-Same prompt-cache-aware rules as `work-on-pr`:
-- Active turn → 270s.
-- Idle → 1200-1800s.
-- Avoid 300s (worst-of-both).
-- "No author activity yet" is an idle state, not completion.
-- Sub-minute sleeps are only for explicit user overrides, not the
-  default watch loop.
+- Default poll interval: **30 seconds** (idle and active alike).
+  Frequent polling burns cache but matches user-stated preference
+  for tight visibility on PR turnaround.
+- The user can override by passing an explicit interval to /loop
+  or by saying "slow down to <N>s".
+- Stop conditions still take precedence over the cadence — never
+  reschedule after approve / merge / close / user-stop.
+
+### Status line
+
+Every iteration emits a single status line to the user, even when
+nothing changed. Format suggestion:
+
+```
+PR #<N> r<round> | state=<OPEN/MERGED/CLOSED> head=<sha7>
+last-author-activity=<iso> new-since-last=<n commits, m comments>
+action=<leaving REVIEW | idle wait | exit:<reason>>
+next=<delaySeconds>s
+```
+
+If a review was posted this pass, also include the event type and a
+1-line digest of findings. If the pass was idle, that fact alone is
+the status — do not pad with prose.
 
 ### Tone
 
