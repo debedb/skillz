@@ -1,26 +1,9 @@
 ---
 name: review-pr-loop
 description: |
-  Iteratively review a specific GitHub pull request as the reviewer:
-  read the underlying issue(s) the PR claims to address, read ALL
-  prior review comments / issue comments / inline threads so prior
-  context is not lost, then review the new diff or the author's
-  latest response. If the author has not responded yet, wait and
-  re-check rather than exiting. Leave structured feedback
-  (REQUEST_CHANGES / COMMENT) or APPROVE, then keep watching until
-  one of the stop conditions is reached. Loop exits when you approve,
-  the PR is merged or closed, or the user stops the cycle.
-  Use when: (1) you are the reviewer on a non-trivial PR and want
-  the agent to drive the back-and-forth, (2) the author keeps
-  pushing fixes and you want each new commit re-reviewed
-  automatically, (3) you want to ensure each review round actually
-  reads the linked issue and prior comments rather than just the
-  latest diff in isolation. Differs from the one-shot
-  `pr-review-toolkit:review-pr` skill: that one is a single sweep;
-  this one drives the iterative cycle and pulls issue + comment
-  context every round.
+  Iteratively review a GitHub pull request across multiple rounds. Each round, read the linked issue(s), prior review comments, issue comments, and inline threads before reviewing only the new diff or the author's latest response. If no author response exists yet, wait and re-check instead of exiting. Leave structured feedback (REQUEST_CHANGES, COMMENT, or APPROVE) and continue until you approve, the PR is merged or closed, or the user stops the loop. Use when you are the reviewer on a non-trivial PR and want the agent to own the back-and-forth review cycle rather than doing a one-shot review.
 author: Claude Code
-version: 1.1.0
+version: 1.1.1
 date: 2026-05-13
 ---
 
@@ -197,12 +180,13 @@ iteration:
 - Target poll interval: **30 seconds** (idle and active alike).
   Frequent polling burns cache but matches user-stated preference
   for tight visibility on PR turnaround.
-- Runtime caveat: Claude Code's `ScheduleWakeup` clamps
-  `delaySeconds` to `[60, 3600]`, so wake-up-based loops bottom out
-  at 60s. To honor the 30s target exactly, drive the loop with an
-  in-process `sleep 30` + re-poll within the same invocation rather
-  than via ScheduleWakeup. Otherwise treat 60s as the effective
-  floor.
+- Runtime caveat: some hosts clamp `ScheduleWakeup`; Claude
+  Code, for example, clamps `delaySeconds` to `[60, 3600]`, so
+  wake-up-based loops there bottom out at 60s. To honor the 30s
+  target exactly on such hosts, drive the loop with an in-process
+  `sleep 30` + re-poll within the same invocation rather than via
+  `ScheduleWakeup`. Otherwise treat the host's clamp floor as the
+  effective minimum.
 - The user can override by passing an explicit interval to /loop
   or by saying "slow down to <N>s".
 - Stop conditions still take precedence over the cadence — never
@@ -357,3 +341,4 @@ Iteration 7:
 - Related skills: [[work-on-pr]] (author side of the same loop),
   [[pr-review-toolkit:review-pr]] (one-shot review),
   [[gh-git-heredoc-body-file]] (body-file pattern).
+

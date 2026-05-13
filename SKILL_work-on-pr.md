@@ -1,25 +1,9 @@
 ---
 name: work-on-pr
 description: |
-  Iteratively work on a specific GitHub pull request as the PR author:
-  watch for new review comments / issue comments / inline review
-  threads. If none exist yet, wait and re-check rather than exiting.
-  Address each one (implement fix in a worktree, run tests, commit,
-  push), post a reply summarizing the fix + commit SHA, then keep
-  waiting until one of the stop conditions is reached. Loop exits
-  when the PR is approved
-  (`reviewDecision == APPROVED`, or a reviewer leaves an approval-
-  phrase comment), when the PR is merged / closed, or when the user
-  stops the cycle. Use when: (1) you opened a PR and are now in a
-  back-and-forth review cycle and want the agent to drive each
-  iteration end-to-end, (2) reviewer keeps catching new issues across
-  multiple rounds and a one-shot reply is not enough, (3) you want to
-  hand off the address-reply-wait loop to the agent so the human only
-  intervenes at approval / scope changes. Differs from the one-shot
-  `pr-review-toolkit:review-pr`: that one reviews; this one is the
-  author side and drives the entire iterative cycle.
+  Iteratively work on a GitHub pull request as the author. Watch for new review comments, issue comments, and inline threads; if nothing new exists yet, wait and re-check instead of exiting. For each actionable item, implement the fix in the PR worktree, run relevant tests, commit and push, then reply with a summary and commit SHA. Continue until the PR is approved, merged or closed, or the user stops the loop. Use when you want the agent to own the address-test-push-reply-wait cycle across multiple review rounds rather than handling a single review comment.
 author: Claude Code
-version: 1.0.2
+version: 1.0.3
 date: 2026-05-12
 ---
 
@@ -279,7 +263,7 @@ Iteration 8:
 
 - **State derivation, not persistence**: each invocation re-derives
   what's new from GitHub timestamps and the bot's own posted
-  comments. No `.claude/work-on-pr-state.json` needed.
+  comments. No local state file is needed.
 - **Invoking before comments exist is expected.** The skill's job is
   to watch the PR until feedback arrives, not to treat an empty poll
   as completion.
@@ -325,3 +309,4 @@ Iteration 8:
   [[gh-git-heredoc-body-file]] (body-file pattern),
   [[python-ast-static-analyzer-scoping]] (worked example of an
   iterative review cycle this skill drove).
+
