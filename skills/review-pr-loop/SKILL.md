@@ -3,7 +3,7 @@ name: review-pr-loop
 description: |
   Iteratively review a GitHub pull request across multiple rounds. Each round, read the linked issue(s), prior review comments, issue comments, and inline threads before reviewing only the new diff or the author's latest response. If no author response exists yet, wait and re-check instead of exiting. Leave structured feedback (REQUEST_CHANGES, COMMENT, or APPROVE) and continue until you approve, the PR is merged or closed, or the user stops the loop. Use when you are the reviewer on a non-trivial PR and want the agent to own the back-and-forth review cycle rather than doing a one-shot review.
 author: Claude Code
-version: 1.2.1
+version: 1.2.2
 date: 2026-05-14
 source: https://github.com/debedb/skillz
 source_file: skills/review-pr-loop/SKILL.md
@@ -58,10 +58,11 @@ Do NOT use when:
 One invocation owns the watch loop. If there is no new author
 activity yet, that is an idle wait state, not completion: keep
 waiting and re-checking. Prefer `ScheduleWakeup` when the host
-supports it; otherwise sleep and poll again in the same invocation.
-Do not return just because one idle poll or sleep completed. An idle
-pass is never a terminal condition; it must reschedule. Each
-iteration:
+supports it and the wake-up survives the current turn; otherwise
+sleep and poll again in the same invocation. Do not return just
+because one idle poll or sleep completed. An idle pass is never a
+terminal condition; it must either schedule a real wake-up or stay
+alive for the next in-process poll. Each iteration:
 
 While the loop is active, do not send a terminal/final handoff
 message just to summarize status. Use progress/status updates only.
@@ -199,8 +200,15 @@ and empty polls are never completion.
       said `LGTM` or equivalent, PR merged/closed, or user
       interrupts). Only those terminal conditions end the loop;
       everything else, including idle passes, reschedules.
-    - If `ScheduleWakeup` exists, use it; otherwise sleep for the
-      active poll interval and loop in-process.
+    - If `ScheduleWakeup` exists and actually survives the current
+      turn in this host, use it.
+    - Otherwise sleep for the active poll interval and loop
+      in-process, but only if the invocation is staying alive. An
+      in-process sleep does not survive a `final` handoff.
+    - If neither is possible because the host has no durable scheduler
+      and the invocation is about to end, stop the watch explicitly
+      with `action=watch stopped:no scheduler in host` instead of
+      implying that polling will continue.
     - **Surface status every tick.** Each pass emits one short
       user-facing line so the operator can see what changed (or
       didn't) without opening GitHub. See "Status line" below.
@@ -220,6 +228,10 @@ and empty polls are never completion.
   `sleep 30` + re-poll within the same invocation rather than via
   `ScheduleWakeup`. Otherwise treat the host's clamp floor as the
   effective minimum.
+- Only print `next=<delaySeconds>s` when the next wake-up is real:
+  either a durable wake-up was scheduled or the current invocation is
+  definitely staying alive to sleep and re-poll. If neither is true,
+  report `watch stopped:no scheduler in host` instead.
 - The user can override by passing an explicit interval to /loop
   or by saying "slow down to <N>s"; keep using that override on
   subsequent passes until changed.
@@ -234,7 +246,7 @@ nothing changed. Format suggestion:
 ```
 PR #<N> r<round> | state=<OPEN/MERGED/CLOSED> head=<sha7>
 last-author-activity=<iso> new-since-last=<n commits, m comments>
-action=<leaving REVIEW | idle wait | exit:<reason>>
+action=<leaving REVIEW | idle wait | exit:<reason> | watch stopped:<reason>>
 next=<delaySeconds>s
 ```
 
@@ -242,10 +254,16 @@ If a review was posted this pass, also include the event type and a
 1-line digest of findings. If the pass was idle, that fact alone is
 the status — do not pad with prose.
 
+`next=<delaySeconds>s` is optional. Omit it unless a wake-up was
+actually scheduled or the current invocation is about to sleep and
+re-poll in-process.
+
 If the watch loop is no longer active, say so explicitly in the status
 line (`action=watch stopped:<reason>`) instead of implying polling is
 still happening. Never emit `watch stopped` on an idle pass or any
-other non-terminal state.
+other non-terminal state. Host capability failure is the exception:
+if the invocation is ending and no durable scheduler exists, emit
+`watch stopped:no scheduler in host`.
 
 ### Tone
 
@@ -282,7 +300,10 @@ After invoking, expect (per iteration):
   #X (acceptance criteria: ...), K prior reviews, M issue comments.
   Found F blocking, G non-blocking. Leaving <REQUEST_CHANGES /
   COMMENT / APPROVE>." OR "No author activity since <timestamp>;
-  waiting <delay>s before the next check."
+  waiting <delay>s before the next check." If no real scheduler
+  exists and the invocation must end, expect an explicit
+  `watch stopped:no scheduler in host` status instead of a fake
+  waiting line.
 - One `gh pr review` call.
 - Either a `ScheduleWakeup`, an in-process sleep / poll loop, or
   termination.
