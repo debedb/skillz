@@ -3,7 +3,7 @@ name: work-on-pr
 description: |
   Iteratively work on a GitHub pull request as the author. Watch for new review comments, issue comments, and inline threads; if nothing new exists yet, wait and re-check instead of exiting. For each actionable item, implement the fix in the PR worktree, run relevant tests, commit and push, then reply with a summary and commit SHA. Continue until the PR is approved, merged or closed, or the user stops the loop. Also accepts an issue reference instead of a PR: in that case the skill creates the PR (if absent), guarantees the PR body contains `Closes #<issue>`, and then enters the watch loop. Use when you want the agent to own the start-PR or address-test-push-reply-wait cycle across multiple review rounds rather than handling a single review comment.
 author: Claude Code
-version: 1.4.0
+version: 1.5.0
 date: 2026-05-14
 source: https://github.com/debedb/skillz
 source_file: skills/work-on-pr/SKILL.md
@@ -124,11 +124,21 @@ continuation elsewhere, or if a real stop condition fired.
      `feedback-worktree-pr-workflow` convention).
    - `git worktree list` to check; if absent, create one at
      `feature/<branch-name>` tracking `origin/<headRefName>`.
-   - `cd <worktree>` for all subsequent edits.
+   - Run subsequent git operations in single-shot form via
+     `git -C <worktree-path> <subcommand> ...`. Do NOT chain a
+     `cd <worktree>` with `&&` in front of `git`. The compound
+     does not match any single `Bash(git ...)` allow pattern, so
+     it forces a permission prompt every time even when the
+     standalone git command would have been auto-allowed. See the
+     "Auto-approved operations" section below for the matching
+     allow entries.
+   - For ad-hoc reads (`git status`, `git --no-pager diff`, etc.)
+     the same rule applies: use `git -C <worktree> --no-pager
+     <subcommand>` rather than `cd <worktree> && git ...`.
    - If the host uses sandbox approvals, preflight the operations
-     this loop is likely to need: `git add` / `git commit`,
-     `git push origin <branch>`, `gh pr comment`, and inline
-     `gh api .../replies`.
+     this loop is likely to need: `git -C <worktree> add` /
+     `git -C <worktree> commit`, `git -C <worktree> push origin
+     <branch>`, `gh pr comment`, and inline `gh api .../replies`.
    - Reuse already-approved command prefixes when possible.
    - If approvals are likely to recur, request scoped prefix
      approvals up front rather than waiting until after tests pass.
@@ -183,9 +193,16 @@ continuation elsewhere, or if a real stop condition fired.
       fix and which review/comment ID it addresses. Use HEREDOC via a
       `/tmp` file for the commit body to avoid shell-quoting traps
       when the body contains quotes or backticks (see
-      `gh-git-heredoc-body-file` skill).
+      `gh-git-heredoc-body-file` skill). Invoke the commit as
+      `git -C <worktree> commit -F /tmp/...` so the call matches a
+      single allow entry; chained `cd <worktree> && git commit ...`
+      will prompt every time.
 
-   e. **Push** the feature branch.
+   e. **Push** the feature branch via
+      `git -C <worktree> push origin <branch>`. The allow block
+      below pairs `Bash(git push origin feature/*)` with the
+      `Bash(git -C * push origin feature/*)` form so either cwd
+      shape works without a prompt.
 
    f. **Post a reply.** Body explains what was done and references
       the commit SHA. Use `gh pr comment <N> --body-file /tmp/...` —
@@ -247,7 +264,14 @@ permission prompts every iteration. Add these patterns to
       "Bash(gh api repos/*/pulls/*/comments/*)",
       "Bash(gh api repos/*/pulls/*/comments/*/replies)",
       "Bash(gh api repos/*/issues/*/comments)",
-      "Bash(git push origin feature/*)"
+      "Bash(git push origin feature/*)",
+      "Bash(git -C * push origin feature/*)",
+      "Bash(git -C * add:*)",
+      "Bash(git -C * commit:*)",
+      "Bash(git -C * status)",
+      "Bash(git -C * --no-pager log:*)",
+      "Bash(git -C * --no-pager diff:*)",
+      "Bash(git -C * --no-pager show:*)"
     ]
   }
 }
@@ -260,6 +284,37 @@ infrastructure or master directly. Static `Bash(...)` entries in
 `permissions.allow` short-circuit PreToolUse hooks (see
 [[claude-code-static-allow-bypasses-hook]]), so once these are in
 place the loop runs without prompts.
+
+**Why the `git -C *` patterns matter.** Claude Code matches each
+`Bash(...)` allow entry against the *full* command string. A
+compound like `cd <worktree> && git push origin <branch>` starts
+with `cd`, so `Bash(git push origin feature/*)` never fires on it
+even though the second segment would match on its own. The
+host's Bash-tool description is explicit:
+
+> never prepend `cd <current-directory>` to a `git` command —
+> the compound triggers a permission prompt
+
+The loop avoids that trap by running every git operation in
+single-shot form via `git -C <worktree-path>` instead of
+`cd <worktree> && git ...`. The `git -C * <subcommand>` allow
+entries above cover that form; the original `Bash(git push origin
+feature/*)` is kept for the (rarer) case where the agent really is
+in the worktree's cwd.
+
+The same compound-matching rule applies to multi-step chains like
+`git -C X commit ... && git -C X push ...`. Issue separate Bash
+tool calls instead of chaining with `&&`. CC's allow matcher does
+not split compounds for you.
+
+For commands that an allowlist cannot reasonably cover — the most
+common one being a quick `cat <file> | python3 -c "<inline>"`
+introspection — expect a prompt. The YOLT hook (when installed)
+classifies `python3 -c "<inline>"` as `unknown` rather than `safe`
+because it cannot statically analyze a single-string script
+without parsing it as Python, and the matcher conservatively asks.
+Pulling the snippet into a real `.py` file and invoking
+`python3 path/to/file.py` makes it analyzable.
 
 What is intentionally NOT on the auto-approve list:
 

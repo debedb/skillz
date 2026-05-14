@@ -9,6 +9,7 @@
 - [Install (from a clone)](#install-from-a-clone)
 - [Verify](#verify)
 - [Usage](#usage)
+- [Reducing permission prompts (Claude Code)](#reducing-permission-prompts-claude-code)
 - [Related code-review approaches](#related-code-review-approaches)
 
 ## Overview
@@ -103,6 +104,46 @@ Each skill owns the watch loop. If `ScheduleWakeup` is available, it
 uses that between polls; otherwise it sleeps and re-polls in-process.
 Invoking before comments exist is expected, and an idle poll is not
 completion.
+
+## Reducing permission prompts (Claude Code)
+
+The author-side loop pushes commits, posts comments, and replies to
+review threads several times per PR. Without the right
+`permissions.allow` patterns in `~/.claude/settings.json`, Claude
+Code will prompt for each of those writes every round and the loop
+stalls waiting for you to click through.
+
+The recommended allow block lives in
+[`skills/work-on-pr/SKILL.md`](skills/work-on-pr/SKILL.md), under
+"Auto-approved operations (self-PR workflow)". Copy it into your
+`~/.claude/settings.json` before the first run.
+
+Two pitfalls worth calling out up front:
+
+- **Never chain `cd <worktree> && git ...`.** Claude Code matches
+  each allow entry against the full command string. The compound
+  starts with `cd`, so a pattern like
+  `Bash(git push origin feature/*)` does not fire even though the
+  second segment would match on its own. The host's Bash-tool docs
+  say this explicitly: *"never prepend `cd <current-directory>` to
+  a `git` command — the compound triggers a permission prompt."*
+  Use `git -C <worktree-path> <subcommand>` instead, and add the
+  matching `Bash(git -C * <subcommand>:*)` entries from the SKILL's
+  allow block. The same rule applies to chains like
+  `git -C X commit ... && git -C X push ...` — issue them as
+  separate Bash tool calls, not a single `&&` string.
+- **`python3 -c "<inline>"` does not auto-allow.** Read-only
+  introspection like
+  `cat ~/.claude/settings.json | python3 -c "<parse>"` still
+  prompts because Claude Code (and the YOLT hook, where installed)
+  treats an inline `-c` script as opaque. Pull the snippet into a
+  real `.py` file and invoke `python3 path/to/script.py` to make
+  it analyzable, or accept the one-off prompt.
+
+See `skills/work-on-pr/SKILL.md` → "Auto-approved operations" for
+the full pattern list and the rationale behind every entry that is
+intentionally NOT auto-approved (`git push origin master`,
+`git push --force`, `gh repo delete`, etc.).
 
 ## Related code-review approaches
 
