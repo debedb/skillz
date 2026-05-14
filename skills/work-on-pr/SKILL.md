@@ -3,17 +3,17 @@ name: work-on-pr
 description: |
   Iteratively work on a GitHub pull request as the author. Watch for new review comments, issue comments, and inline threads; if nothing new exists yet, wait and re-check instead of exiting. For each actionable item, implement the fix in the PR worktree, run relevant tests, commit and push, then reply with a summary and commit SHA. Continue until the PR is approved, merged or closed, or the user stops the loop. Use when you want the agent to own the address-test-push-reply-wait cycle across multiple review rounds rather than handling a single review comment.
 author: Claude Code
-version: 1.1.0
+version: 1.2.0
 date: 2026-05-13
-source: https://gist.github.com/debedb/5f606018eb36a75dc292016268f08e7c
-source_file: SKILL_work-on-pr.md
+source: https://github.com/debedb/skillz
+source_file: skills/work-on-pr/SKILL.md
 ---
 
-> **Canonical source.** This skill lives in the gist at
-> https://gist.github.com/debedb/5f606018eb36a75dc292016268f08e7c
-> (file: `SKILL_work-on-pr.md`). Pull canonical version:
-> `gh gist view 5f606018eb36a75dc292016268f08e7c -f SKILL_work-on-pr.md --raw`.
-> Push updates: `gh gist edit 5f606018eb36a75dc292016268f08e7c -f SKILL_work-on-pr.md ~/.claude/skills/work-on-pr/SKILL.md`.
+> **Canonical source.** This skill lives in the repo at
+> https://github.com/debedb/skillz (file: `skills/work-on-pr/SKILL.md`).
+> Updates go through the repo's worktree + PR workflow — open an issue,
+> branch, PR. The repo replaced gist 5f606018eb36a75dc292016268f08e7c,
+> which is preserved as a redirect.
 
 # work-on-pr
 
