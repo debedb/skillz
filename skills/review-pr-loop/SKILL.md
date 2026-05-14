@@ -3,8 +3,8 @@ name: review-pr-loop
 description: |
   Iteratively review a GitHub pull request across multiple rounds. Each round, read the linked issue(s), prior review comments, issue comments, and inline threads before reviewing only the new diff or the author's latest response. If no author response exists yet, wait and re-check instead of exiting. Leave structured feedback (REQUEST_CHANGES, COMMENT, or APPROVE) and continue until you approve, the PR is merged or closed, or the user stops the loop. Use when you are the reviewer on a non-trivial PR and want the agent to own the back-and-forth review cycle rather than doing a one-shot review.
 author: Claude Code
-version: 1.2.0
-date: 2026-05-13
+version: 1.2.1
+date: 2026-05-14
 source: https://github.com/debedb/skillz
 source_file: skills/review-pr-loop/SKILL.md
 ---
@@ -59,14 +59,16 @@ One invocation owns the watch loop. If there is no new author
 activity yet, that is an idle wait state, not completion: keep
 waiting and re-checking. Prefer `ScheduleWakeup` when the host
 supports it; otherwise sleep and poll again in the same invocation.
-Do not return just because one idle poll or sleep completed. Each
+Do not return just because one idle poll or sleep completed. An idle
+pass is never a terminal condition; it must reschedule. Each
 iteration:
 
 While the loop is active, do not send a terminal/final handoff
 message just to summarize status. Use progress/status updates only.
-Only end the invocation when a real stop condition fires (approved /
-merged / closed / user-stop) or when the watch loop has explicitly
-stopped and you say so.
+Only end the invocation when one of these terminal conditions fires:
+you approved / said `LGTM` or equivalent, the PR merged or closed, or
+the user explicitly stopped the loop. Idle passes, approval prompts,
+and empty polls are never completion.
 
 1. **Pull full context first — every round.** This is the most
    important rule.
@@ -193,10 +195,10 @@ stopped and you say so.
     - If the user asks for a different cadence (for example
       "slow down to 180s"), treat that as the active poll interval for
       the rest of the invocation unless the user changes it again.
-    - The loop continues until a stop condition fires (you approved,
-      PR merged/closed, user interrupts). Both branches — goal
-      reached and user-interrupt — terminate; everything else
-      reschedules.
+    - The loop continues until a stop condition fires (you approved /
+      said `LGTM` or equivalent, PR merged/closed, or user
+      interrupts). Only those terminal conditions end the loop;
+      everything else, including idle passes, reschedules.
     - If `ScheduleWakeup` exists, use it; otherwise sleep for the
       active poll interval and loop in-process.
     - **Surface status every tick.** Each pass emits one short
@@ -242,7 +244,8 @@ the status — do not pad with prose.
 
 If the watch loop is no longer active, say so explicitly in the status
 line (`action=watch stopped:<reason>`) instead of implying polling is
-still happening.
+still happening. Never emit `watch stopped` on an idle pass or any
+other non-terminal state.
 
 ### Tone
 
@@ -290,7 +293,8 @@ Exit signals:
 - You approved → stop.
 - PR closed/merged → stop.
 - User stops loop → stop.
-- 20 idle wake-ups → escalate.
+- 20 idle wake-ups → notify/escalate to the user, but keep polling
+  unless the user explicitly stops the loop.
 
 ## Example
 
