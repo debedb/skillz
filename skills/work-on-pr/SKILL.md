@@ -1,9 +1,9 @@
 ---
 name: work-on-pr
 description: |
-  Iteratively work on a GitHub pull request as the author. Watch for new review comments, issue comments, and inline threads; if nothing new exists yet, wait and re-check instead of exiting. For each actionable item, implement the fix in the PR worktree, run relevant tests, commit and push, then reply with a summary and commit SHA. Continue until the PR is approved, merged or closed, or the user stops the loop. Use when you want the agent to own the address-test-push-reply-wait cycle across multiple review rounds rather than handling a single review comment.
+  Iteratively work on a GitHub pull request as the author. Watch for new review comments, issue comments, and inline threads; if nothing new exists yet, wait and re-check instead of exiting. For each actionable item, implement the fix in the PR worktree, run relevant tests, commit and push, then reply with a summary and commit SHA. Continue until the PR is approved, merged or closed, or the user stops the loop. Also accepts an issue reference instead of a PR: in that case the skill creates the PR (if absent), guarantees the PR body contains `Closes #<issue>`, and then enters the watch loop. Use when you want the agent to own the start-PR or address-test-push-reply-wait cycle across multiple review rounds rather than handling a single review comment.
 author: Claude Code
-version: 1.2.0
+version: 1.3.0
 date: 2026-05-13
 source: https://github.com/debedb/skillz
 source_file: skills/work-on-pr/SKILL.md
@@ -48,11 +48,14 @@ Invoke when:
   soon, and the user wants the agent to drive the iteration.
 - After an initial PR has been opened (e.g. by the feature-dev or
   rapid-prototyper flow) and review feedback is starting to arrive.
+- The user supplies an **issue** reference (URL or `#N`) and asks
+  the agent to start a PR. The skill creates the PR (if not yet
+  open) and then enters the watch loop. The created PR body MUST
+  contain `Closes #<issue>` so merging the PR auto-closes the
+  issue.
 
 Do NOT use when:
 
-- Opening a brand new PR (use the normal feature-branch + `gh pr
-  create` flow first, then hand off here).
 - Just reviewing someone else's PR — see `review-pr-loop` instead.
 - The PR is already approved or merged — nothing to drive.
 
@@ -69,11 +72,45 @@ continuation elsewhere, or if a real stop condition fired.
 
 ### Single-iteration flow
 
-1. **Resolve PR coordinates.**
-   - PR identifier from skill args: number, URL, or branch.
-   - `gh pr view <N> --json
-     number,state,headRefName,headRefOid,baseRefName,mergeable,reviewDecision,url`
-   - If `state != OPEN` → report and stop (no reschedule).
+1. **Resolve invocation target.**
+   - Parse the skill args. Two valid shapes:
+     - **PR ref**: number, PR URL, or branch name. Skip to 1a.
+     - **Issue ref**: issue URL (`https://github.com/<owner>/<repo>/issues/<N>`)
+       or `#<N>` plus repo context. Go through 1b first.
+   - **1a. Existing PR:** `gh pr view <N> --json
+     number,state,headRefName,headRefOid,baseRefName,mergeable,reviewDecision,url,body`.
+     If `state != OPEN` → report and stop (no reschedule). Then run
+     step 1c (issue-linkage repair).
+   - **1b. Issue → PR (create if absent):** check whether a PR
+     already exists for the issue:
+     - `gh pr list --repo <owner>/<repo> --search "Closes #<N> in:body" --state open --json number,url`,
+       or grep the user-author's open PRs for a branch matching the
+       issue.
+     - If no PR exists, create the worktree (step 3) and the feature
+       branch, scaffold the work needed by the issue, push, then run
+       `gh pr create` with a body that includes `Closes #<N>` (use a
+       `--body-file` heredoc so quoting survives). The PR's first
+       commit on the branch is fine even if it is just a scaffolding
+       commit; subsequent rounds add real fixes. After creation,
+       continue with step 2 on the just-created PR.
+     - If a PR exists, hand off to step 1a.
+   - **1c. Issue-linkage repair (existing PR + known issue):**
+     when the invocation arg is an issue ref AND an open PR was
+     found, check whether the PR's body contains a closing keyword
+     for that issue:
+     ```
+     /\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+#<N>\b/i
+     ```
+     (also accept `<owner>/<repo>#<N>` form). If absent, edit the
+     PR body to append `Closes #<N>`:
+     ```
+     body=$(gh pr view <PR> --json body --jq .body)
+     printf '%s\n\nCloses #%s\n' "$body" <N> > /tmp/pr-body.md
+     gh pr edit <PR> --body-file /tmp/pr-body.md
+     ```
+     Use `--body-file` so multiline bodies and backticks survive.
+     This step is idempotent; running it on a PR that already has
+     `Closes #<N>` is a no-op.
 
 2. **Check exit condition: approved.**
    - `reviewDecision == "APPROVED"` → stop, report success.
@@ -282,6 +319,14 @@ After invoking, expect to see (per iteration):
 - Either a `ScheduleWakeup` call or an in-process sleep / poll loop
   unless the loop exited.
 
+When invoked with an issue reference, additionally expect:
+
+- A new PR whose body contains `Closes #<issue>` (idempotent — the
+  agent must not add a duplicate `Closes` line if one already
+  exists).
+- OR, if a PR for that issue already exists, the PR body edited
+  exactly once to append `Closes #<issue>` if it was missing.
+
 Exit signals:
 
 - `reviewDecision == APPROVED` → summary + stop.
@@ -322,6 +367,36 @@ Iteration 8:
 - Latest review state == APPROVED → exit. Final summary:
   "PR #20 approved by @reviewer in 7 rounds. Ready to merge."
 
+### Example: issue-mode invocation
+
+User: "/work-on-pr Issue https://github.com/voitta-ai/voitta-yolt/issues/18, start a PR"
+
+Iteration 1:
+- Parse arg → issue ref: owner=`voitta-ai`, repo=`voitta-yolt`, N=18.
+- Search for an open PR linking issue 18 → none.
+- Read issue body. Implement the scoped work in a fresh worktree
+  on `feature/issue-18-<slug>` tracking `origin/master`.
+- `gh pr create --body-file /tmp/pr.md` where the body contains
+  a `## Summary` section and the line `Closes #18`.
+- Confirm in the PR's `body` field that `Closes #18` is present
+  (idempotency guard: do not add a second `Closes #18` if one is
+  already there).
+- Enter the watch loop on the just-created PR.
+
+Iteration 2+: identical to the PR-mode flow above.
+
+### Example: existing PR + missing `Closes`
+
+User: "/work-on-pr Issue https://github.com/foo/bar/issues/42"
+
+- Parse arg → issue ref. PR search finds open PR #99 on a branch
+  whose name contains `issue-42`.
+- `gh pr view 99 --json body` → body lacks any `Closes #42` /
+  `Fixes #42` / `Resolves #42`.
+- `gh pr edit 99 --body-file /tmp/pr-body.md` with the original
+  body + `\n\nCloses #42\n` appended.
+- Continue with normal watch loop on PR 99.
+
 ## Notes
 
 - **State derivation, not persistence**: each invocation re-derives
@@ -344,6 +419,20 @@ Iteration 8:
   drop to `gh api` for the per-thread surfaces and for fields the
   high-level commands don't expose (committed_at, individual review
   bodies by ID).
+- **Issue closing keywords**: GitHub honors `close[sd]?`, `fix(es|ed)?`,
+  `resolve[sd]?` (case-insensitive) followed by `#N` or
+  `owner/repo#N`. The detection regex must accept all of these so
+  the skill does not append a second `Closes #N` when the user
+  already wrote `Fixes #N`. Default to `Closes #N` when adding one,
+  since "closes" is the most generic verb.
+- **Idempotency**: every issue-linkage step must be safe to re-run.
+  The repair appends exactly one `Closes #N` line, only when none
+  of the recognized keywords match `#N` in the existing body. The
+  same holds for PR-create when an issue ref is supplied — never
+  emit a second `Closes #N`.
+- **Bumping the version**: when editing this skill, increment
+  `version:` in the frontmatter so installed copies can be compared
+  against the canonical source.
 - **Scheduler fallback**: if `ScheduleWakeup` is unavailable in the
   host agent, keep the current turn alive with `sleep` + re-poll
   instead of returning "nothing to do".
