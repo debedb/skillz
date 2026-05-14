@@ -3,9 +3,17 @@ name: work-on-pr
 description: |
   Iteratively work on a GitHub pull request as the author. Watch for new review comments, issue comments, and inline threads; if nothing new exists yet, wait and re-check instead of exiting. For each actionable item, implement the fix in the PR worktree, run relevant tests, commit and push, then reply with a summary and commit SHA. Continue until the PR is approved, merged or closed, or the user stops the loop. Use when you want the agent to own the address-test-push-reply-wait cycle across multiple review rounds rather than handling a single review comment.
 author: Claude Code
-version: 1.0.3
-date: 2026-05-12
+version: 1.1.0
+date: 2026-05-13
+source: https://gist.github.com/debedb/5f606018eb36a75dc292016268f08e7c
+source_file: SKILL_work-on-pr.md
 ---
+
+> **Canonical source.** This skill lives in the gist at
+> https://gist.github.com/debedb/5f606018eb36a75dc292016268f08e7c
+> (file: `SKILL_work-on-pr.md`). Pull canonical version:
+> `gh gist view 5f606018eb36a75dc292016268f08e7c -f SKILL_work-on-pr.md --raw`.
+> Push updates: `gh gist edit 5f606018eb36a75dc292016268f08e7c -f SKILL_work-on-pr.md ~/.claude/skills/work-on-pr/SKILL.md`.
 
 # work-on-pr
 
@@ -173,6 +181,61 @@ continuation elsewhere, or if a real stop condition fired.
    - Keep the same delay policy in-process; do not collapse to short
      ad hoc sleeps just because the loop is already running.
    - Skip further waiting if the loop has terminated.
+
+### Auto-approved operations (self-PR workflow)
+
+When the agent is iterating on its own PR (author side, not
+reviewing someone else's), the following operations should be on
+the user's `permissions.allow` list so the loop does not stall on
+permission prompts every iteration. Add these patterns to
+`~/.claude/settings.json`:
+
+```json
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh pr create:*)",
+      "Bash(gh pr edit:*)",
+      "Bash(gh pr comment:*)",
+      "Bash(gh pr merge:*)",
+      "Bash(gh pr ready:*)",
+      "Bash(gh issue create:*)",
+      "Bash(gh issue comment:*)",
+      "Bash(gh issue edit:*)",
+      "Bash(gh api repos/*/pulls/*/comments)",
+      "Bash(gh api repos/*/pulls/*/comments/*)",
+      "Bash(gh api repos/*/pulls/*/comments/*/replies)",
+      "Bash(gh api repos/*/issues/*/comments)",
+      "Bash(git push origin feature/*)"
+    ]
+  }
+}
+```
+
+Rationale: every entry is a *write* the loop does on the agent's
+own work — opening the PR, replying to its reviews, pushing
+follow-up commits to its feature branch. None of them touch shared
+infrastructure or master directly. Static `Bash(...)` entries in
+`permissions.allow` short-circuit PreToolUse hooks (see
+[[claude-code-static-allow-bypasses-hook]]), so once these are in
+place the loop runs without prompts.
+
+What is intentionally NOT on the auto-approve list:
+
+- `git push origin master` / `git push --force` — never auto-allow
+  pushing to a default branch.
+- `gh pr merge` of someone else's PR — the pattern above covers
+  `gh pr merge <N>` of any PR, so use scoped prefixes
+  (e.g. `Bash(gh pr merge:*)`) only when you trust the agent to
+  judge merge readiness. If not, drop that one entry.
+- `gh release create` — release artifacts deserve a human gate.
+- `gh repo delete` / `gh repo archive` — irreversible.
+
+For YOLT users (`voitta-yolt` hook): the bundled `rules/shell.json`
+classifies the same `gh pr/issue/api` writes as `safe` so the hook
+agrees with the allowlist. The hook is bypassed when allowlist
+matches, but consistent classification helps when the same agent
+runs in a context without the allowlist.
 
 ### Pacing rules
 
