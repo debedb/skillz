@@ -3,8 +3,8 @@ name: work-on-pr
 description: |
   Iteratively work on a GitHub pull request as the author. Watch for new review comments, issue comments, and inline threads; if nothing new exists yet, wait and re-check instead of exiting. For each actionable item, implement the fix in the PR worktree, run relevant tests, commit and push, then reply with a summary and commit SHA. Continue until the PR is approved, merged or closed, or the user stops the loop. Also accepts an issue reference instead of a PR: in that case the skill creates the PR (if absent), guarantees the PR body contains `Closes #<issue>`, and then enters the watch loop. Use when you want the agent to own the start-PR or address-test-push-reply-wait cycle across multiple review rounds rather than handling a single review comment.
 author: Claude Code
-version: 1.3.0
-date: 2026-05-13
+version: 1.4.0
+date: 2026-05-14
 source: https://github.com/debedb/skillz
 source_file: skills/work-on-pr/SKILL.md
 ---
@@ -193,7 +193,11 @@ continuation elsewhere, or if a real stop condition fired.
       For inline review-thread replies, use
       `gh api repos/:owner/:repo/pulls/<N>/comments/<comment_id>/replies
        -f body=@/tmp/reply.md` or the `--in-reply-to` form of `gh
-      api`.
+      api`. When host/model identity is known, prefix the body with a
+      short tag (e.g. `[claude]`, `[codex]`) — see "Reply convention"
+      below. This mirrors the reviewer-side rule in `review-pr-loop`
+      so the reader can tell who/what generated each post in a
+      multi-round thread.
 
 7. **Escalate to the user** when:
    - A reviewer asked for a scope change you cannot interpret without
@@ -294,6 +298,13 @@ runs in a context without the allowlist.
 - Don't restate the reviewer's text.
 - Don't promise future work in the same PR scope — open a new issue
   if needed.
+- When the host/model identity is known, prefix the reply body with
+  a short tag such as `[codex]` or `[claude]` (e.g.
+  `[claude] Addressed in 6f23a45.`). If the identity cannot be
+  determined, omit the tag rather than guessing. This mirrors the
+  reviewer-side rule in [[review-pr-loop]] — once a PR has several
+  rounds the tag is the fastest way to scan who-said-what without
+  opening every comment.
 
 ### Worktree + branch hygiene
 
