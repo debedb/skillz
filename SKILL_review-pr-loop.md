@@ -3,8 +3,8 @@ name: review-pr-loop
 description: |
   Iteratively review a GitHub pull request across multiple rounds. Each round, read the linked issue(s), prior review comments, issue comments, and inline threads before reviewing only the new diff or the author's latest response. If no author response exists yet, wait and re-check instead of exiting. Leave structured feedback (REQUEST_CHANGES, COMMENT, or APPROVE) and continue until you approve, the PR is merged or closed, or the user stops the loop. Use when you are the reviewer on a non-trivial PR and want the agent to own the back-and-forth review cycle rather than doing a one-shot review.
 author: Claude Code
-version: 1.1.1
-date: 2026-05-13
+version: 1.1.3
+date: 2026-05-14
 ---
 
 # review-pr-loop
@@ -55,6 +55,12 @@ supports it; otherwise sleep and poll again in the same invocation.
 Do not return just because one idle poll or sleep completed. Each
 iteration:
 
+While the loop is active, do not send a terminal/final handoff
+message just to summarize status. Use progress/status updates only.
+Only end the invocation when a real stop condition fires (approved /
+merged / closed / user-stop) or when the watch loop has explicitly
+stopped and you say so.
+
 1. **Pull full context first — every round.** This is the most
    important rule.
 
@@ -96,6 +102,11 @@ iteration:
 3. **Check exit conditions.**
    - `reviewDecision == APPROVED` AND latest APPROVED review is
      yours → stop, already done.
+   - If this is a self-review and your latest review/comment on the PR
+     clearly expresses approval (`LGTM`, `APPROVE`, or equivalent,
+     optionally prefixed with a model tag), treat that as goal reached
+     and stop unless the user explicitly asked you to keep watching
+     through merge / close.
    - PR merged/closed → stop.
 
 4. **Determine what's new since your last review.**
@@ -156,21 +167,31 @@ iteration:
       -f 'comments[][path]=...' -f 'comments[][line]=...'
       -f 'comments[][body]=...'`
      so each blocking finding lands next to the offending line.
+   - Prefer inline comments whenever a finding maps cleanly to a line
+     in the current diff. A single review pass may therefore submit one
+     top-level review body plus several inline file comments.
    - Use `--body-file`, not `-b`, to dodge shell quoting (see
      [[gh-git-heredoc-body-file]]).
    - In approval-gated sandboxes, preflight the write operations
      likely to recur in this loop: `gh pr review` and any inline
      `gh api .../reviews` posts. Reuse already-approved prefixes when
      possible, and do not treat "approval needed" as loop completion.
+   - When the host/model identity is known, prefix every submitted
+     top-level review body and inline comment with a short tag such as
+     `[codex]` or `[claude]`. If the identity cannot be determined,
+     omit the tag rather than guessing.
 
 10. **Schedule next wake-up** unless the loop terminated.
     - Default cadence: **30 seconds**, every pass, idle or active.
+    - If the user asks for a different cadence (for example
+      "slow down to 180s"), treat that as the active poll interval for
+      the rest of the invocation unless the user changes it again.
     - The loop continues until a stop condition fires (you approved,
       PR merged/closed, user interrupts). Both branches — goal
       reached and user-interrupt — terminate; everything else
       reschedules.
-    - If `ScheduleWakeup` exists, use it; otherwise sleep 30s and
-      loop in-process.
+    - If `ScheduleWakeup` exists, use it; otherwise sleep for the
+      active poll interval and loop in-process.
     - **Surface status every tick.** Each pass emits one short
       user-facing line so the operator can see what changed (or
       didn't) without opening GitHub. See "Status line" below.
@@ -180,6 +201,9 @@ iteration:
 - Target poll interval: **30 seconds** (idle and active alike).
   Frequent polling burns cache but matches user-stated preference
   for tight visibility on PR turnaround.
+- A user-provided override (for example `180s`) replaces the default
+  cadence for the rest of the invocation and should be reflected in
+  every status line's `next=<delaySeconds>s`.
 - Runtime caveat: some hosts clamp `ScheduleWakeup`; Claude
   Code, for example, clamps `delaySeconds` to `[60, 3600]`, so
   wake-up-based loops there bottom out at 60s. To honor the 30s
@@ -188,7 +212,8 @@ iteration:
   `ScheduleWakeup`. Otherwise treat the host's clamp floor as the
   effective minimum.
 - The user can override by passing an explicit interval to /loop
-  or by saying "slow down to <N>s".
+  or by saying "slow down to <N>s"; keep using that override on
+  subsequent passes until changed.
 - Stop conditions still take precedence over the cadence — never
   reschedule after approve / merge / close / user-stop.
 
@@ -208,6 +233,10 @@ If a review was posted this pass, also include the event type and a
 1-line digest of findings. If the pass was idle, that fact alone is
 the status — do not pad with prose.
 
+If the watch loop is no longer active, say so explicitly in the status
+line (`action=watch stopped:<reason>`) instead of implying polling is
+still happening.
+
 ### Tone
 
 - One line per finding, severity-tagged.
@@ -216,6 +245,7 @@ the status — do not pad with prose.
 - Match the project's reviewer convention by reading prior reviews
   (step 1b) — some projects prefer batched threads, others prefer
   inline comments.
+- Keep model tags terse: `[codex] blocking: ...`, `[claude] LGTM ...`.
 
 ### Approval
 
@@ -228,9 +258,11 @@ history.
 (`GraphQL: Review Can not approve / request changes on your own
 pull request`). On self-review, use `--comment` and include explicit
 LGTM / "blocking" language so the paired `work-on-pr` skill (or a
-later merger) can read intent. This is not a stop condition: keep
-the watch loop alive until merge / close / user stop. Do not retry
-the same `--approve` call expecting a different answer.
+later merger) can read intent. Unless the user explicitly asked to
+keep watching through merge / close, an explicit self-review approval
+comment counts as goal reached for this review loop and should stop the
+watch. Do not retry the same `--approve` call expecting a different
+answer.
 
 ## Verification
 
@@ -244,6 +276,7 @@ After invoking, expect (per iteration):
 - One `gh pr review` call.
 - Either a `ScheduleWakeup`, an in-process sleep / poll loop, or
   termination.
+- No `final` / terminal handoff while the loop is still in watch mode.
 
 Exit signals:
 
@@ -341,4 +374,3 @@ Iteration 7:
 - Related skills: [[work-on-pr]] (author side of the same loop),
   [[pr-review-toolkit:review-pr]] (one-shot review),
   [[gh-git-heredoc-body-file]] (body-file pattern).
-
