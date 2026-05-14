@@ -14,12 +14,26 @@ pull request review cycle:
 
 The skill markdown is shared across both hosts. `install.sh` can
 install into Codex (`~/.codex/skills`), Claude Code (`~/.claude/skills`),
-or both, so one gist stays the source of truth.
+or both, so one repo stays the source of truth.
+
+## Layout
+
+```
+skills/
+  work-on-pr/SKILL.md
+  review-pr-loop/SKILL.md
+install.sh
+README.md
+```
+
+This repo replaced gist `5f606018eb36a75dc292016268f08e7c`. The full
+gist revision history was imported as the first 13 commits on
+`master` and the gist now redirects here.
 
 ## Install (one-liner)
 
 ```bash
-bash < (curl -sL https://gist.githubusercontent.com/debedb/5f606018eb36a75dc292016268f08e7c/raw/install.sh)
+bash < (curl -sL https://raw.githubusercontent.com/debedb/skillz/master/install.sh)
 ```
 
 ## Install targets
@@ -33,9 +47,9 @@ By default, `install.sh` uses `--target auto`:
 You can force a target explicitly:
 
 ```bash
-bash <(curl -sL https://gist.githubusercontent.com/debedb/5f606018eb36a75dc292016268f08e7c/raw/install.sh) -- --target codex
-bash <(curl -sL https://gist.githubusercontent.com/debedb/5f606018eb36a75dc292016268f08e7c/raw/install.sh) -- --target claude
-bash <(curl -sL https://gist.githubusercontent.com/debedb/5f606018eb36a75dc292016268f08e7c/raw/install.sh) -- --target both
+bash <(curl -sL https://raw.githubusercontent.com/debedb/skillz/master/install.sh) -- --target codex
+bash <(curl -sL https://raw.githubusercontent.com/debedb/skillz/master/install.sh) -- --target claude
+bash <(curl -sL https://raw.githubusercontent.com/debedb/skillz/master/install.sh) -- --target both
 ```
 
 You can also override the destination directly with `SKILLS_DEST_ROOT`.
@@ -44,8 +58,8 @@ You can also override the destination directly with `SKILLS_DEST_ROOT`.
 ## Install (from a clone)
 
 ```bash
-git clone https://gist.github.com/debedb/5f606018eb36a75dc292016268f08e7c.git /tmp/pr-loop-skills
-cd /tmp/pr-loop-skills
+git clone https://github.com/debedb/skillz.git /tmp/skillz
+cd /tmp/skillz
 ./install.sh --target both
 ```
 

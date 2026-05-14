@@ -3,9 +3,16 @@ name: review-pr-loop
 description: |
   Iteratively review a GitHub pull request across multiple rounds. Each round, read the linked issue(s), prior review comments, issue comments, and inline threads before reviewing only the new diff or the author's latest response. If no author response exists yet, wait and re-check instead of exiting. Leave structured feedback (REQUEST_CHANGES, COMMENT, or APPROVE) and continue until you approve, the PR is merged or closed, or the user stops the loop. Use when you are the reviewer on a non-trivial PR and want the agent to own the back-and-forth review cycle rather than doing a one-shot review.
 author: Claude Code
-version: 1.1.3
-date: 2026-05-14
+version: 1.2.0
+date: 2026-05-13
+source: https://github.com/debedb/skillz
+source_file: skills/review-pr-loop/SKILL.md
 ---
+
+> **Canonical source.** This skill lives in the repo at
+> https://github.com/debedb/skillz (file: `skills/review-pr-loop/SKILL.md`).
+> Updates go through the repo's worktree + PR workflow. The repo replaced
+> gist 5f606018eb36a75dc292016268f08e7c, which is preserved as a redirect.
 
 # review-pr-loop
 
