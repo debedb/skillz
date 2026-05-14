@@ -19,7 +19,7 @@ or both, so one gist stays the source of truth.
 ## Install (one-liner)
 
 ```bash
-bash <(curl -sL https://gist.githubusercontent.com/debedb/5f606018eb36a75dc292016268f08e7c/raw/install.sh)
+bash < (curl -sL https://gist.githubusercontent.com/debedb/5f606018eb36a75dc292016268f08e7c/raw/install.sh)
 ```
 
 ## Install targets
