@@ -14,6 +14,12 @@
       "path": "skills/review-pr-loop/SKILL.md",
       "hosts": ["claude", "codex"],
       "summary": "Reviewer-side PR iteration loop."
+    },
+    {
+      "name": "continuous-learning",
+      "path": "skills/continuous-learning/SKILL.md",
+      "hosts": ["codex"],
+      "summary": "End-of-task retrospective: extract reusable, verified learnings as Codex skills."
     }
   ],
   "collections": [
@@ -31,6 +37,12 @@
       "claude_marketplace": ".claude-plugin/marketplace.json",
       "codex_manifest": ".codex-plugin/plugin.json",
       "summary": "Full repo packaged as Claude Code + Codex plugin."
+    },
+    {
+      "name": "codex-continuous-learning",
+      "codex_manifest": "plugins/codex-continuous-learning/.codex-plugin/plugin.json",
+      "hosts": ["codex"],
+      "summary": "Codex-only plugin bundle: continuous-learning skill plus UserPromptSubmit + Stop hooks that drive an end-of-task retrospective."
     }
   ],
   "defaults": {
