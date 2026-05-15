@@ -1,0 +1,11 @@
+{
+  "name": "skillz",
+  "description": "Paired PR-loop skills: work-on-pr (author) and review-pr-loop (reviewer).",
+  "version": "1.0.0",
+  "author": {
+    "name": "debedb"
+  },
+  "homepage": "https://github.com/debedb/skillz",
+  "repository": "https://github.com/debedb/skillz",
+  "license": "MIT"
+}

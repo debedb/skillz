@@ -4,9 +4,10 @@
 
 - [Overview](#overview)
 - [Layout](#layout)
-- [Install (one-liner)](#install-one-liner)
-- [Install targets](#install-targets)
-- [Install (from a clone)](#install-from-a-clone)
+- [Install — Claude Code plugin (recommended)](#install--claude-code-plugin-recommended)
+- [Install — Codex plugin (recommended)](#install--codex-plugin-recommended)
+- [Install — legacy script](#install--legacy-script)
+- [Updating](#updating)
 - [Verify](#verify)
 - [Usage](#usage)
 - [Reducing permission prompts (Claude Code)](#reducing-permission-prompts-claude-code)
@@ -26,17 +27,30 @@ pull request review cycle:
   threads before reviewing only the new diff or the author's latest
   response.
 
-The skill markdown is shared across both hosts. `install.sh` can
-install into Codex (`~/.codex/skills`), Claude Code (`~/.claude/skills`),
-or both, so one repo stays the source of truth.
+The skill markdown is shared across both hosts. The recommended
+install path on each host is its native plugin marketplace
+(`/plugin` on Claude Code, `/plugins` on Codex). `install.sh` is
+retained as a legacy fallback that copies skills into
+`~/.codex/skills` and/or `~/.claude/skills` directly.
+
+The plugin bundle and the legacy script install the same skills from
+the same `skills/` directory at the top of `master`. The plugin
+`version` field is pinned at `1.0.0` and not bumped per change — both
+plugin hosts update by re-pulling `master`, so the version number is
+cosmetic.
 
 ## Layout
 
 ```
+.claude-plugin/
+  marketplace.json   # Claude Code marketplace manifest
+  plugin.json        # Claude Code plugin manifest
+.codex-plugin/
+  plugin.json        # Codex plugin manifest
 skills/
   work-on-pr/SKILL.md
   review-pr-loop/SKILL.md
-install.sh
+install.sh           # legacy direct-copy installer
 README.md
 ```
 
@@ -44,13 +58,54 @@ This repo replaced gist `5f606018eb36a75dc292016268f08e7c`. The full
 gist revision history was imported as the first 13 commits on
 `master` and the gist now redirects here.
 
-## Install (one-liner)
+## Install — Claude Code plugin (recommended)
 
-```bash
-bash < (curl -sL https://raw.githubusercontent.com/debedb/skillz/master/install.sh)
+From inside Claude Code:
+
+```text
+/plugin marketplace add debedb/skillz
+/plugin install skillz@skillz
 ```
 
-## Install targets
+Skills then load from the plugin's own `skills/` directory; no copy
+into `~/.claude/skills/` is created or required. If you previously
+installed via `install.sh --target claude`, delete the old copies to
+avoid duplicates:
+
+```bash
+rm -rf ~/.claude/skills/work-on-pr ~/.claude/skills/review-pr-loop
+```
+
+## Install — Codex plugin (recommended)
+
+Requires Codex CLI **0.117.0** or newer (plugin system shipped in
+that release). Check with `codex --version`.
+
+From inside Codex (`/plugins`), add the marketplace and install:
+
+```text
+/plugins
+```
+
+Then in the plugin browser, add `https://github.com/debedb/skillz`
+as a marketplace source and install the `skillz` plugin. Or, from a
+clone, install as a local marketplace folder pointing at the repo
+root.
+
+To remove old direct-copy installs after switching:
+
+```bash
+rm -rf ~/.codex/skills/work-on-pr ~/.codex/skills/review-pr-loop
+```
+
+## Install — legacy script
+
+Use this only if you cannot use the plugin path (older Codex, locked
+Claude Code config, sandboxed environment, etc.).
+
+```bash
+bash <(curl -sL https://raw.githubusercontent.com/debedb/skillz/master/install.sh)
+```
 
 By default, `install.sh` uses `--target auto`:
 
@@ -58,7 +113,7 @@ By default, `install.sh` uses `--target auto`:
 - installs to `~/.claude/skills` when Claude Code is configured or present
 - installs to both default roots when neither home exists yet
 
-You can force a target explicitly:
+Force a target explicitly:
 
 ```bash
 bash <(curl -sL https://raw.githubusercontent.com/debedb/skillz/master/install.sh) -- --target codex
@@ -66,10 +121,10 @@ bash <(curl -sL https://raw.githubusercontent.com/debedb/skillz/master/install.s
 bash <(curl -sL https://raw.githubusercontent.com/debedb/skillz/master/install.sh) -- --target both
 ```
 
-You can also override the destination directly with `SKILLS_DEST_ROOT`.
+Override the destination directly with `SKILLS_DEST_ROOT`.
 `CODEX_HOME` and `CLAUDE_SKILLS_DIR` are both honored.
 
-## Install (from a clone)
+From a clone:
 
 ```bash
 git clone https://github.com/debedb/skillz.git /tmp/skillz
@@ -77,7 +132,29 @@ cd /tmp/skillz
 ./install.sh --target both
 ```
 
+## Updating
+
+- **Claude Code plugin:** `/plugin update` (or `/plugin marketplace
+  update skillz`) re-fetches `master` from this repo.
+- **Codex plugin:** open `/plugins`, select `skillz`, run the update
+  action; same effect.
+- **Legacy script:** re-run the curl one-liner or `git pull && ./install.sh`.
+
 ## Verify
+
+Plugin install (Claude Code):
+
+```text
+/plugin list
+```
+
+Plugin install (Codex):
+
+```text
+/plugins
+```
+
+Legacy install:
 
 ```bash
 ls ~/.codex/skills/work-on-pr/SKILL.md ~/.codex/skills/review-pr-loop/SKILL.md
