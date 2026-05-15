@@ -1,5 +1,5 @@
 {
-  "$schema": "https://github.com/debedb/skillz/blob/master/plugins/codex-continuous-learning/hooks/hooks.schema.json",
+  "$schema": "https://github.com/voitta-ai/skillz/blob/master/plugins/codex-continuous-learning/hooks/hooks.schema.json",
   "version": 1,
   "description": "Codex hook wiring for the continuous-learning skill. UserPromptSubmit injects a one-line reminder; Stop forces a brief retrospective before exit.",
   "hooks": {

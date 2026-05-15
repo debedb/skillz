@@ -12,6 +12,7 @@ manifests on top.
 - [Install — Claude Code plugin (recommended)](#install--claude-code-plugin-recommended)
 - [Install — Codex plugin (recommended)](#install--codex-plugin-recommended)
 - [Install — script (single skill / collection / all)](#install--script-single-skill--collection--all)
+- [Migrating from `debedb/skillz`](#migrating-from-debedbskillz)
 - [Catalog manifest](#catalog-manifest)
 - [Updating](#updating)
 - [Verify](#verify)
@@ -76,7 +77,7 @@ The plugin bundle installs every skill in the repo at once. From
 inside Claude Code:
 
 ```text
-/plugin marketplace add debedb/skillz
+/plugin marketplace add voitta-ai/skillz
 /plugin install skillz@skillz
 ```
 
@@ -111,24 +112,24 @@ without the plugin bundle, or when the plugin path is unavailable
 
 ```bash
 # Default: install the pr-loop collection (work-on-pr + review-pr-loop)
-bash <(curl -sL https://raw.githubusercontent.com/debedb/skillz/master/install.sh)
+bash <(curl -sL https://raw.githubusercontent.com/voitta-ai/skillz/master/install.sh)
 
 # Single skill
-bash <(curl -sL https://raw.githubusercontent.com/debedb/skillz/master/install.sh) -- --skill work-on-pr
+bash <(curl -sL https://raw.githubusercontent.com/voitta-ai/skillz/master/install.sh) -- --skill work-on-pr
 
 # Named collection
-bash <(curl -sL https://raw.githubusercontent.com/debedb/skillz/master/install.sh) -- --collection pr-loop
+bash <(curl -sL https://raw.githubusercontent.com/voitta-ai/skillz/master/install.sh) -- --collection pr-loop
 
 # Everything in the catalog
-bash <(curl -sL https://raw.githubusercontent.com/debedb/skillz/master/install.sh) -- --all
+bash <(curl -sL https://raw.githubusercontent.com/voitta-ai/skillz/master/install.sh) -- --all
 
 # Force a target host
-bash <(curl -sL https://raw.githubusercontent.com/debedb/skillz/master/install.sh) -- --target codex
-bash <(curl -sL https://raw.githubusercontent.com/debedb/skillz/master/install.sh) -- --target claude
-bash <(curl -sL https://raw.githubusercontent.com/debedb/skillz/master/install.sh) -- --target both
+bash <(curl -sL https://raw.githubusercontent.com/voitta-ai/skillz/master/install.sh) -- --target codex
+bash <(curl -sL https://raw.githubusercontent.com/voitta-ai/skillz/master/install.sh) -- --target claude
+bash <(curl -sL https://raw.githubusercontent.com/voitta-ai/skillz/master/install.sh) -- --target both
 
 # Dry-run shows what would happen without writing anything
-bash <(curl -sL https://raw.githubusercontent.com/debedb/skillz/master/install.sh) -- --all --dry-run
+bash <(curl -sL https://raw.githubusercontent.com/voitta-ai/skillz/master/install.sh) -- --all --dry-run
 ```
 
 `--skill` and `--collection` are repeatable. `--target` accepts
@@ -139,12 +140,54 @@ destination directly with `SKILLS_DEST_ROOT`. `CODEX_HOME` and
 From a clone:
 
 ```bash
-git clone https://github.com/debedb/skillz.git /tmp/skillz
+git clone https://github.com/voitta-ai/skillz.git /tmp/skillz
 /tmp/skillz/install.sh --target both --collection pr-loop
 ```
 
 Backward compatibility: invoking `install.sh` with no selection
 flags installs the `pr-loop` collection, matching the prior default.
+
+## Migrating from `debedb/skillz`
+
+This repo previously lived at
+[`debedb/skillz`](https://github.com/debedb/skillz). It has moved
+to [`voitta-ai/skillz`](https://github.com/voitta-ai/skillz).
+GitHub redirects the old URL indefinitely (until the
+`debedb/skillz` name is reused), so existing installs continue to
+work without changes. The notes below cover the few cases where a
+manual switch is worth doing.
+
+**Script install (`install.sh`).** Re-run the curl one-liner
+against the new raw URL — it overwrites in place, same skill paths,
+no orphan files:
+
+```bash
+bash <(curl -sL https://raw.githubusercontent.com/voitta-ai/skillz/master/install.sh)
+```
+
+The old `debedb` URL still resolves via the GitHub redirect, so
+nothing breaks if you keep using it; the new URL is just the
+canonical one going forward.
+
+**Claude Code plugin.** The redirect also covers `/plugin
+marketplace add` / `/plugin update`, so existing installs keep
+updating from the renamed repo automatically. To switch the
+marketplace entry to the new owner explicitly:
+
+```text
+/plugin uninstall skillz@skillz
+/plugin marketplace remove skillz
+/plugin marketplace add voitta-ai/skillz
+/plugin install skillz@skillz
+```
+
+**Codex plugin.** Same pattern — the marketplace source URL
+redirects, so existing installs keep working. Re-add as
+`voitta-ai/skillz` if you want the marketplace entry to reflect
+the new owner.
+
+This section will be removed once the rename has aged enough that
+nobody is hitting the old URL anymore — see #22.
 
 ## Catalog manifest
 
@@ -354,7 +397,7 @@ single review) and are complementary, not competing. They can be
 stacked: `review-pr-loop` driving the cycle while internally invoking
 a formatter and/or an adversarial subagent per round.
 
-| Feature | [caveman-review](https://github.com/JuliusBrussee/caveman) | [ce-adversarial-reviewer](https://github.com/EveryInc/compound-engineering-plugin) | [claudskills adversarial-review](https://claudskills.com/skills/adversarial-review/) | [debedb/skillz review-pr-loop](./skills/review-pr-loop/SKILL.md) |
+| Feature | [caveman-review](https://github.com/JuliusBrussee/caveman) | [ce-adversarial-reviewer](https://github.com/EveryInc/compound-engineering-plugin) | [claudskills adversarial-review](https://claudskills.com/skills/adversarial-review/) | [voitta-ai/skillz review-pr-loop](./skills/review-pr-loop/SKILL.md) |
 |---|---|---|---|---|
 | Type | Skill | Agent (subagent) | Skill | Skill (paired with [work-on-pr](./skills/work-on-pr/SKILL.md)) |
 | Job | Compress review prose | Chaos-engineer failure scenarios | PASS/FAIL adversarial verdict | Drive multi-round PR review *loop* |

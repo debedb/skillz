@@ -1,5 +1,5 @@
 {
-  "$schema": "https://github.com/debedb/skillz/blob/master/scripts/catalog.schema.json",
+  "$schema": "https://github.com/voitta-ai/skillz/blob/master/scripts/catalog.schema.json",
   "version": 1,
   "description": "Catalog of skills, collections, and plugin bundles distributable from this repo.",
   "skills": [
