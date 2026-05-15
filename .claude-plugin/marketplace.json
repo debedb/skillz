@@ -1,0 +1,15 @@
+{
+  "name": "skillz",
+  "owner": {
+    "name": "debedb",
+    "url": "https://github.com/debedb"
+  },
+  "description": "Paired PR-loop skills (work-on-pr, review-pr-loop) for Claude Code.",
+  "plugins": [
+    {
+      "name": "skillz",
+      "source": "./",
+      "description": "work-on-pr (author-side) and review-pr-loop (reviewer-side) PR iteration skills."
+    }
+  ]
+}
