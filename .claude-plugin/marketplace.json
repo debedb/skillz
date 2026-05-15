@@ -1,8 +1,8 @@
 {
   "name": "skillz",
   "owner": {
-    "name": "debedb",
-    "url": "https://github.com/debedb"
+    "name": "voitta-ai",
+    "url": "https://github.com/voitta-ai"
   },
   "description": "Paired PR-loop skills (work-on-pr, review-pr-loop) for Claude Code.",
   "plugins": [

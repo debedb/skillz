@@ -5,12 +5,12 @@ description: |
 author: Claude Code
 version: 1.5.0
 date: 2026-05-14
-source: https://github.com/debedb/skillz
+source: https://github.com/voitta-ai/skillz
 source_file: skills/work-on-pr/SKILL.md
 ---
 
 > **Canonical source.** This skill lives in the repo at
-> https://github.com/debedb/skillz (file: `skills/work-on-pr/SKILL.md`).
+> https://github.com/voitta-ai/skillz (file: `skills/work-on-pr/SKILL.md`).
 > Updates go through the repo's worktree + PR workflow — open an issue,
 > branch, PR. The repo replaced gist 5f606018eb36a75dc292016268f08e7c,
 > which is preserved as a redirect.

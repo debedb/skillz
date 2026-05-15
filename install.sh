@@ -82,7 +82,7 @@ done
 
 DEFAULT_CODEX_ROOT="${CODEX_HOME:-$HOME/.codex}/skills"
 DEFAULT_CLAUDE_ROOT="${CLAUDE_SKILLS_DIR:-$HOME/.claude/skills}"
-SKILLZ_RAW_BASE="${SKILLZ_RAW_BASE:-${GIST_RAW_BASE:-https://raw.githubusercontent.com/debedb/skillz/master}}"
+SKILLZ_RAW_BASE="${SKILLZ_RAW_BASE:-${GIST_RAW_BASE:-https://raw.githubusercontent.com/voitta-ai/skillz/master}}"
 SCRIPT_DIR=""
 DEST_ROOTS=()
 

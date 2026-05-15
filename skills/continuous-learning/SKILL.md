@@ -5,12 +5,12 @@ description: |
 author: Codex
 version: 0.1.0
 date: 2026-05-15
-source: https://github.com/debedb/skillz
+source: https://github.com/voitta-ai/skillz
 source_file: skills/continuous-learning/SKILL.md
 ---
 
 > **Canonical source.** This skill lives in the repo at
-> https://github.com/debedb/skillz (file:
+> https://github.com/voitta-ai/skillz (file:
 > `skills/continuous-learning/SKILL.md`). Updates go through the
 > repo's worktree + PR workflow — open an issue, branch, PR.
 
@@ -108,7 +108,7 @@ search and waters down each skill's trigger criteria. Updating wins.
 - **Repo-specific learnings** (build system quirks, internal
   conventions, project-only workflow): repo-local skill directory.
 - **Org-wide learnings**: contribute back to the team's shared
-  catalog (e.g. a repo like `debedb/skillz`) via the normal
+  catalog (e.g. a repo like `voitta-ai/skillz`) via the normal
   worktree + PR workflow.
 
 When in doubt, prefer user-global over repo-local — repo-local
@@ -206,6 +206,6 @@ followed.
 
 - Claudeception (the Claude Code reference implementation):
   https://github.com/blader/Claudeception
-- skillz catalog: https://github.com/debedb/skillz
+- skillz catalog: https://github.com/voitta-ai/skillz
 - Multi-skill catalog refactor that this bundle depends on: #16
   (closed in this repo).
