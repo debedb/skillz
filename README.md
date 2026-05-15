@@ -17,6 +17,8 @@ manifests on top.
 - [Verify](#verify)
 - [Collections](#collections)
   - [pr-loop](#pr-loop-collection)
+- [Plugins](#plugins)
+  - [codex-continuous-learning](#codex-continuous-learning-codex-only)
 - [Validation](#validation)
 - [Related code-review approaches](#related-code-review-approaches)
 
@@ -26,8 +28,10 @@ manifests on top.
 |---|---|---|---|
 | [work-on-pr](./skills/work-on-pr/SKILL.md) | skill | Claude, Codex | Author-side PR iteration loop |
 | [review-pr-loop](./skills/review-pr-loop/SKILL.md) | skill | Claude, Codex | Reviewer-side PR iteration loop |
+| [continuous-learning](./skills/continuous-learning/SKILL.md) | skill | Codex | End-of-task retrospective: extract reusable, verified learnings as Codex skills |
 | [pr-loop](./collections/pr-loop.json) | collection | Claude, Codex | Paired author + reviewer PR-loop skills |
 | `skillz` plugin | plugin | Claude, Codex | Full repo packaged as Claude Code + Codex plugin |
+| [`codex-continuous-learning` plugin](./plugins/codex-continuous-learning/) | plugin | Codex | continuous-learning skill plus UserPromptSubmit + Stop hooks |
 
 Machine-readable index: [`catalog.json`](./catalog.json). The
 installer and validation script both read from it, so new entries
@@ -42,11 +46,20 @@ collections/
 skills/
   work-on-pr/SKILL.md
   review-pr-loop/SKILL.md
+  continuous-learning/SKILL.md     # canonical continuous-learning skill
 .claude-plugin/
   marketplace.json                 # Claude Code marketplace manifest
   plugin.json                      # Claude Code plugin manifest
 .codex-plugin/
-  plugin.json                      # Codex plugin manifest
+  plugin.json                      # Codex whole-repo plugin manifest
+plugins/
+  codex-continuous-learning/       # standalone Codex bundle (skill + hooks)
+    .codex-plugin/plugin.json
+    skills/continuous-learning -> ../../../skills/continuous-learning
+    hooks/
+      hooks.json
+      continuous_learning_prompt.py
+      continuous_learning_stop.py
 install.sh                         # catalog-driven installer
 scripts/
   validate-catalog.sh              # CI/local catalog validation
@@ -254,6 +267,65 @@ See `skills/work-on-pr/SKILL.md` → "Auto-approved operations" for
 the full pattern list and the rationale behind every entry that is
 intentionally NOT auto-approved (`git push origin master`,
 `git push --force`, `gh repo delete`, etc.).
+
+## Plugins
+
+### codex-continuous-learning (Codex only)
+
+A Codex-native counterpart of
+[Claudeception](https://github.com/blader/Claudeception). Bundles the
+[`continuous-learning`](./skills/continuous-learning/SKILL.md) skill
+with two Codex hooks:
+
+- **UserPromptSubmit** — injects a one-line reminder that any
+  reusable, verified learning from this turn should be captured
+  before exit.
+- **Stop** — forces a brief end-of-task retrospective. The agent
+  either invokes `continuous-learning` and acts on its output, or
+  emits the literal line `No reusable learning.` and exits.
+
+Design intent: capture only learnings that pass four retrospective
+gates (real discovery cost, recurrence likelihood, verifiable
+trigger, verified result). Most turns terminate with
+`No reusable learning.` — that escape hatch is the point. See the
+skill for the full policy and skill-shape requirements.
+
+Layout:
+
+```
+plugins/codex-continuous-learning/
+  .codex-plugin/plugin.json        # Codex plugin manifest
+  skills/continuous-learning -> ../../../skills/continuous-learning
+  hooks/
+    hooks.json                     # UserPromptSubmit + Stop wiring
+    continuous_learning_prompt.py  # UserPromptSubmit hook
+    continuous_learning_stop.py    # Stop hook
+```
+
+The `skills/continuous-learning` directory inside the plugin is a
+relative symlink to the canonical
+[`skills/continuous-learning/`](./skills/continuous-learning/) at the
+repo root, so the bundle stays a single source of truth.
+
+Hook scripts are dependency-free Python (`python3` only, no
+third-party imports, no filesystem writes, no network) and both fail
+open via `on_error: ignore` in `hooks.json`. A hook crash never
+breaks the user's session.
+
+This bundle is **Codex-only** and not exposed via the Claude Code
+plugin or the `pr-loop` collection. Claude Code users who want
+similar end-of-task behavior should install Claudeception directly.
+
+Install (when supported by the local Codex CLI):
+
+```text
+/plugins
+# add this repo as a marketplace source, then install
+# codex-continuous-learning
+```
+
+Or, from a clone, point Codex at `plugins/codex-continuous-learning/`
+as a local plugin folder.
 
 ## Validation
 
