@@ -1,0 +1,39 @@
+{
+  "$schema": "https://github.com/debedb/skillz/blob/master/scripts/catalog.schema.json",
+  "version": 1,
+  "description": "Catalog of skills, collections, and plugin bundles distributable from this repo.",
+  "skills": [
+    {
+      "name": "work-on-pr",
+      "path": "skills/work-on-pr/SKILL.md",
+      "hosts": ["claude", "codex"],
+      "summary": "Author-side PR iteration loop."
+    },
+    {
+      "name": "review-pr-loop",
+      "path": "skills/review-pr-loop/SKILL.md",
+      "hosts": ["claude", "codex"],
+      "summary": "Reviewer-side PR iteration loop."
+    }
+  ],
+  "collections": [
+    {
+      "name": "pr-loop",
+      "path": "collections/pr-loop.json",
+      "summary": "Paired PR-loop skills: work-on-pr (author) + review-pr-loop (reviewer).",
+      "skills": ["work-on-pr", "review-pr-loop"]
+    }
+  ],
+  "plugins": [
+    {
+      "name": "skillz",
+      "claude_manifest": ".claude-plugin/plugin.json",
+      "claude_marketplace": ".claude-plugin/marketplace.json",
+      "codex_manifest": ".codex-plugin/plugin.json",
+      "summary": "Full repo packaged as Claude Code + Codex plugin."
+    }
+  ],
+  "defaults": {
+    "no_arg_install": "pr-loop"
+  }
+}

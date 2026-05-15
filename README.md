@@ -1,56 +1,55 @@
-# PR iteration loop skills for Claude Code and Codex
+# skillz — multi-skill catalog for Claude Code and Codex
+
+A small, growing catalog of Claude Code / Codex skills, installable
+individually, as named collections, or as a host-native plugin
+bundle. Skills are plain `SKILL.md` files; bundles add plugin
+manifests on top.
 
 ## Table of contents
 
-- [Overview](#overview)
+- [Catalog](#catalog)
 - [Layout](#layout)
 - [Install — Claude Code plugin (recommended)](#install--claude-code-plugin-recommended)
 - [Install — Codex plugin (recommended)](#install--codex-plugin-recommended)
-- [Install — legacy script](#install--legacy-script)
+- [Install — script (single skill / collection / all)](#install--script-single-skill--collection--all)
+- [Catalog manifest](#catalog-manifest)
 - [Updating](#updating)
 - [Verify](#verify)
-- [Usage](#usage)
-- [Reducing permission prompts (Claude Code)](#reducing-permission-prompts-claude-code)
+- [Collections](#collections)
+  - [pr-loop](#pr-loop-collection)
+- [Validation](#validation)
 - [Related code-review approaches](#related-code-review-approaches)
 
-## Overview
+## Catalog
 
-Two paired skills that drive the iterative back-and-forth of a GitHub
-pull request review cycle:
+| Name | Type | Hosts | Purpose |
+|---|---|---|---|
+| [work-on-pr](./skills/work-on-pr/SKILL.md) | skill | Claude, Codex | Author-side PR iteration loop |
+| [review-pr-loop](./skills/review-pr-loop/SKILL.md) | skill | Claude, Codex | Reviewer-side PR iteration loop |
+| [pr-loop](./collections/pr-loop.json) | collection | Claude, Codex | Paired author + reviewer PR-loop skills |
+| `skillz` plugin | plugin | Claude, Codex | Full repo packaged as Claude Code + Codex plugin |
 
-- **work-on-pr**: author-side loop. Watch for new review comments,
-  issue comments, and inline threads; wait when feedback has not
-  landed yet; address each in a worktree; run tests; commit; push;
-  post a reply with the commit SHA; then keep waiting.
-- **review-pr-loop**: reviewer-side loop. Every round, re-read the
-  linked issue(s) and all prior reviews, issue comments, and inline
-  threads before reviewing only the new diff or the author's latest
-  response.
-
-The skill markdown is shared across both hosts. The recommended
-install path on each host is its native plugin marketplace
-(`/plugin` on Claude Code, `/plugins` on Codex). `install.sh` is
-retained as a legacy fallback that copies skills into
-`~/.codex/skills` and/or `~/.claude/skills` directly.
-
-The plugin bundle and the legacy script install the same skills from
-the same `skills/` directory at the top of `master`. The plugin
-`version` field is pinned at `1.0.0` and not bumped per change — both
-plugin hosts update by re-pulling `master`, so the version number is
-cosmetic.
+Machine-readable index: [`catalog.json`](./catalog.json). The
+installer and validation script both read from it, so new entries
+land in the docs and tooling at the same time.
 
 ## Layout
 
 ```
-.claude-plugin/
-  marketplace.json   # Claude Code marketplace manifest
-  plugin.json        # Claude Code plugin manifest
-.codex-plugin/
-  plugin.json        # Codex plugin manifest
+catalog.json                       # machine-readable catalog index
+collections/
+  pr-loop.json                     # paired PR-loop collection
 skills/
   work-on-pr/SKILL.md
   review-pr-loop/SKILL.md
-install.sh           # legacy direct-copy installer
+.claude-plugin/
+  marketplace.json                 # Claude Code marketplace manifest
+  plugin.json                      # Claude Code plugin manifest
+.codex-plugin/
+  plugin.json                      # Codex plugin manifest
+install.sh                         # catalog-driven installer
+scripts/
+  validate-catalog.sh              # CI/local catalog validation
 README.md
 ```
 
@@ -60,17 +59,18 @@ gist revision history was imported as the first 13 commits on
 
 ## Install — Claude Code plugin (recommended)
 
-From inside Claude Code:
+The plugin bundle installs every skill in the repo at once. From
+inside Claude Code:
 
 ```text
 /plugin marketplace add debedb/skillz
 /plugin install skillz@skillz
 ```
 
-Skills then load from the plugin's own `skills/` directory; no copy
-into `~/.claude/skills/` is created or required. If you previously
-installed via `install.sh --target claude`, delete the old copies to
-avoid duplicates:
+Skills load from the plugin's own `skills/` directory; no copy into
+`~/.claude/skills/` is created. If you previously installed via
+`install.sh --target claude`, remove the old copies to avoid
+duplicates:
 
 ```bash
 rm -rf ~/.claude/skills/work-on-pr ~/.claude/skills/review-pr-loop
@@ -78,67 +78,84 @@ rm -rf ~/.claude/skills/work-on-pr ~/.claude/skills/review-pr-loop
 
 ## Install — Codex plugin (recommended)
 
-Requires Codex CLI **0.117.0** or newer (plugin system shipped in
-that release). Check with `codex --version`.
+Requires Codex CLI **0.117.0** or newer. Check with `codex --version`.
 
-From inside Codex (`/plugins`), add the marketplace and install:
+From inside Codex (`/plugins`), add this repo as a marketplace source
+and install the `skillz` plugin. Or, from a clone, point Codex at the
+repo root as a local marketplace folder.
 
-```text
-/plugins
-```
-
-Then in the plugin browser, add `https://github.com/debedb/skillz`
-as a marketplace source and install the `skillz` plugin. Or, from a
-clone, install as a local marketplace folder pointing at the repo
-root.
-
-To remove old direct-copy installs after switching:
+Remove old direct-copy installs after switching:
 
 ```bash
 rm -rf ~/.codex/skills/work-on-pr ~/.codex/skills/review-pr-loop
 ```
 
-## Install — legacy script
+## Install — script (single skill / collection / all)
 
-Use this only if you cannot use the plugin path (older Codex, locked
-Claude Code config, sandboxed environment, etc.).
+Use the script when you want a single skill or a single collection
+without the plugin bundle, or when the plugin path is unavailable
+(older Codex, locked Claude Code config, sandboxed environment).
 
 ```bash
+# Default: install the pr-loop collection (work-on-pr + review-pr-loop)
 bash <(curl -sL https://raw.githubusercontent.com/debedb/skillz/master/install.sh)
-```
 
-By default, `install.sh` uses `--target auto`:
+# Single skill
+bash <(curl -sL https://raw.githubusercontent.com/debedb/skillz/master/install.sh) -- --skill work-on-pr
 
-- installs to `~/.codex/skills` when Codex is configured or present
-- installs to `~/.claude/skills` when Claude Code is configured or present
-- installs to both default roots when neither home exists yet
+# Named collection
+bash <(curl -sL https://raw.githubusercontent.com/debedb/skillz/master/install.sh) -- --collection pr-loop
 
-Force a target explicitly:
+# Everything in the catalog
+bash <(curl -sL https://raw.githubusercontent.com/debedb/skillz/master/install.sh) -- --all
 
-```bash
+# Force a target host
 bash <(curl -sL https://raw.githubusercontent.com/debedb/skillz/master/install.sh) -- --target codex
 bash <(curl -sL https://raw.githubusercontent.com/debedb/skillz/master/install.sh) -- --target claude
 bash <(curl -sL https://raw.githubusercontent.com/debedb/skillz/master/install.sh) -- --target both
+
+# Dry-run shows what would happen without writing anything
+bash <(curl -sL https://raw.githubusercontent.com/debedb/skillz/master/install.sh) -- --all --dry-run
 ```
 
-Override the destination directly with `SKILLS_DEST_ROOT`.
-`CODEX_HOME` and `CLAUDE_SKILLS_DIR` are both honored.
+`--skill` and `--collection` are repeatable. `--target` accepts
+`auto` (default), `codex`, `claude`, or `both`. Override the
+destination directly with `SKILLS_DEST_ROOT`. `CODEX_HOME` and
+`CLAUDE_SKILLS_DIR` are honored.
 
 From a clone:
 
 ```bash
 git clone https://github.com/debedb/skillz.git /tmp/skillz
-cd /tmp/skillz
-./install.sh --target both
+/tmp/skillz/install.sh --target both --collection pr-loop
 ```
+
+Backward compatibility: invoking `install.sh` with no selection
+flags installs the `pr-loop` collection, matching the prior default.
+
+## Catalog manifest
+
+[`catalog.json`](./catalog.json) is the single source of truth for
+what the repo ships. It lists:
+
+- Every skill (`name`, `path`, supported `hosts`, one-line summary).
+- Every collection (`name`, member skill names, optional path to a
+  per-collection JSON file).
+- Plugin bundles (`name`, paths to host manifests).
+- A default for the no-arg install (currently `pr-loop`).
+
+`install.sh` parses this file at runtime. Adding a new skill is a
+two-file change: drop in `skills/<name>/SKILL.md` and add an entry
+under `skills` in `catalog.json`. No installer edits required.
 
 ## Updating
 
 - **Claude Code plugin:** `/plugin update` (or `/plugin marketplace
   update skillz`) re-fetches `master` from this repo.
 - **Codex plugin:** open `/plugins`, select `skillz`, run the update
-  action; same effect.
-- **Legacy script:** re-run the curl one-liner or `git pull && ./install.sh`.
+  action.
+- **Script:** re-run the curl one-liner, or `git pull && ./install.sh`
+  from a clone.
 
 ## Verify
 
@@ -154,48 +171,64 @@ Plugin install (Codex):
 /plugins
 ```
 
-Legacy install:
+Script install:
 
 ```bash
-ls ~/.codex/skills/work-on-pr/SKILL.md ~/.codex/skills/review-pr-loop/SKILL.md
+ls ~/.codex/skills/work-on-pr/SKILL.md   ~/.codex/skills/review-pr-loop/SKILL.md
 ls ~/.claude/skills/work-on-pr/SKILL.md ~/.claude/skills/review-pr-loop/SKILL.md
 ```
 
 Check only the host(s) you actually use.
 
-## Usage
+## Collections
 
-Author side, after opening PR #N:
+### pr-loop collection
 
-```text
-/work-on-pr N
+Paired skills that drive the iterative back-and-forth of a GitHub
+pull request review cycle. Install as one unit via:
+
+```bash
+./install.sh --collection pr-loop
 ```
 
-Reviewer side, on someone else's PR #N:
+The two skills:
 
-```text
-/review-pr-loop N
-```
+- **work-on-pr** ([SKILL.md](./skills/work-on-pr/SKILL.md)):
+  author-side loop. Watches for new review comments, issue comments,
+  and inline threads; waits when feedback has not landed; addresses
+  each in a worktree; runs tests; commits; pushes; replies with the
+  commit SHA. Also accepts an issue reference and creates the PR if
+  one does not yet exist (ensuring `Closes #<issue>` is in the body).
+- **review-pr-loop** ([SKILL.md](./skills/review-pr-loop/SKILL.md)):
+  reviewer-side loop. Each round re-reads the linked issue(s) and
+  all prior reviews, issue comments, and inline threads before
+  reviewing only the new diff or the author's latest response.
+  Leaves structured feedback (REQUEST_CHANGES, COMMENT, APPROVE)
+  and continues until approved, merged, or closed.
 
 Each skill owns the watch loop. If `ScheduleWakeup` is available, it
 uses that between polls; otherwise it sleeps and re-polls in-process.
 Invoking before comments exist is expected, and an idle poll is not
 completion.
 
-## Reducing permission prompts (Claude Code)
+Usage:
+
+```text
+/work-on-pr <N>        # author side (or pass an issue ref to start a PR)
+/review-pr-loop <N>    # reviewer side
+```
+
+#### Reducing permission prompts (Claude Code)
 
 The author-side loop pushes commits, posts comments, and replies to
-review threads several times per PR. Without the right
+review threads several rounds per PR. Without the right
 `permissions.allow` patterns in `~/.claude/settings.json`, Claude
-Code will prompt for each of those writes every round and the loop
-stalls waiting for you to click through.
+Code prompts for each write every round and the loop stalls.
 
 The recommended allow block lives in
 [`skills/work-on-pr/SKILL.md`](skills/work-on-pr/SKILL.md), under
-"Auto-approved operations (self-PR workflow)". Copy it into your
-`~/.claude/settings.json` before the first run.
-
-Two pitfalls worth calling out up front:
+"Auto-approved operations (self-PR workflow)". Two pitfalls worth
+calling out up front:
 
 - **Never chain `cd <worktree> && git ...`.** Claude Code matches
   each allow entry against the full command string. The compound
@@ -214,22 +247,40 @@ Two pitfalls worth calling out up front:
   `cat ~/.claude/settings.json | python3 -c "<parse>"` still
   prompts because Claude Code (and the YOLT hook, where installed)
   treats an inline `-c` script as opaque. Pull the snippet into a
-  real `.py` file and invoke `python3 path/to/script.py` to make
-  it analyzable, or accept the one-off prompt.
+  real `.py` file and invoke `python3 path/to/script.py` to make it
+  analyzable, or accept the one-off prompt.
 
 See `skills/work-on-pr/SKILL.md` → "Auto-approved operations" for
 the full pattern list and the rationale behind every entry that is
 intentionally NOT auto-approved (`git push origin master`,
 `git push --force`, `gh repo delete`, etc.).
 
+## Validation
+
+```bash
+./scripts/validate-catalog.sh
+```
+
+The script:
+
+- Confirms every catalog-referenced skill path exists.
+- Confirms every `SKILL.md` opens with YAML frontmatter containing
+  `name:` and `description:`.
+- Confirms every collection references only known skills.
+- Confirms plugin-manifest paths declared in `catalog.json` exist.
+- Runs `install.sh --dry-run` for the no-arg default,
+  `--collection pr-loop`, `--skill work-on-pr`, and `--all`.
+
+Run it before opening a PR that touches the catalog or installer.
+
 ## Related code-review approaches
 
-The skills in this repo operate at the **workflow** layer — when to
+The pr-loop collection operates at the **workflow** layer — when to
 review, how often, what to compare against across rounds. Several
-other projects address the **content** layer (what to say in a single
-review) and are complementary, not competing. They can be stacked:
-`review-pr-loop` driving the cycle while internally invoking a
-formatter and/or an adversarial subagent per round.
+other projects address the **content** layer (what to say in a
+single review) and are complementary, not competing. They can be
+stacked: `review-pr-loop` driving the cycle while internally invoking
+a formatter and/or an adversarial subagent per round.
 
 | Feature | [caveman-review](https://github.com/JuliusBrussee/caveman) | [ce-adversarial-reviewer](https://github.com/EveryInc/compound-engineering-plugin) | [claudskills adversarial-review](https://claudskills.com/skills/adversarial-review/) | [debedb/skillz review-pr-loop](./skills/review-pr-loop/SKILL.md) |
 |---|---|---|---|---|

@@ -1,0 +1,9 @@
+{
+  "name": "pr-loop",
+  "description": "Paired PR-loop skills for iterative review cycles: work-on-pr (author) + review-pr-loop (reviewer).",
+  "hosts": ["claude", "codex"],
+  "skills": [
+    "work-on-pr",
+    "review-pr-loop"
+  ]
+}
