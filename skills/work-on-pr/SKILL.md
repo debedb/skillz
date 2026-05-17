@@ -3,8 +3,8 @@ name: work-on-pr
 description: |
   Iteratively work on a GitHub pull request as the author. Watch for new review comments, issue comments, and inline threads; if nothing new exists yet, wait and re-check instead of exiting. For each actionable item, implement the fix in the PR worktree, run relevant tests, commit and push, then reply with a summary and commit SHA. Continue until the PR is approved, merged or closed, or the user stops the loop. Also accepts an issue reference instead of a PR: in that case the skill creates the PR (if absent), guarantees the PR body contains `Closes #<issue>`, and then enters the watch loop. Use when you want the agent to own the start-PR or address-test-push-reply-wait cycle across multiple review rounds rather than handling a single review comment.
 author: Claude Code
-version: 1.5.0
-date: 2026-05-14
+version: 1.6.0
+date: 2026-05-16
 source: https://github.com/voitta-ai/skillz
 source_file: skills/work-on-pr/SKILL.md
 ---
@@ -265,17 +265,46 @@ permission prompts every iteration. Add these patterns to
       "Bash(gh api repos/*/pulls/*/comments/*/replies)",
       "Bash(gh api repos/*/issues/*/comments)",
       "Bash(git push origin feature/*)",
+      "Bash(git push -u origin feature/*)",
       "Bash(git -C * push origin feature/*)",
+      "Bash(git -C * push -u origin feature/*)",
       "Bash(git -C * add:*)",
       "Bash(git -C * commit:*)",
       "Bash(git -C * status)",
       "Bash(git -C * --no-pager log:*)",
       "Bash(git -C * --no-pager diff:*)",
-      "Bash(git -C * --no-pager show:*)"
+      "Bash(git -C * --no-pager show:*)",
+      "Write(/tmp/**)",
+      "Edit",
+      "Write",
+      "MultiEdit"
     ]
   }
 }
 ```
+
+**Why the `-u` push variants.** The first push of a new branch is
+typically `git push -u origin feature/<name>` to set upstream
+tracking. CC's allow matcher matches the full command verbatim and
+does not strip flags, so `Bash(git -C * push origin feature/*)`
+does NOT match a `-u` push. Both shapes are listed so the first
+push and subsequent follow-up pushes are both auto-allowed.
+
+**Why `Write(/tmp/**)`.** The skill writes commit-body, reply-body,
+and PR-body heredocs to `/tmp/<file>` and passes them via
+`--body-file` / `git commit -F`. The `Write` tool prompts on every
+new file without this entry. `/tmp` is process-local scratch — no
+risk of overwriting persistent data.
+
+**The `Edit` / `Write` / `MultiEdit` tradeoff.** Listing the tools
+without a path scope allows edits to ANY file from ANY cwd, not
+just the worktree. This is the most pragmatic option today because
+CC's allow matcher does not accept a path glob for `Edit` /
+`Write` (e.g. `Edit(/path/to/repo-wt-*/**)` is not honored). If
+you'd rather keep `Edit` prompting outside the loop and only
+auto-allow inside the worktree, omit those three entries and
+accept one prompt per file edit per iteration. The blanket form is
+the only way to make the loop fully prompt-free today.
 
 Rationale: every entry is a *write* the loop does on the agent's
 own work — opening the PR, replying to its reviews, pushing
