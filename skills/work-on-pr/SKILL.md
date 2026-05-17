@@ -3,7 +3,7 @@ name: work-on-pr
 description: |
   Iteratively work on a GitHub pull request as the author. Watch for new review comments, issue comments, and inline threads; if nothing new exists yet, wait and re-check instead of exiting. For each actionable item, implement the fix in the PR worktree, run relevant tests, commit and push, then reply with a summary and commit SHA. Continue until the PR is approved, merged or closed, or the user stops the loop. Also accepts an issue reference instead of a PR: in that case the skill creates the PR (if absent), guarantees the PR body contains `Closes #<issue>`, and then enters the watch loop. Use when you want the agent to own the start-PR or address-test-push-reply-wait cycle across multiple review rounds rather than handling a single review comment.
 author: Claude Code
-version: 1.6.2
+version: 1.6.3
 date: 2026-05-17
 source: https://github.com/voitta-ai/skillz
 source_file: skills/work-on-pr/SKILL.md
@@ -164,9 +164,16 @@ wake-up was actually scheduled and control is being handed off to it.
    - "Last addressed" anchor = max(committed_at of head commit,
      created_at of last issue comment posted by the authenticated
      user). Compute via:
-     - `gh api repos/:owner/:repo/commits/<headRefOid> --jq .committer.date`
+     - `gh api repos/:owner/:repo/commits/<headRefOid> --jq .commit.committer.date`
      - `gh api repos/:owner/:repo/issues/<N>/comments
         --jq '[.[] | select(.user.login == "<me>")] | last | .created_at'`
+   - Note: the response from `GET /repos/{owner}/{repo}/commits/{ref}` nests
+     commit metadata under `.commit.*`. The top-level `.committer` is the
+     GitHub user object (login/id), not the commit timestamp —
+     `.committer.date` is empty. Prefer `.commit.committer.date` over
+     `.commit.author.date`: committer date moves on rebase, author date does
+     not, so committer date better reflects "when did this commit hit the
+     branch".
    - Take the MAX. Call it `anchor_ts`.
    - Fetch all three comment surfaces:
      - reviews: `gh api repos/:owner/:repo/pulls/<N>/reviews`
