@@ -4,7 +4,7 @@
     "name": "voitta-ai",
     "url": "https://github.com/voitta-ai"
   },
-  "description": "Skillz marketplace: full bundle plus per-skill and grouped plugin entries.",
+  "description": "Skillz marketplace (Codex): full bundle plus per-skill and grouped plugin entries.",
   "plugins": [
     {
       "name": "skillz",
@@ -25,6 +25,16 @@
       "name": "review-pr-loop",
       "source": "./plugins/review-pr-loop/",
       "description": "Reviewer-side PR iteration loop only."
+    },
+    {
+      "name": "continuous-learning",
+      "source": "./plugins/continuous-learning/",
+      "description": "Codex-only: continuous-learning skill (no hooks). For the hook-driven bundle, install codex-continuous-learning."
+    },
+    {
+      "name": "codex-continuous-learning",
+      "source": "./plugins/codex-continuous-learning/",
+      "description": "Codex-only: continuous-learning skill plus UserPromptSubmit + Stop hooks."
     }
   ]
 }

@@ -1,11 +1,11 @@
 {
   "name": "skillz",
   "version": "1.0.0",
-  "description": "Paired PR-loop skills: work-on-pr (author) and review-pr-loop (reviewer).",
+  "description": "Full skillz bundle: every skill in the catalog (work-on-pr, review-pr-loop, continuous-learning).",
   "author": "voitta-ai",
   "homepage": "https://github.com/voitta-ai/skillz",
   "repository": "https://github.com/voitta-ai/skillz",
   "license": "MIT",
-  "keywords": ["pr", "github", "code-review", "skills"],
+  "keywords": ["claude", "codex", "skills", "bundle"],
   "skills": "./skills/"
 }

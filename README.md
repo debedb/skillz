@@ -1,9 +1,12 @@
 # skillz — multi-skill catalog for Claude Code and Codex
 
-A small, growing catalog of Claude Code / Codex skills, installable
-individually, as named collections, or as a host-native plugin
-bundle. Skills are plain `SKILL.md` files; bundles add plugin
-manifests on top.
+A small, growing catalog of Claude Code / Codex skills, exposed as
+individual plugins and a full-bundle plugin via the host's native
+`/plugin install` flow. Skills are plain `SKILL.md` files; each
+plugin entry adds a thin manifest plus a `skills/` directory of
+symlinks back to the canonical `skills/<name>/`. A legacy
+`install.sh` script remains available as a fallback for sandboxed
+environments and older Codex versions.
 
 ## Table of contents
 
@@ -11,7 +14,7 @@ manifests on top.
 - [Layout](#layout)
 - [Install — Claude Code plugin (recommended)](#install--claude-code-plugin-recommended)
 - [Install — Codex plugin (recommended)](#install--codex-plugin-recommended)
-- [Install — script (single skill / collection / all)](#install--script-single-skill--collection--all)
+- [Install — script (legacy / fallback)](#install--script-legacy--fallback)
 - [Migrating from `debedb/skillz`](#migrating-from-debedbskillz)
 - [Catalog manifest](#catalog-manifest)
 - [Updating](#updating)
@@ -30,9 +33,13 @@ manifests on top.
 | [work-on-pr](./skills/work-on-pr/SKILL.md) | skill | Claude, Codex | Author-side PR iteration loop |
 | [review-pr-loop](./skills/review-pr-loop/SKILL.md) | skill | Claude, Codex | Reviewer-side PR iteration loop |
 | [continuous-learning](./skills/continuous-learning/SKILL.md) | skill | Codex | End-of-task retrospective: extract reusable, verified learnings as Codex skills |
-| [pr-loop](./collections/pr-loop.json) | collection | Claude, Codex | Paired author + reviewer PR-loop skills |
-| `skillz` plugin | plugin | Claude, Codex | Full repo packaged as Claude Code + Codex plugin |
+| [`skillz` plugin](./plugins/skillz/) | plugin | Claude, Codex | Full repo bundle: every skill |
+| [`pr-loop` plugin](./plugins/pr-loop/) | plugin | Claude, Codex | Paired author + reviewer PR-loop skills |
+| [`work-on-pr` plugin](./plugins/work-on-pr/) | plugin | Claude, Codex | Single-skill plugin: work-on-pr |
+| [`review-pr-loop` plugin](./plugins/review-pr-loop/) | plugin | Claude, Codex | Single-skill plugin: review-pr-loop |
+| [`continuous-learning` plugin](./plugins/continuous-learning/) | plugin | Codex | Single-skill plugin (no hooks) |
 | [`codex-continuous-learning` plugin](./plugins/codex-continuous-learning/) | plugin | Codex | continuous-learning skill plus UserPromptSubmit + Stop hooks |
+| [pr-loop](./collections/pr-loop.json) | collection (legacy) | Claude, Codex | `install.sh` selector. Prefer the `pr-loop` plugin entry. |
 
 Machine-readable index: [`catalog.json`](./catalog.json). The
 installer and validation script both read from it, so new entries
@@ -43,29 +50,58 @@ land in the docs and tooling at the same time.
 ```
 catalog.json                       # machine-readable catalog index
 collections/
-  pr-loop.json                     # paired PR-loop collection
-skills/
+  pr-loop.json                     # legacy install.sh selector (kept for backcompat)
+skills/                            # canonical skill content
   work-on-pr/SKILL.md
   review-pr-loop/SKILL.md
-  continuous-learning/SKILL.md     # canonical continuous-learning skill
+  continuous-learning/SKILL.md
 .claude-plugin/
-  marketplace.json                 # Claude Code marketplace manifest
-  plugin.json                      # Claude Code plugin manifest
+  marketplace.json                 # Claude Code marketplace (lists all plugin entries)
 .codex-plugin/
-  plugin.json                      # Codex whole-repo plugin manifest
-plugins/
-  codex-continuous-learning/       # standalone Codex bundle (skill + hooks)
+  marketplace.json                 # Codex marketplace (lists all plugin entries)
+plugins/                           # per-plugin manifests + skill symlinks
+  skillz/                          # full bundle
+    .claude-plugin/plugin.json
+    .codex-plugin/plugin.json
+    skills/
+      work-on-pr -> ../../../skills/work-on-pr
+      review-pr-loop -> ../../../skills/review-pr-loop
+      continuous-learning -> ../../../skills/continuous-learning
+  pr-loop/                         # work-on-pr + review-pr-loop only
+    .claude-plugin/plugin.json
+    .codex-plugin/plugin.json
+    skills/
+      work-on-pr -> ../../../skills/work-on-pr
+      review-pr-loop -> ../../../skills/review-pr-loop
+  work-on-pr/                      # single-skill plugin
+    .claude-plugin/plugin.json
+    .codex-plugin/plugin.json
+    skills/work-on-pr -> ../../../skills/work-on-pr
+  review-pr-loop/                  # single-skill plugin
+    .claude-plugin/plugin.json
+    .codex-plugin/plugin.json
+    skills/review-pr-loop -> ../../../skills/review-pr-loop
+  continuous-learning/             # Codex-only single-skill plugin (no hooks)
+    .codex-plugin/plugin.json
+    skills/continuous-learning -> ../../../skills/continuous-learning
+  codex-continuous-learning/       # Codex skill + hooks bundle
     .codex-plugin/plugin.json
     skills/continuous-learning -> ../../../skills/continuous-learning
     hooks/
       hooks.json
       continuous_learning_prompt.py
       continuous_learning_stop.py
-install.sh                         # catalog-driven installer
+install.sh                         # catalog-driven installer (legacy / fallback)
 scripts/
   validate-catalog.sh              # CI/local catalog validation
 README.md
 ```
+
+Each `plugins/<name>/skills/<skill>` is a symlink back to the
+canonical `skills/<skill>/`, so every plugin reads from a single
+source of truth. The root `.claude-plugin/marketplace.json` and
+`.codex-plugin/marketplace.json` enumerate every plugin entry so
+hosts can offer them individually in `/plugin install`.
 
 This repo replaced gist `5f606018eb36a75dc292016268f08e7c`. The full
 gist revision history was imported as the first 13 commits on
@@ -73,18 +109,29 @@ gist revision history was imported as the first 13 commits on
 
 ## Install — Claude Code plugin (recommended)
 
-The plugin bundle installs every skill in the repo at once. From
-inside Claude Code:
+The marketplace exposes every plugin entry individually, so you can
+install exactly the subset you want. From inside Claude Code:
 
 ```text
 /plugin marketplace add voitta-ai/skillz
+
+# Full bundle (every skill):
 /plugin install skillz@skillz
+
+# Author + reviewer PR-loop pair:
+/plugin install pr-loop@skillz
+
+# Single-skill plugins:
+/plugin install work-on-pr@skillz
+/plugin install review-pr-loop@skillz
 ```
 
-Skills load from the plugin's own `skills/` directory; no copy into
-`~/.claude/skills/` is created. If you previously installed via
-`install.sh --target claude`, remove the old copies to avoid
-duplicates:
+Each plugin's `skills/` directory is a set of symlinks back to
+`skills/<name>/`, so installing one plugin does not duplicate skill
+content on disk.
+
+If you previously installed via `install.sh --target claude`,
+remove the old copies to avoid duplicates:
 
 ```bash
 rm -rf ~/.claude/skills/work-on-pr ~/.claude/skills/review-pr-loop
@@ -95,8 +142,18 @@ rm -rf ~/.claude/skills/work-on-pr ~/.claude/skills/review-pr-loop
 Requires Codex CLI **0.117.0** or newer. Check with `codex --version`.
 
 From inside Codex (`/plugins`), add this repo as a marketplace source
-and install the `skillz` plugin. Or, from a clone, point Codex at the
-repo root as a local marketplace folder.
+and install whichever plugin entry you want — same set as Claude
+Code, plus two Codex-only entries:
+
+- `skillz` — full bundle
+- `pr-loop` — work-on-pr + review-pr-loop
+- `work-on-pr` — single skill
+- `review-pr-loop` — single skill
+- `continuous-learning` — single skill, no hooks
+- `codex-continuous-learning` — skill + UserPromptSubmit/Stop hooks
+
+Or, from a clone, point Codex at the repo root as a local
+marketplace folder.
 
 Remove old direct-copy installs after switching:
 
@@ -104,11 +161,13 @@ Remove old direct-copy installs after switching:
 rm -rf ~/.codex/skills/work-on-pr ~/.codex/skills/review-pr-loop
 ```
 
-## Install — script (single skill / collection / all)
+## Install — script (legacy / fallback)
 
-Use the script when you want a single skill or a single collection
-without the plugin bundle, or when the plugin path is unavailable
-(older Codex, locked Claude Code config, sandboxed environment).
+`install.sh` predates the per-plugin marketplace entries above. Use
+it when the plugin path is unavailable (older Codex, locked Claude
+Code config, sandboxed environment) or when you want to drop skills
+directly into `~/.claude/skills/` / `~/.codex/skills/` without going
+through `/plugin`.
 
 ```bash
 # Default: install the pr-loop collection (work-on-pr + review-pr-loop)
@@ -236,7 +295,13 @@ ls ~/.claude/skills/work-on-pr/SKILL.md ~/.claude/skills/review-pr-loop/SKILL.md
 
 Check only the host(s) you actually use.
 
-## Collections
+## Collections (legacy)
+
+Collections are an `install.sh`-only concept; Claude Code and Codex
+do not have a native notion of "collection." New work should use
+the equivalent **plugin** entries (e.g. install `pr-loop@skillz` via
+`/plugin install`). Collections remain documented here for users
+still on the script install path.
 
 ### pr-loop collection
 
@@ -246,6 +311,10 @@ pull request review cycle. Install as one unit via:
 ```bash
 ./install.sh --collection pr-loop
 ```
+
+The same pairing is also available as the `pr-loop` plugin entry —
+`/plugin install pr-loop@skillz` is the preferred path on Claude
+Code and on Codex CLI ≥ 0.117.
 
 The two skills:
 

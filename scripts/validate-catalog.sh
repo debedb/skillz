@@ -77,10 +77,64 @@ for c in catalog.get("collections", []):
 
 # Plugin assets referenced by manifests
 for p in catalog.get("plugins", []):
-    for key in ("claude_manifest", "claude_marketplace", "codex_manifest"):
+    pname = p.get("name", "<unnamed>")
+    for key in (
+        "claude_manifest",
+        "claude_marketplace",
+        "codex_manifest",
+        "codex_marketplace",
+    ):
         rel = p.get(key)
         if rel and not os.path.isfile(os.path.join(root, rel)):
-            errors.append(f"plugin '{p.get('name')}' missing {key}: {rel}")
+            errors.append(f"plugin '{pname}' missing {key}: {rel}")
+
+    # For each plugin manifest under plugins/<name>/, verify the sibling
+    # skills/ dir exists and every symlink in it resolves to a real skill
+    # directory under skills/.
+    declared_skills = set(p.get("skills", []))
+    plugin_dirs = set()
+    for key in ("claude_manifest", "codex_manifest"):
+        rel = p.get(key)
+        if rel and rel.startswith("plugins/"):
+            plugin_dirs.add(os.path.dirname(os.path.dirname(rel)))
+    for pdir in plugin_dirs:
+        skills_dir = os.path.join(root, pdir, "skills")
+        if not os.path.isdir(skills_dir):
+            errors.append(f"plugin '{pname}' missing skills/ dir: {pdir}/skills")
+            continue
+        symlink_skills = set()
+        for entry in sorted(os.listdir(skills_dir)):
+            link_path = os.path.join(skills_dir, entry)
+            if not os.path.islink(link_path):
+                continue
+            target = os.path.realpath(link_path)
+            expected_prefix = os.path.realpath(os.path.join(root, "skills"))
+            if not target.startswith(expected_prefix):
+                errors.append(
+                    f"plugin '{pname}' symlink {pdir}/skills/{entry} -> "
+                    f"{target} escapes skills/"
+                )
+                continue
+            if not os.path.isdir(target):
+                errors.append(
+                    f"plugin '{pname}' symlink {pdir}/skills/{entry} broken: "
+                    f"{target} not a directory"
+                )
+                continue
+            symlink_skills.add(entry)
+        if declared_skills and symlink_skills != declared_skills:
+            missing = declared_skills - symlink_skills
+            extra = symlink_skills - declared_skills
+            if missing:
+                errors.append(
+                    f"plugin '{pname}' skills/ missing symlinks for: "
+                    f"{sorted(missing)}"
+                )
+            if extra:
+                errors.append(
+                    f"plugin '{pname}' skills/ has unexpected symlinks: "
+                    f"{sorted(extra)}"
+                )
 
 if errors:
     for e in errors:
