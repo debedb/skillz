@@ -3,8 +3,8 @@ name: work-on-pr
 description: |
   Iteratively work on a GitHub pull request as the author. Watch for new review comments, issue comments, and inline threads; if nothing new exists yet, wait and re-check instead of exiting. For each actionable item, implement the fix in the PR worktree, run relevant tests, commit and push, then reply with a summary and commit SHA. Continue until the PR is approved, merged or closed, or the user stops the loop. Also accepts an issue reference instead of a PR: in that case the skill creates the PR (if absent), guarantees the PR body contains `Closes #<issue>`, and then enters the watch loop. Use when you want the agent to own the start-PR or address-test-push-reply-wait cycle across multiple review rounds rather than handling a single review comment.
 author: Claude Code
-version: 1.5.0
-date: 2026-05-14
+version: 1.5.1
+date: 2026-05-17
 source: https://github.com/voitta-ai/skillz
 source_file: skills/work-on-pr/SKILL.md
 ---
@@ -65,10 +65,25 @@ One invocation owns the watch loop until a termination condition is
 reached or the user interrupts it. If there is no actionable
 reviewer activity yet, that is an idle wait state, not success: keep
 waiting and re-checking. Prefer `ScheduleWakeup` when the host
-supports it; otherwise sleep and poll again in the same invocation.
-Do not return just because a quiet poll or one sleep interval
-completed. A loop round only ends early if it actually scheduled a
-continuation elsewhere, or if a real stop condition fired.
+supports it and the wake-up survives turn end; otherwise sleep and
+poll again in the same invocation. Do not return just because a
+quiet poll or one sleep interval completed. A loop round only ends
+early if it actually scheduled a durable continuation elsewhere, or
+if a real stop condition fired.
+
+At the first idle/reschedule pass, surface which watch mode is
+active:
+
+- `watch-mode=durable`: a real wake-up was scheduled and survives
+  turn end.
+- `watch-mode=in-process-only`: no durable wake-up exists, so the
+  current invocation must stay alive and re-poll in-process.
+
+While the loop is active, do not send a terminal/final handoff just
+to summarize status. Use progress/status updates only. Idle passes,
+approval prompts, and empty polls are never completion. Only end the
+invocation when a real stop condition fired, or when a durable
+wake-up was actually scheduled and control is being handed off to it.
 
 ### Single-iteration flow
 
@@ -168,11 +183,20 @@ continuation elsewhere, or if a real stop condition fired.
    - Recent activity (anchor < 10 min old) → short delay
      (`270s` to stay inside the 5-minute prompt-cache TTL).
    - Quiet (anchor > 30 min) → long delay (`1800s` or `3600s`).
-   - If the environment exposes `ScheduleWakeup`, schedule the next
-     check with the same `/work-on-pr <N>` prompt and end the current
-     iteration.
-   - Otherwise send a brief user-facing wait update, sleep for the
-     chosen delay, and jump back to step 1 in the same invocation.
+   - Emit one short status line for the pass. Use
+     `watch-mode=durable` only when a real wake-up was scheduled;
+     otherwise use `watch-mode=in-process-only`.
+   - If the environment exposes `ScheduleWakeup` and the wake-up
+     survives turn end, schedule the next check with the same
+     `/work-on-pr <N>` prompt and end the current iteration.
+   - Otherwise send a brief user-facing wait update, keep the current
+     invocation alive, sleep for the chosen delay, and jump back to
+     step 1. An in-process sleep does not survive a terminal/final
+     handoff.
+   - If the invocation is ending and no durable wake-up was actually
+     scheduled, stop the watch explicitly with
+     `action=watch stopped:no durable wake-up and invocation ending`
+     instead of implying that polling will continue.
    - Do not substitute ad hoc `30s` sleeps unless the user explicitly
      asked for aggressive polling.
    - Only terminate on approval / merge / user stop / hard-cap
@@ -234,11 +258,43 @@ continuation elsewhere, or if a real stop condition fired.
      turn).
    - Quiet period → 1800s.
    - User instructed "check daily" → 3600s.
-   - If `ScheduleWakeup` exists, use it; otherwise sleep and loop
-     in-process.
+   - If `ScheduleWakeup` exists and the wake-up survives turn end,
+     use it; otherwise sleep and loop in-process.
+   - `watch-mode=in-process-only` only remains true while the current
+     invocation stays alive. An in-process sleep does not survive a
+     terminal/final handoff.
    - Keep the same delay policy in-process; do not collapse to short
      ad hoc sleeps just because the loop is already running.
    - Skip further waiting if the loop has terminated.
+
+### Status line
+
+Every iteration emits a single status line to the user, even when
+nothing changed. Format suggestion:
+
+```
+PR #<N> r<round> | state=<OPEN/MERGED/CLOSED> head=<sha7>
+watch-mode=<durable|in-process-only> anchor=<iso>
+new-since-anchor=<n reviews, m issue comments, k inline comments>
+action=<addressing:<id> | idle wait | exit:<reason> | watch stopped:<reason>>
+next=<delaySeconds>s
+```
+
+`next=<delaySeconds>s` is optional. Omit it unless a wake-up was
+actually scheduled or the current invocation is about to sleep and
+re-poll in-process. If the invocation is ending and no durable
+wake-up exists, use
+`action=watch stopped:no durable wake-up and invocation ending`
+instead of a fake waiting line.
+
+### Pre-handoff guardrail
+
+Before any terminal/final handoff, force this checklist:
+
+1. Did a real stop condition fire?
+2. Was a durable wake-up actually scheduled?
+3. If neither is true, do not end the invocation; keep polling
+   in-process.
 
 ### Auto-approved operations (self-PR workflow)
 
@@ -378,12 +434,17 @@ After invoking, expect to see (per iteration):
 
 - A single short user-facing update: "Iteration N on PR #X. Found M
   new comment(s). Addressing comment <id>." OR "No new comments yet
-  as of <timestamp>; waiting <delay>s before the next check."
+  as of <timestamp>; waiting <delay>s before the next check." The
+  status line should include `watch-mode=<durable|in-process-only>`.
+  If no durable wake-up exists and the invocation must end, expect
+  `watch stopped:no durable wake-up and invocation ending` instead
+  of a fake waiting line.
 - One commit pushed per round (only when there were actionable
   comments).
 - One reply posted per addressed comment.
 - Either a `ScheduleWakeup` call or an in-process sleep / poll loop
   unless the loop exited.
+- No `final` / terminal handoff while the watch loop is still active.
 
 When invoked with an issue reference, additionally expect:
 
@@ -501,7 +562,9 @@ User: "/work-on-pr Issue https://github.com/foo/bar/issues/42"
   against the canonical source.
 - **Scheduler fallback**: if `ScheduleWakeup` is unavailable in the
   host agent, keep the current turn alive with `sleep` + re-poll
-  instead of returning "nothing to do".
+  instead of returning "nothing to do". `watch-mode=in-process-only`
+  only remains valid while that invocation stays alive; a `final`
+  handoff ends it.
 - **Approval-aware execution**: in constrained sandboxes, `git add` /
   `git commit` may need approval for shared git metadata writes, and
   `git push` / `gh pr comment` / inline `gh api` replies may need
@@ -527,4 +590,3 @@ User: "/work-on-pr Issue https://github.com/foo/bar/issues/42"
   [[gh-git-heredoc-body-file]] (body-file pattern),
   [[python-ast-static-analyzer-scoping]] (worked example of an
   iterative review cycle this skill drove).
-

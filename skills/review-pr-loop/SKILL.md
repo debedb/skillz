@@ -3,8 +3,8 @@ name: review-pr-loop
 description: |
   Iteratively review a GitHub pull request across multiple rounds. Each round, read the linked issue(s), prior review comments, issue comments, and inline threads before reviewing only the new diff or the author's latest response. If no author response exists yet, wait and re-check instead of exiting. Leave structured feedback (REQUEST_CHANGES, COMMENT, or APPROVE) and continue until you approve, the PR is merged or closed, or the user stops the loop. Use when you are the reviewer on a non-trivial PR and want the agent to own the back-and-forth review cycle rather than doing a one-shot review.
 author: Claude Code
-version: 1.2.2
-date: 2026-05-14
+version: 1.2.3
+date: 2026-05-17
 source: https://github.com/voitta-ai/skillz
 source_file: skills/review-pr-loop/SKILL.md
 ---
@@ -62,14 +62,24 @@ supports it and the wake-up survives the current turn; otherwise
 sleep and poll again in the same invocation. Do not return just
 because one idle poll or sleep completed. An idle pass is never a
 terminal condition; it must either schedule a real wake-up or stay
-alive for the next in-process poll. Each iteration:
+alive for the next in-process poll.
+
+At the first idle/reschedule pass, surface which watch mode is
+active:
+
+- `watch-mode=durable`: a real wake-up was scheduled and survives
+  turn end.
+- `watch-mode=in-process-only`: no durable wake-up exists, so the
+  current invocation must stay alive and re-poll in-process.
 
 While the loop is active, do not send a terminal/final handoff
 message just to summarize status. Use progress/status updates only.
 Only end the invocation when one of these terminal conditions fires:
 you approved / said `LGTM` or equivalent, the PR merged or closed, or
-the user explicitly stopped the loop. Idle passes, approval prompts,
-and empty polls are never completion.
+the user explicitly stopped the loop. The only non-terminal handoff
+that may end the current iteration is a real durable wake-up that was
+actually scheduled. Idle passes, approval prompts, and empty polls are
+never completion. Each iteration:
 
 1. **Pull full context first — every round.** This is the most
    important rule.
@@ -205,10 +215,10 @@ and empty polls are never completion.
     - Otherwise sleep for the active poll interval and loop
       in-process, but only if the invocation is staying alive. An
       in-process sleep does not survive a `final` handoff.
-    - If neither is possible because the host has no durable scheduler
-      and the invocation is about to end, stop the watch explicitly
-      with `action=watch stopped:no scheduler in host` instead of
-      implying that polling will continue.
+    - If the invocation is about to end and no durable wake-up was
+      actually scheduled, stop the watch explicitly with
+      `action=watch stopped:no durable wake-up and invocation ending`
+      instead of implying that polling will continue.
     - **Surface status every tick.** Each pass emits one short
       user-facing line so the operator can see what changed (or
       didn't) without opening GitHub. See "Status line" below.
@@ -231,7 +241,8 @@ and empty polls are never completion.
 - Only print `next=<delaySeconds>s` when the next wake-up is real:
   either a durable wake-up was scheduled or the current invocation is
   definitely staying alive to sleep and re-poll. If neither is true,
-  report `watch stopped:no scheduler in host` instead.
+  report `watch stopped:no durable wake-up and invocation ending`
+  instead.
 - The user can override by passing an explicit interval to /loop
   or by saying "slow down to <N>s"; keep using that override on
   subsequent passes until changed.
@@ -245,7 +256,8 @@ nothing changed. Format suggestion:
 
 ```
 PR #<N> r<round> | state=<OPEN/MERGED/CLOSED> head=<sha7>
-last-author-activity=<iso> new-since-last=<n commits, m comments>
+watch-mode=<durable|in-process-only> last-author-activity=<iso>
+new-since-last=<n commits, m comments>
 action=<leaving REVIEW | idle wait | exit:<reason> | watch stopped:<reason>>
 next=<delaySeconds>s
 ```
@@ -262,8 +274,17 @@ If the watch loop is no longer active, say so explicitly in the status
 line (`action=watch stopped:<reason>`) instead of implying polling is
 still happening. Never emit `watch stopped` on an idle pass or any
 other non-terminal state. Host capability failure is the exception:
-if the invocation is ending and no durable scheduler exists, emit
-`watch stopped:no scheduler in host`.
+if the invocation is ending and no durable wake-up exists, emit
+`watch stopped:no durable wake-up and invocation ending`.
+
+### Pre-handoff guardrail
+
+Before any terminal/final handoff, force this checklist:
+
+1. Did a real stop condition fire?
+2. Was a durable wake-up actually scheduled?
+3. If neither is true, do not end the invocation; keep polling
+   in-process.
 
 ### Tone
 
@@ -300,10 +321,10 @@ After invoking, expect (per iteration):
   #X (acceptance criteria: ...), K prior reviews, M issue comments.
   Found F blocking, G non-blocking. Leaving <REQUEST_CHANGES /
   COMMENT / APPROVE>." OR "No author activity since <timestamp>;
-  waiting <delay>s before the next check." If no real scheduler
+  waiting <delay>s before the next check." If no durable wake-up
   exists and the invocation must end, expect an explicit
-  `watch stopped:no scheduler in host` status instead of a fake
-  waiting line.
+  `watch stopped:no durable wake-up and invocation ending` status
+  instead of a fake waiting line.
 - One `gh pr review` call.
 - Either a `ScheduleWakeup`, an in-process sleep / poll loop, or
   termination.
@@ -391,7 +412,9 @@ Iteration 7:
   per-thread inline comments and for fetching review bodies by ID.
 - **Scheduler fallback**: if `ScheduleWakeup` is unavailable in the
   host agent, keep the current turn alive with `sleep` + re-poll
-  instead of returning early on an idle pass.
+  instead of returning early on an idle pass. `watch-mode=in-process-only`
+  only remains valid while that invocation stays alive; a `final`
+  handoff ends it.
 - **Approval-aware execution**: in constrained sandboxes, GitHub
   review submissions and inline review-comment writes may need
   approval. Ask once with stable command shapes if needed, then keep

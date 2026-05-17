@@ -262,10 +262,19 @@ The two skills:
   Leaves structured feedback (REQUEST_CHANGES, COMMENT, APPROVE)
   and continues until approved, merged, or closed.
 
-Each skill owns the watch loop. If `ScheduleWakeup` is available, it
-uses that between polls; otherwise it sleeps and re-polls in-process.
+Each skill owns the watch loop. Every pass should surface which watch
+mode is active:
+
+- `watch-mode=durable`: a real `ScheduleWakeup`-style continuation
+  was scheduled and survives turn end.
+- `watch-mode=in-process-only`: no durable wake-up exists, so the
+  current invocation must stay alive with `sleep` + re-poll.
+
 Invoking before comments exist is expected, and an idle poll is not
-completion.
+completion. In-process polling only works while the current
+invocation stays alive; a terminal/final handoff ends it.
+`watch stopped:*` is only valid when the invocation is actually
+ending, not on an ordinary idle pass.
 
 Usage:
 
