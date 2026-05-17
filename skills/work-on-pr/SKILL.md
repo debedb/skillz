@@ -3,7 +3,7 @@ name: work-on-pr
 description: |
   Iteratively work on a GitHub pull request as the author. Watch for new review comments, issue comments, and inline threads; if nothing new exists yet, wait and re-check instead of exiting. For each actionable item, implement the fix in the PR worktree, run relevant tests, commit and push, then reply with a summary and commit SHA. Continue until the PR is approved, merged or closed, or the user stops the loop. Also accepts an issue reference instead of a PR: in that case the skill creates the PR (if absent), guarantees the PR body contains `Closes #<issue>`, and then enters the watch loop. Use when you want the agent to own the start-PR or address-test-push-reply-wait cycle across multiple review rounds rather than handling a single review comment.
 author: Claude Code
-version: 1.5.1
+version: 1.6.1
 date: 2026-05-17
 source: https://github.com/voitta-ai/skillz
 source_file: skills/work-on-pr/SKILL.md
@@ -321,25 +321,57 @@ permission prompts every iteration. Add these patterns to
       "Bash(gh api repos/*/pulls/*/comments/*/replies)",
       "Bash(gh api repos/*/issues/*/comments)",
       "Bash(git push origin feature/*)",
+      "Bash(git push -u origin feature/*)",
       "Bash(git -C * push origin feature/*)",
+      "Bash(git -C * push -u origin feature/*)",
       "Bash(git -C * add:*)",
       "Bash(git -C * commit:*)",
       "Bash(git -C * status)",
       "Bash(git -C * --no-pager log:*)",
       "Bash(git -C * --no-pager diff:*)",
-      "Bash(git -C * --no-pager show:*)"
+      "Bash(git -C * --no-pager show:*)",
+      "Write(/tmp/**)",
+      "Edit",
+      "Write",
+      "MultiEdit"
     ]
   }
 }
 ```
 
+**Why the `-u` push variants.** The first push of a new branch is
+typically `git push -u origin feature/<name>` to set upstream
+tracking. CC's allow matcher matches the full command verbatim and
+does not strip flags, so `Bash(git -C * push origin feature/*)`
+does NOT match a `-u` push. Both shapes are listed so the first
+push and subsequent follow-up pushes are both auto-allowed.
+
+**Why `Write(/tmp/**)`.** The skill writes commit-body, reply-body,
+and PR-body heredocs to `/tmp/<file>` and passes them via
+`--body-file` / `git commit -F`. The `Write` tool prompts on every
+new file without this entry. `/tmp` is process-local scratch — no
+risk of overwriting persistent data.
+
+**The `Edit` / `Write` / `MultiEdit` tradeoff.** Listing the tools
+without a path scope allows edits to ANY file from ANY cwd, not
+just the worktree. This is the simplest way to silence per-edit
+prompts because CC's allow matcher does not accept a path glob for
+`Edit` / `Write` (e.g. `Edit(/path/to/repo-wt-*/**)` is not
+honored). If you'd rather keep `Edit` prompting outside the loop
+and only auto-allow inside the worktree, omit those three entries
+and accept one prompt per file edit per iteration.
+
 Rationale: every entry is a *write* the loop does on the agent's
 own work — opening the PR, replying to its reviews, pushing
 follow-up commits to its feature branch. None of them touch shared
 infrastructure or master directly. Static `Bash(...)` entries in
-`permissions.allow` short-circuit PreToolUse hooks (see
+`permissions.allow` short-circuit CC's native permission layer and
+its PreToolUse hooks (see
 [[claude-code-static-allow-bypasses-hook]]), so once these are in
-place the loop runs without prompts.
+place the loop runs without prompts **from CC's own permission
+matcher**. A separately-installed PreToolUse hook may still
+intercept — see "YOLT-specific gotcha" below for the one case we
+know of in practice.
 
 **Why the `git -C *` patterns matter.** Claude Code matches each
 `Bash(...)` allow entry against the *full* command string. A
@@ -383,11 +415,75 @@ What is intentionally NOT on the auto-approve list:
 - `gh release create` — release artifacts deserve a human gate.
 - `gh repo delete` / `gh repo archive` — irreversible.
 
-For YOLT users (`voitta-yolt` hook): the bundled `rules/shell.json`
-classifies the same `gh pr/issue/api` writes as `safe` so the hook
-agrees with the allowlist. The hook is bypassed when allowlist
-matches, but consistent classification helps when the same agent
-runs in a context without the allowlist.
+### YOLT-specific gotcha: allow patterns ignored on UNSAFE
+
+The above `permissions.allow` block is sufficient on its own only
+when no PreToolUse hook is installed, or when the installed hook
+defers to CC's allow list. The bundled `voitta-yolt` hook's
+`rules/shell.json` classifies `gh pr / issue / api` writes as
+`safe` and so agrees with the allowlist, but classifies core git
+mutations (`git add`, `git commit`, `git push`) and several `gh`
+mutations as UNSAFE — and crucially its `_maybe_allow` (in
+`hooks/grammar_classifier.py`) consults the user allow list only
+when its own decision is UNKNOWN. UNSAFE decisions ignore the
+allow list entirely, so the documented `Bash(...)` entries do NOT
+silence those prompts even though they're present. Tracked as
+voitta-ai/voitta-yolt#35.
+
+Workarounds today (do at least one if running with YOLT):
+
+1. Override the classification per command in
+   `~/.claude/yolt/shell.json` so YOLT sees the loop's writes as
+   `safe`. YOLT merges this with the bundled `rules/shell.json`
+   at load. Cover BOTH the `gh` writes and the `git` writes, since
+   both subcommand families have UNSAFE-classified entries the
+   loop relies on:
+
+   ```json
+   {
+     "commands": {
+       "gh": {
+         "safe_subcommands": ["pr create", "pr edit", "pr comment",
+                              "pr ready", "pr merge",
+                              "issue create", "issue comment",
+                              "issue edit"]
+       },
+       "git": {
+         "safe_subcommands": ["add", "commit", "push"]
+       }
+     }
+   }
+   ```
+
+   Caveat: promoting `git push` to safe here also auto-allows
+   `git push origin master` / `git push --force` from YOLT's
+   perspective; the `permissions.allow` block above still does NOT
+   allow those (no matching pattern), so CC's native matcher
+   continues to prompt on them. The two layers compose
+   restrictively — both must allow for a command to run silent.
+
+2. Disable the YOLT plugin (`/plugin disable yolt`) for the
+   duration of the loop and rely on `permissions.allow` alone.
+
+3. Wait for voitta-ai/voitta-yolt#35 — once `_maybe_allow` is
+   relaxed to apply allow patterns on UNSAFE too, the documented
+   `Bash(...)` entries will short-circuit YOLT directly and no
+   per-command override is needed.
+
+### Skill-activation prompt
+
+The first time the host invokes this skill in a given working
+directory, Claude Code shows a one-time confirmation:
+
+```
+Use skill "work-on-pr"?
+ 1. Yes
+ 2. Yes, and don't ask again for work-on-pr in <cwd>
+```
+
+Pick **option 2** so the loop doesn't pause on every restart in
+the same project. This is separate from `permissions.allow` —
+skill activation is gated independently.
 
 ### Pacing rules
 
