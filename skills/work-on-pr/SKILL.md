@@ -3,7 +3,7 @@ name: work-on-pr
 description: |
   Iteratively work on a GitHub pull request as the author. Watch for new review comments, issue comments, and inline threads; if nothing new exists yet, wait and re-check instead of exiting. For each actionable item, implement the fix in the PR worktree, run relevant tests, commit and push, then reply with a summary and commit SHA. Continue until the PR is approved, merged or closed, or the user stops the loop. Also accepts an issue reference instead of a PR: in that case the skill creates the PR (if absent), guarantees the PR body contains `Closes #<issue>`, and then enters the watch loop. Use when you want the agent to own the start-PR or address-test-push-reply-wait cycle across multiple review rounds rather than handling a single review comment.
 author: Claude Code
-version: 1.6.1
+version: 1.6.2
 date: 2026-05-17
 source: https://github.com/voitta-ai/skillz
 source_file: skills/work-on-pr/SKILL.md
@@ -176,6 +176,44 @@ wake-up was actually scheduled and control is being handed off to it.
      `created_at > anchor_ts` (comments) AND author != self.
    - Approval-only reviews (no body, state=APPROVED) → handled in
      step 2; otherwise treat the body as actionable.
+   - **Timeline fallback (cache-stale list endpoints).** If all three
+     list endpoints above return `[]` AND `anchor_ts` is more than
+     ~2 minutes ago (i.e. enough time has passed that real activity
+     could have landed), do not trust the empty result. The
+     `api.github.com` list endpoints are edge-cached more
+     aggressively than single-resource lookups; right after a fresh
+     PR opens, the cache can serve `[]` for many minutes while
+     newer comments / reviews already exist at the origin. Hit the
+     PR timeline endpoint instead:
+     ```
+     gh api "repos/:owner/:repo/issues/<N>/timeline?per_page=100" \
+       -H "Accept: application/vnd.github.mockingbird-preview+json"
+     ```
+     The timeline returns `commented`, `reviewed`, `line-commented`,
+     `merged`, and `closed` events with `created_at` / `submitted_at`
+     timestamps. For each event whose timestamp is newer than
+     `anchor_ts` and whose actor is not self, hydrate the referenced
+     comment / review by ID via single-resource fetch (which does
+     not exhibit the same staleness):
+     - issue comment: `gh api repos/:owner/:repo/issues/comments/<id>`
+     - review: `gh api repos/:owner/:repo/pulls/<N>/reviews/<id>`
+     - inline review comment: `gh api repos/:owner/:repo/pulls/comments/<id>`
+     Treat the hydrated bodies as the actionable set for this round.
+     If the timeline ALSO returns no relevant events, the PR really
+     is quiet — proceed to step 5.
+   - **Cache-suspicious empty polls.** Track per-PR whether the most
+     recent list-endpoint poll returned `[]`. If the next poll also
+     returns `[]` within ~5 minutes (well under typical edge-cache
+     TTL), log it as cache-suspicious and use the timeline fallback
+     above on this iteration too, instead of treating the back-to-back
+     `[]` as definitively quiet. Two adjacent empty polls on a fresh
+     PR are exactly the failure mode that hid the LGTM in #33.
+   - **Manual comment-URL handoff.** If the user pastes a specific
+     comment URL into the loop, parse the comment ID out of the URL
+     and fetch the comment directly via the single-resource endpoint
+     rather than relying on the list view to surface it. The list
+     view may still be returning `[]` even though the comment is
+     reachable by ID.
 
 5. **No new actionable items yet → keep waiting.**
    - No comments yet is not completion; the reviewer may simply not
@@ -675,6 +713,24 @@ User: "/work-on-pr Issue https://github.com/foo/bar/issues/42"
   treated like a comment if the user opted into "address CI
   failures too"; default is to surface CI failures to the user
   rather than auto-fix.
+- **GitHub list-endpoint cache staleness (the #33 quirk).** The
+  list endpoints (`/issues/<N>/comments`, `/pulls/<N>/reviews`,
+  `/pulls/<N>/comments`) can return `[]` for many minutes after a
+  fresh PR is opened, even when a real comment / review already
+  exists at the origin and can be fetched by ID. The PR timeline
+  endpoint
+  (`/issues/<N>/timeline`) and single-resource lookups
+  (`/issues/comments/<id>`, `/pulls/<N>/reviews/<id>`,
+  `/pulls/comments/<id>`) appear to be less aggressively cached and
+  surface the activity quickly. Watch-style loops MUST use the
+  timeline fallback in step 4 instead of trusting an `[]` list
+  result on a young PR, or an LGTM / changes-requested signal can
+  sit invisible for 10+ minutes per poll. Treat back-to-back `[]`
+  list polls within ~5 minutes as cache-suspicious and force the
+  fallback. The same caveat likely applies to other GitHub watch
+  workflows that poll list endpoints, so consider extracting a
+  shared `gh-api-list-cache-staleness` skill if a second use site
+  appears.
 
 ## References
 
