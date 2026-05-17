@@ -362,6 +362,59 @@ agrees with the allowlist. The hook is bypassed when allowlist
 matches, but consistent classification helps when the same agent
 runs in a context without the allowlist.
 
+### YOLT-specific gotcha: allow patterns ignored on UNSAFE
+
+Even with the documented `Bash(...)` entries in
+`~/.claude/settings.json#permissions.allow`, the YOLT hook may
+still prompt on commands its rules classify as UNSAFE (e.g. `gh
+issue create`, `git add`, `git commit`, `git push`). The hook's
+`_maybe_allow` only consults the user allow list when its own
+decision is UNKNOWN — UNSAFE decisions ignore the allow list
+entirely. See `hooks/grammar_classifier.py` (function
+`_maybe_allow`) and issue voitta-ai/voitta-yolt#35.
+
+Workarounds today:
+
+1. Override the classification per command in
+   `~/.claude/yolt/shell.json` so YOLT sees it as `safe`. Example:
+
+   ```json
+   {
+     "commands": {
+       "gh": {
+         "safe_subcommands": ["pr create", "pr edit", "pr comment",
+                              "pr ready", "pr merge",
+                              "issue create", "issue comment",
+                              "issue edit"]
+       }
+     }
+   }
+   ```
+
+   YOLT merges this with the bundled `rules/shell.json` at load.
+
+2. Disable the YOLT plugin (`/plugin disable yolt`) for the
+   duration of the loop and rely on `permissions.allow` alone.
+
+3. Wait for voitta-ai/voitta-yolt#35 — once `_maybe_allow` is
+   relaxed to apply allow patterns on UNSAFE too, the documented
+   `Bash(...)` entries will short-circuit YOLT directly.
+
+### Skill-activation prompt
+
+The first time the host invokes this skill in a given working
+directory, Claude Code shows a one-time confirmation:
+
+```
+Use skill "work-on-pr"?
+ 1. Yes
+ 2. Yes, and don't ask again for work-on-pr in <cwd>
+```
+
+Pick **option 2** so the loop doesn't pause on every restart in
+the same project. This is separate from `permissions.allow` —
+skill activation is gated independently.
+
 ### Pacing rules
 
 - Anthropic prompt cache TTL is 5 min. Stay under 270s when
