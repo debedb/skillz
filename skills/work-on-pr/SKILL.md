@@ -298,21 +298,24 @@ risk of overwriting persistent data.
 
 **The `Edit` / `Write` / `MultiEdit` tradeoff.** Listing the tools
 without a path scope allows edits to ANY file from ANY cwd, not
-just the worktree. This is the most pragmatic option today because
-CC's allow matcher does not accept a path glob for `Edit` /
-`Write` (e.g. `Edit(/path/to/repo-wt-*/**)` is not honored). If
-you'd rather keep `Edit` prompting outside the loop and only
-auto-allow inside the worktree, omit those three entries and
-accept one prompt per file edit per iteration. The blanket form is
-the only way to make the loop fully prompt-free today.
+just the worktree. This is the simplest way to silence per-edit
+prompts because CC's allow matcher does not accept a path glob for
+`Edit` / `Write` (e.g. `Edit(/path/to/repo-wt-*/**)` is not
+honored). If you'd rather keep `Edit` prompting outside the loop
+and only auto-allow inside the worktree, omit those three entries
+and accept one prompt per file edit per iteration.
 
 Rationale: every entry is a *write* the loop does on the agent's
 own work — opening the PR, replying to its reviews, pushing
 follow-up commits to its feature branch. None of them touch shared
 infrastructure or master directly. Static `Bash(...)` entries in
-`permissions.allow` short-circuit PreToolUse hooks (see
+`permissions.allow` short-circuit CC's native permission layer and
+its PreToolUse hooks (see
 [[claude-code-static-allow-bypasses-hook]]), so once these are in
-place the loop runs without prompts.
+place the loop runs without prompts **from CC's own permission
+matcher**. A separately-installed PreToolUse hook may still
+intercept — see "YOLT-specific gotcha" below for the one case we
+know of in practice.
 
 **Why the `git -C *` patterns matter.** Claude Code matches each
 `Bash(...)` allow entry against the *full* command string. A
@@ -356,27 +359,29 @@ What is intentionally NOT on the auto-approve list:
 - `gh release create` — release artifacts deserve a human gate.
 - `gh repo delete` / `gh repo archive` — irreversible.
 
-For YOLT users (`voitta-yolt` hook): the bundled `rules/shell.json`
-classifies the same `gh pr/issue/api` writes as `safe` so the hook
-agrees with the allowlist. The hook is bypassed when allowlist
-matches, but consistent classification helps when the same agent
-runs in a context without the allowlist.
-
 ### YOLT-specific gotcha: allow patterns ignored on UNSAFE
 
-Even with the documented `Bash(...)` entries in
-`~/.claude/settings.json#permissions.allow`, the YOLT hook may
-still prompt on commands its rules classify as UNSAFE (e.g. `gh
-issue create`, `git add`, `git commit`, `git push`). The hook's
-`_maybe_allow` only consults the user allow list when its own
-decision is UNKNOWN — UNSAFE decisions ignore the allow list
-entirely. See `hooks/grammar_classifier.py` (function
-`_maybe_allow`) and issue voitta-ai/voitta-yolt#35.
+The above `permissions.allow` block is sufficient on its own only
+when no PreToolUse hook is installed, or when the installed hook
+defers to CC's allow list. The bundled `voitta-yolt` hook's
+`rules/shell.json` classifies `gh pr / issue / api` writes as
+`safe` and so agrees with the allowlist, but classifies core git
+mutations (`git add`, `git commit`, `git push`) and several `gh`
+mutations as UNSAFE — and crucially its `_maybe_allow` (in
+`hooks/grammar_classifier.py`) consults the user allow list only
+when its own decision is UNKNOWN. UNSAFE decisions ignore the
+allow list entirely, so the documented `Bash(...)` entries do NOT
+silence those prompts even though they're present. Tracked as
+voitta-ai/voitta-yolt#35.
 
-Workarounds today:
+Workarounds today (do at least one if running with YOLT):
 
 1. Override the classification per command in
-   `~/.claude/yolt/shell.json` so YOLT sees it as `safe`. Example:
+   `~/.claude/yolt/shell.json` so YOLT sees the loop's writes as
+   `safe`. YOLT merges this with the bundled `rules/shell.json`
+   at load. Cover BOTH the `gh` writes and the `git` writes, since
+   both subcommand families have UNSAFE-classified entries the
+   loop relies on:
 
    ```json
    {
@@ -386,19 +391,28 @@ Workarounds today:
                               "pr ready", "pr merge",
                               "issue create", "issue comment",
                               "issue edit"]
+       },
+       "git": {
+         "safe_subcommands": ["add", "commit", "push"]
        }
      }
    }
    ```
 
-   YOLT merges this with the bundled `rules/shell.json` at load.
+   Caveat: promoting `git push` to safe here also auto-allows
+   `git push origin master` / `git push --force` from YOLT's
+   perspective; the `permissions.allow` block above still does NOT
+   allow those (no matching pattern), so CC's native matcher
+   continues to prompt on them. The two layers compose
+   restrictively — both must allow for a command to run silent.
 
 2. Disable the YOLT plugin (`/plugin disable yolt`) for the
    duration of the loop and rely on `permissions.allow` alone.
 
 3. Wait for voitta-ai/voitta-yolt#35 — once `_maybe_allow` is
    relaxed to apply allow patterns on UNSAFE too, the documented
-   `Bash(...)` entries will short-circuit YOLT directly.
+   `Bash(...)` entries will short-circuit YOLT directly and no
+   per-command override is needed.
 
 ### Skill-activation prompt
 
