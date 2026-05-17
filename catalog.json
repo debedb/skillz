@@ -26,22 +26,57 @@
     {
       "name": "pr-loop",
       "path": "collections/pr-loop.json",
-      "summary": "Paired PR-loop skills: work-on-pr (author) + review-pr-loop (reviewer).",
+      "summary": "Paired PR-loop skills: work-on-pr (author) + review-pr-loop (reviewer). Legacy install.sh selector; prefer the pr-loop plugin entry.",
       "skills": ["work-on-pr", "review-pr-loop"]
     }
   ],
   "plugins": [
     {
       "name": "skillz",
-      "claude_manifest": ".claude-plugin/plugin.json",
+      "claude_manifest": "plugins/skillz/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/skillz/.codex-plugin/plugin.json",
       "claude_marketplace": ".claude-plugin/marketplace.json",
-      "codex_manifest": ".codex-plugin/plugin.json",
-      "summary": "Full repo packaged as Claude Code + Codex plugin."
+      "codex_marketplace": ".codex-plugin/marketplace.json",
+      "hosts": ["claude", "codex"],
+      "skills": ["work-on-pr", "review-pr-loop", "continuous-learning"],
+      "summary": "Full repo bundle: every skill in one plugin."
+    },
+    {
+      "name": "pr-loop",
+      "claude_manifest": "plugins/pr-loop/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/pr-loop/.codex-plugin/plugin.json",
+      "hosts": ["claude", "codex"],
+      "skills": ["work-on-pr", "review-pr-loop"],
+      "summary": "Paired PR-loop plugin: work-on-pr + review-pr-loop."
+    },
+    {
+      "name": "work-on-pr",
+      "claude_manifest": "plugins/work-on-pr/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/work-on-pr/.codex-plugin/plugin.json",
+      "hosts": ["claude", "codex"],
+      "skills": ["work-on-pr"],
+      "summary": "Single-skill plugin: work-on-pr."
+    },
+    {
+      "name": "review-pr-loop",
+      "claude_manifest": "plugins/review-pr-loop/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/review-pr-loop/.codex-plugin/plugin.json",
+      "hosts": ["claude", "codex"],
+      "skills": ["review-pr-loop"],
+      "summary": "Single-skill plugin: review-pr-loop."
+    },
+    {
+      "name": "continuous-learning",
+      "codex_manifest": "plugins/continuous-learning/.codex-plugin/plugin.json",
+      "hosts": ["codex"],
+      "skills": ["continuous-learning"],
+      "summary": "Codex-only single-skill plugin: continuous-learning (no hooks)."
     },
     {
       "name": "codex-continuous-learning",
       "codex_manifest": "plugins/codex-continuous-learning/.codex-plugin/plugin.json",
       "hosts": ["codex"],
+      "skills": ["continuous-learning"],
       "summary": "Codex-only plugin bundle: continuous-learning skill plus UserPromptSubmit + Stop hooks that drive an end-of-task retrospective."
     }
   ],
