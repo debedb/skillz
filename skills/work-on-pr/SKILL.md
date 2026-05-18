@@ -3,8 +3,8 @@ name: work-on-pr
 description: |
   Iteratively work on a GitHub pull request as the author. Watch for new review comments, issue comments, and inline threads; if nothing new exists yet, wait and re-check instead of exiting. For each actionable item, implement the fix in the PR worktree, run relevant tests, commit and push, then reply with a summary and commit SHA. Continue until the PR is approved, merged or closed, or the user stops the loop. Also accepts an issue reference instead of a PR: in that case the skill creates the PR (if absent), guarantees the PR body contains `Closes #<issue>`, and then enters the watch loop. Use when you want the agent to own the start-PR or address-test-push-reply-wait cycle across multiple review rounds rather than handling a single review comment.
 author: Claude Code
-version: 1.6.3
-date: 2026-05-17
+version: 1.7.0
+date: 2026-05-18
 source: https://github.com/voitta-ai/skillz
 source_file: skills/work-on-pr/SKILL.md
 ---
@@ -266,6 +266,14 @@ wake-up was actually scheduled and control is being handed off to it.
       `git -C <worktree> commit -F /tmp/...` so the call matches a
       single allow entry; chained `cd <worktree> && git commit ...`
       will prompt every time.
+      **Heredoc file path is always under `/tmp/`** (e.g.
+      `/tmp/pr-<N>-commit.txt`, `/tmp/issue-<N>-commit.txt`).
+      Never write the heredoc body file inside the worktree, cwd,
+      or any other tracked location: that creates an untracked file
+      the next `git add` may stage by accident, AND it falls outside
+      the `Write(/tmp/**)` allow entry below so the Write tool will
+      prompt. The basename alone (`issue-<N>-commit.txt`) without the
+      `/tmp/` prefix is the most common form of this mistake.
 
    e. **Push** the feature branch via
       `git -C <worktree> push origin <branch>`. The allow block
@@ -460,29 +468,41 @@ What is intentionally NOT on the auto-approve list:
 - `gh release create` — release artifacts deserve a human gate.
 - `gh repo delete` / `gh repo archive` — irreversible.
 
-### YOLT-specific gotcha: allow patterns ignored on UNSAFE
+### YOLT interaction (post voitta-yolt#36)
 
-The above `permissions.allow` block is sufficient on its own only
-when no PreToolUse hook is installed, or when the installed hook
-defers to CC's allow list. The bundled `voitta-yolt` hook's
-`rules/shell.json` classifies `gh pr / issue / api` writes as
-`safe` and so agrees with the allowlist, but classifies core git
-mutations (`git add`, `git commit`, `git push`) and several `gh`
-mutations as UNSAFE — and crucially its `_maybe_allow` (in
-`hooks/grammar_classifier.py`) consults the user allow list only
-when its own decision is UNKNOWN. UNSAFE decisions ignore the
-allow list entirely, so the documented `Bash(...)` entries do NOT
-silence those prompts even though they're present. Tracked as
-voitta-ai/voitta-yolt#35.
+The `permissions.allow` block above composes correctly with the
+`voitta-yolt` hook on builds that include
+voitta-ai/voitta-yolt#36 (merged 2026-05-17, commit `e610f3e8`).
+That change does two things:
 
-Workarounds today (do at least one if running with YOLT):
+1. `_maybe_allow` (in `hooks/grammar_classifier.py`) now applies
+   user allow patterns to UNSAFE decisions, not just UNKNOWN. The
+   classifier still labels `git add` / `git commit` / `git push`
+   and `gh pr <create|comment|edit|merge|ready>` /
+   `gh issue <create|comment|edit>` as UNSAFE in
+   `rules/shell.json`, but a matching `Bash(...)` entry in
+   `~/.claude/settings.json#permissions.allow` short-circuits the
+   ask. So the patterns documented above are now sufficient on
+   their own — no `~/.claude/yolt/shell.json` override needed.
+2. When the hook does ask (no allow pattern matches the UNSAFE
+   command), the ask body now appends a paste-ready
+   `Bash(...)` hint derived from the command shape. Copy that line
+   into `permissions.allow` to silence future prompts of the same
+   shape.
+
+The yolt-side enumeration is not exhaustive yet — see
+voitta-ai/voitta-yolt#37 for the residual gaps (`gh pr review`
+hint generation, mapped-push hint generation, friendlier
+`python3 -c` SyntaxError reason). Until those land, the affected
+commands will still ask without a copy-paste hint, but the allow
+pattern (if you compose it by hand) still works.
+
+If your installed yolt predates `e610f3e8`, fall back to one of:
 
 1. Override the classification per command in
    `~/.claude/yolt/shell.json` so YOLT sees the loop's writes as
    `safe`. YOLT merges this with the bundled `rules/shell.json`
-   at load. Cover BOTH the `gh` writes and the `git` writes, since
-   both subcommand families have UNSAFE-classified entries the
-   loop relies on:
+   at load:
 
    ```json
    {
@@ -510,10 +530,66 @@ Workarounds today (do at least one if running with YOLT):
 2. Disable the YOLT plugin (`/plugin disable yolt`) for the
    duration of the loop and rely on `permissions.allow` alone.
 
-3. Wait for voitta-ai/voitta-yolt#35 — once `_maybe_allow` is
-   relaxed to apply allow patterns on UNSAFE too, the documented
-   `Bash(...)` entries will short-circuit YOLT directly and no
-   per-command override is needed.
+3. Upgrade to a yolt build containing `e610f3e8` or later and
+   delete any per-command override that's no longer needed.
+
+### Codex CLI / sandbox approval flow
+
+Codex CLI prompts differently from Claude Code: instead of a
+static `permissions.allow` matched at tool-call time, it asks at
+each unknown command with three options — accept once,
+`Yes, and don't ask again for commands that start with <prefix>`
+(option **p**), or cancel. Choose the prefix-remember option
+deliberately so the loop stops re-prompting on the same shape
+for the rest of the session.
+
+Useful prefixes the loop will hit if you let Codex drive it:
+
+- `gh api repos/<owner>/<repo>/pulls/<N>/comments/` — covers ALL
+  inline review-thread replies in PR <N>, regardless of comment
+  ID. Pick this when Codex asks about the FIRST
+  `comments/<id>/replies` write of the round; subsequent replies
+  silently match.
+- `gh pr comment <N> --repo <owner>/<repo>` — covers all
+  top-level reply comments on PR <N>. The `--repo` form is what
+  Codex emits when the cwd is a different repo (e.g. driving a
+  yolt PR from the skillz worktree).
+- `git -C <worktree-path> add` — covers all per-round staging.
+- `git -C <worktree-path> commit` — covers all per-round commits.
+- `git -C <worktree-path> push origin` — covers feature-branch
+  pushes from that worktree. Includes the `-u` first-push form.
+
+What NOT to prefix-remember at session scope:
+
+- `git push origin master` / `git push --force` shapes — always
+  let those re-prompt.
+- `gh pr merge` of someone else's PR.
+- `rm -rf /` and friends.
+
+### Merge-conflict resolution path
+
+If the watch loop hits a merge conflict against base (step 7
+escalation), and the user delegates conflict resolution back to
+the loop instead of taking over, the resolution will additionally
+need approvals or allow patterns for:
+
+- `git -C <worktree> merge --no-edit origin/master` — merge base
+  into PR branch.
+- `git -C <worktree> rebase --continue` — alternative path if
+  rebasing instead of merging.
+- `git -C <worktree> push origin <branch>` (and possibly the
+  mapped form `<local>:<remote>` if the worktree was created on
+  a differently-named branch).
+- `kill <pid>` if `git rebase --continue` spawned an interactive
+  editor that hangs the loop.
+
+These are intentionally NOT on the default `permissions.allow`
+block above — conflict resolution is a structural change that
+deserves its own approval per PR. On Codex CLI, expect a fresh
+ask for each shape and apply the prefix-remember option
+sparingly. If you intend to do many conflict resolutions in one
+session, add `Bash(git -C * merge --no-edit origin/master)` to
+`permissions.allow` temporarily, then remove it.
 
 ### Skill-activation prompt
 
