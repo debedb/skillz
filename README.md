@@ -142,9 +142,19 @@ rm -rf ~/.claude/skills/work-on-pr ~/.claude/skills/review-pr-loop
 
 Requires Codex CLI **0.117.0** or newer. Check with `codex --version`.
 
-From inside Codex (`/plugins`), add this repo as a marketplace source
-and install whichever plugin entry you want — same set as Claude
-Code, plus two Codex-only entries:
+From any shell, add this repo as a Codex marketplace:
+
+```bash
+codex plugin marketplace add voitta-ai/skillz
+```
+
+Then open Codex's plugin browser and install whichever plugin entry
+you want from the `skillz` marketplace — same set as Claude Code,
+plus two Codex-only entries:
+
+```text
+/plugins
+```
 
 - `skillz` — full bundle
 - `pr-loop` — work-on-pr + review-pr-loop
@@ -153,8 +163,14 @@ Code, plus two Codex-only entries:
 - `continuous-learning` — single skill, no hooks
 - `codex-continuous-learning` — skill + UserPromptSubmit/Stop hooks
 
-Or, from a clone, point Codex at the repo root as a local
-marketplace folder.
+From a local checkout, point Codex at the repo root instead:
+
+```bash
+codex plugin marketplace add /absolute/path/to/skillz
+```
+
+If you add a local checkout, keep that checkout up to date yourself
+with `git pull` in the clone.
 
 Remove old direct-copy installs after switching:
 
@@ -242,9 +258,16 @@ marketplace entry to the new owner explicitly:
 ```
 
 **Codex plugin.** Same pattern — the marketplace source URL
-redirects, so existing installs keep working. Re-add as
-`voitta-ai/skillz` if you want the marketplace entry to reflect
-the new owner.
+redirects, so existing installs keep working. To switch the
+configured marketplace entry to the new owner explicitly:
+
+```bash
+codex plugin marketplace remove skillz
+codex plugin marketplace add voitta-ai/skillz
+```
+
+Then reopen `/plugins`, select the `skillz` marketplace, and
+reinstall or update the same plugin entry you were already using.
 
 This section will be removed once the rename has aged enough that
 nobody is hitting the old URL anymore — see #22.
@@ -268,8 +291,10 @@ under `skills` in `catalog.json`. No installer edits required.
 
 - **Claude Code plugin:** `/plugin update` (or `/plugin marketplace
   update skillz`) re-fetches `master` from this repo.
-- **Codex plugin:** open `/plugins`, select `skillz`, run the update
-  action.
+- **Codex plugin (GitHub marketplace source):** open `/plugins`,
+  select `skillz`, run the update action.
+- **Codex plugin (local checkout source):** `git pull` inside the
+  checkout you added, then reopen `/plugins` if needed.
 - **Script:** re-run the curl one-liner, or `git pull && ./install.sh`
   from a clone.
 
