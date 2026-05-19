@@ -3,7 +3,7 @@ name: review-pr-loop
 description: |
   Iteratively review a GitHub pull request across multiple rounds. Each round, read the linked issue(s), prior review comments, issue comments, and inline threads before reviewing only the new diff or the author's latest response. If no author response exists yet, wait and re-check instead of exiting. Leave structured feedback (REQUEST_CHANGES, COMMENT, or APPROVE) and continue until you approve, the PR is merged or closed, or the user stops the loop. Use when you are the reviewer on a non-trivial PR and want the agent to own the back-and-forth review cycle rather than doing a one-shot review.
 author: Claude Code
-version: 1.3.0
+version: 1.3.1
 date: 2026-05-18
 source: https://github.com/voitta-ai/skillz
 source_file: skills/review-pr-loop/SKILL.md
@@ -370,7 +370,8 @@ entry.
 Use a fresh worktree on the PR's branch instead:
 
 ```
-git -C <main-repo> fetch origin <pr-branch>
+git -C <main-repo> fetch origin \
+  <pr-branch>:refs/remotes/origin/<pr-branch>
 git -C <main-repo> worktree add <main-repo>-mergetest-<N> \
   origin/<pr-branch>
 git -C <main-repo>-mergetest-<N> merge --no-edit origin/master
@@ -384,6 +385,21 @@ the worktree path is local to the original repo so cleanup is
 patterns from `work-on-pr` cover most of this; `git -C * merge`
 and `git -C * worktree add/remove` are the remaining shapes that
 may prompt.
+
+**Why the explicit `<pr-branch>:refs/remotes/origin/<pr-branch>`
+refspec.** A plain `git fetch origin <pr-branch>` only guarantees
+that `FETCH_HEAD` is updated. Whether it also updates
+`refs/remotes/origin/<pr-branch>` depends on the remote's fetch
+refspec config and on whether the branch is already known
+locally — on a fresh clone or a worktree that has never seen the
+PR branch, the tracking ref is NOT created, and the next
+`git worktree add ... origin/<pr-branch>` fails with
+`fatal: invalid reference`. The explicit `<src>:<dst>` refspec
+forces creation of the tracking ref every time, so the worktree
+add is unconditional. (Alternative: `git worktree add --detach
+<path> FETCH_HEAD` works too if you don't care about the symbolic
+name, but `origin/<pr-branch>` reads better and matches what the
+worktree's status line will show.)
 
 ### Approval
 
