@@ -3,8 +3,8 @@ name: work-on-pr
 description: |
   Iteratively work on a GitHub pull request as the author. Watch for new review comments, issue comments, and inline threads; if nothing new exists yet, wait and re-check instead of exiting. For each actionable item, implement the fix in the PR worktree, run relevant tests, commit and push, then reply with a summary and commit SHA. Continue until the PR is approved, merged or closed, or the user stops the loop. Also accepts an issue reference instead of a PR: in that case the skill creates the PR (if absent), guarantees the PR body contains `Closes #<issue>`, and then enters the watch loop. Use when you want the agent to own the start-PR or address-test-push-reply-wait cycle across multiple review rounds rather than handling a single review comment.
 author: Claude Code
-version: 1.7.0
-date: 2026-05-18
+version: 1.7.1
+date: 2026-05-19
 source: https://github.com/voitta-ai/skillz
 source_file: skills/work-on-pr/SKILL.md
 ---
@@ -286,12 +286,22 @@ wake-up was actually scheduled and control is being handed off to it.
       `--body-file`, not `-b`, to dodge shell quoting.
       For inline review-thread replies, use
       `gh api repos/:owner/:repo/pulls/<N>/comments/<comment_id>/replies
-       -f body=@/tmp/reply.md` or the `--in-reply-to` form of `gh
-      api`. When host/model identity is known, prefix the body with a
-      short tag (e.g. `[claude]`, `[codex]`) — see "Reply convention"
-      below. This mirrors the reviewer-side rule in `review-pr-loop`
-      so the reader can tell who/what generated each post in a
-      multi-round thread.
+       -F body=@/tmp/reply.md` or the `--in-reply-to` form of `gh
+      api`. **Use `-F` (uppercase), not `-f`**: `-f`/`--raw-field`
+      sends the value as a literal string, so
+      `-f body=@/tmp/reply.md` posts the literal text `@/tmp/reply.md`
+      as the comment body and the actual file contents never get
+      uploaded. `-F`/`--field` honors the `@file` prefix and reads
+      the file. The bug is silent — the POST succeeds and returns
+      `201`, just with garbage content. Same caveat applies to
+      `gh api ... /reviews` (top-level review bodies) and any other
+      `gh api -F body=@<file>` write. (Editing afterward is
+      `gh api -X PATCH /repos/:owner/:repo/pulls/comments/<id>
+       -F body=@/tmp/reply.md`.) When host/model identity is known,
+      prefix the body with a short tag (e.g. `[claude]`, `[codex]`)
+      — see "Reply convention" below. This mirrors the reviewer-side
+      rule in `review-pr-loop` so the reader can tell who/what
+      generated each post in a multi-round thread.
 
 7. **Escalate to the user** when:
    - A reviewer asked for a scope change you cannot interpret without
