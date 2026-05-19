@@ -3,8 +3,8 @@ name: review-pr-loop
 description: |
   Iteratively review a GitHub pull request across multiple rounds. Each round, read the linked issue(s), prior review comments, issue comments, and inline threads before reviewing only the new diff or the author's latest response. If no author response exists yet, wait and re-check instead of exiting. Leave structured feedback (REQUEST_CHANGES, COMMENT, or APPROVE) and continue until you approve, the PR is merged or closed, or the user stops the loop. Use when you are the reviewer on a non-trivial PR and want the agent to own the back-and-forth review cycle rather than doing a one-shot review.
 author: Claude Code
-version: 1.2.3
-date: 2026-05-17
+version: 1.3.1
+date: 2026-05-18
 source: https://github.com/voitta-ai/skillz
 source_file: skills/review-pr-loop/SKILL.md
 ---
@@ -295,6 +295,111 @@ Before any terminal/final handoff, force this checklist:
   (step 1b) — some projects prefer batched threads, others prefer
   inline comments.
 - Keep model tags terse: `[codex] blocking: ...`, `[claude] LGTM ...`.
+
+### Auto-approved operations (reviewer workflow)
+
+The reviewer loop's writes are narrower than the author loop's,
+but they still prompt every round without an allow list. Add
+these patterns to `~/.claude/settings.json#permissions.allow`:
+
+```json
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh pr review:*)",
+      "Bash(gh pr comment:*)",
+      "Bash(gh api repos/*/pulls/*/reviews)",
+      "Bash(gh api repos/*/pulls/*/comments)",
+      "Bash(gh api repos/*/pulls/*/comments/*/replies)",
+      "Bash(gh issue comment:*)",
+      "Write(/tmp/**)"
+    ]
+  }
+}
+```
+
+- `gh pr review` is THE main reviewer write — `--approve`,
+  `--request-changes`, `--comment`. The default voitta-yolt
+  bundle classifies it as UNSAFE; on yolt builds containing
+  voitta-ai/voitta-yolt#36 the explicit allow pattern is
+  honored (see [[work-on-pr]] for the equivalent author-side
+  notes).
+- The `/reviews` POST and `/comments/<id>/replies` POST entries
+  cover the inline-comment path when `gh pr review` is not
+  enough.
+- `Write(/tmp/**)` covers the heredoc-to-file pattern used for
+  every review body (`/tmp/body.md`, `/tmp/r<N>.md`,
+  `/tmp/approval.md`). Heredoc files must live in `/tmp/`, not
+  in the cwd — same convention as `work-on-pr`.
+
+### Avoiding the python3 `-c` inline-script prompt
+
+For any non-trivial introspection (regex tests, fnmatch checks,
+JSON shape verification), prefer writing the snippet to a real
+`.py` file under `/tmp/` and invoking it as
+`python3 /tmp/<name>.py`, rather than `python3 -c "<inline>"`.
+
+The voitta-yolt hook classifies inline `-c` scripts as
+`unknown (SyntaxError)` — it can't statically analyze a script
+delivered as a single string without parsing it as Python — and
+the matcher conservatively asks. A real file at `/tmp/<name>.py`
+is analyzable and routes through the safe path.
+
+The `Write(/tmp/**)` allow entry above already covers creating
+the script file. Add `Bash(python3 /tmp/*)` to
+`permissions.allow` if you also want to silence the run prompt.
+
+### Test-merge into base: prefer worktree to `/tmp` reclone
+
+A common reviewer subroutine — testing that the PR's branch
+merges cleanly into current master before approving — has a
+trap shape:
+
+```
+cd /tmp && rm -rf skillz-mergetest && \
+  git clone <local-or-remote> skillz-mergetest && \
+  cd skillz-mergetest && git fetch origin <pr-branch>:<pr-branch> && \
+  git checkout <pr-branch> && git merge origin/master --no-edit
+```
+
+That single chain contains `rm -rf`, `git clone`, `git checkout`,
+`git merge` — four mutating verbs in one compound, which any
+analyzer will flag and which compound-matches no single allow
+entry.
+
+Use a fresh worktree on the PR's branch instead:
+
+```
+git -C <main-repo> fetch origin \
+  <pr-branch>:refs/remotes/origin/<pr-branch>
+git -C <main-repo> worktree add <main-repo>-mergetest-<N> \
+  origin/<pr-branch>
+git -C <main-repo>-mergetest-<N> merge --no-edit origin/master
+# verify, then:
+git -C <main-repo> worktree remove <main-repo>-mergetest-<N>
+```
+
+One git operation per Bash tool call, no `rm -rf`, no clone, and
+the worktree path is local to the original repo so cleanup is
+`git worktree remove`. The same `git -C * <subcommand>` allow
+patterns from `work-on-pr` cover most of this; `git -C * merge`
+and `git -C * worktree add/remove` are the remaining shapes that
+may prompt.
+
+**Why the explicit `<pr-branch>:refs/remotes/origin/<pr-branch>`
+refspec.** A plain `git fetch origin <pr-branch>` only guarantees
+that `FETCH_HEAD` is updated. Whether it also updates
+`refs/remotes/origin/<pr-branch>` depends on the remote's fetch
+refspec config and on whether the branch is already known
+locally — on a fresh clone or a worktree that has never seen the
+PR branch, the tracking ref is NOT created, and the next
+`git worktree add ... origin/<pr-branch>` fails with
+`fatal: invalid reference`. The explicit `<src>:<dst>` refspec
+forces creation of the tracking ref every time, so the worktree
+add is unconditional. (Alternative: `git worktree add --detach
+<path> FETCH_HEAD` works too if you don't care about the symbolic
+name, but `origin/<pr-branch>` reads better and matches what the
+worktree's status line will show.)
 
 ### Approval
 
