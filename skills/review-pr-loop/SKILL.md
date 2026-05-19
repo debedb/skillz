@@ -3,8 +3,8 @@ name: review-pr-loop
 description: |
   Iteratively review a GitHub pull request across multiple rounds. Each round, read the linked issue(s), prior review comments, issue comments, and inline threads before reviewing only the new diff or the author's latest response. If no author response exists yet, wait and re-check instead of exiting. Leave structured feedback (REQUEST_CHANGES, COMMENT, or APPROVE) and continue until you approve, the PR is merged or closed, or the user stops the loop. Use when you are the reviewer on a non-trivial PR and want the agent to own the back-and-forth review cycle rather than doing a one-shot review.
 author: Claude Code
-version: 1.3.1
-date: 2026-05-18
+version: 1.3.2
+date: 2026-05-19
 source: https://github.com/voitta-ai/skillz
 source_file: skills/review-pr-loop/SKILL.md
 ---
@@ -71,6 +71,13 @@ active:
   turn end.
 - `watch-mode=in-process-only`: no durable wake-up exists, so the
   current invocation must stay alive and re-poll in-process.
+
+If the active mode is `watch-mode=in-process-only`, a final response
+stops the watcher. Do not choose to end the turn after a small number
+of idle polls just because no durable scheduler exists. In-process-only
+means "keep this invocation alive with `sleep` + re-poll" until a real
+stop condition fires, the user stops the loop, or the host/runtime
+forces termination.
 
 While the loop is active, do not send a terminal/final handoff
 message just to summarize status. Use progress/status updates only.
@@ -215,10 +222,11 @@ never completion. Each iteration:
     - Otherwise sleep for the active poll interval and loop
       in-process, but only if the invocation is staying alive. An
       in-process sleep does not survive a `final` handoff.
-    - If the invocation is about to end and no durable wake-up was
-      actually scheduled, stop the watch explicitly with
+    - If the host/runtime forces the invocation to end and no durable
+      wake-up was actually scheduled, stop the watch explicitly with
       `action=watch stopped:no durable wake-up and invocation ending`
-      instead of implying that polling will continue.
+      instead of implying that polling will continue. This is a
+      forced-shutdown disclosure, not a normal idle-loop action.
     - **Surface status every tick.** Each pass emits one short
       user-facing line so the operator can see what changed (or
       didn't) without opening GitHub. See "Status line" below.
@@ -241,8 +249,8 @@ never completion. Each iteration:
 - Only print `next=<delaySeconds>s` when the next wake-up is real:
   either a durable wake-up was scheduled or the current invocation is
   definitely staying alive to sleep and re-poll. If neither is true,
-  report `watch stopped:no durable wake-up and invocation ending`
-  instead.
+  and the host is not forcing termination, do another in-process
+  sleep/poll cycle instead of reporting completion.
 - The user can override by passing an explicit interval to /loop
   or by saying "slow down to <N>s"; keep using that override on
   subsequent passes until changed.
@@ -273,9 +281,11 @@ re-poll in-process.
 If the watch loop is no longer active, say so explicitly in the status
 line (`action=watch stopped:<reason>`) instead of implying polling is
 still happening. Never emit `watch stopped` on an idle pass or any
-other non-terminal state. Host capability failure is the exception:
-if the invocation is ending and no durable wake-up exists, emit
-`watch stopped:no durable wake-up and invocation ending`.
+other non-terminal state. Lack of durable wake-up is not itself a stop
+condition. Only emit
+`watch stopped:no durable wake-up and invocation ending` when the
+host/runtime is actually ending the invocation despite the loop still
+being active, or when the user explicitly told you to stop.
 
 ### Pre-handoff guardrail
 
@@ -283,8 +293,10 @@ Before any terminal/final handoff, force this checklist:
 
 1. Did a real stop condition fire?
 2. Was a durable wake-up actually scheduled?
-3. If neither is true, do not end the invocation; keep polling
-   in-process.
+3. Is the host/runtime forcing this invocation to end, or did the
+   user explicitly stop the loop?
+4. If none of the above is true, do not end the invocation; keep
+   polling in-process.
 
 ### Tone
 
@@ -427,9 +439,9 @@ After invoking, expect (per iteration):
   Found F blocking, G non-blocking. Leaving <REQUEST_CHANGES /
   COMMENT / APPROVE>." OR "No author activity since <timestamp>;
   waiting <delay>s before the next check." If no durable wake-up
-  exists and the invocation must end, expect an explicit
-  `watch stopped:no durable wake-up and invocation ending` status
-  instead of a fake waiting line.
+  exists, the invocation stays alive and polls in-process. Only a
+  host-forced shutdown or explicit user stop should produce
+  `watch stopped:no durable wake-up and invocation ending`.
 - One `gh pr review` call.
 - Either a `ScheduleWakeup`, an in-process sleep / poll loop, or
   termination.
@@ -442,6 +454,14 @@ Exit signals:
 - User stops loop → stop.
 - 20 idle wake-ups → notify/escalate to the user, but keep polling
   unless the user explicitly stops the loop.
+
+Anti-pattern:
+
+- Do not poll a few times, see no author activity, and then finish with
+  `watch stopped:no durable wake-up and invocation ending`. That drops
+  later author updates on the floor. If no durable wake-up exists, the
+  loop either stays alive in-process or honestly reports that a
+  host/runtime limit forced shutdown.
 
 ## Example
 
