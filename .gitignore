@@ -1,0 +1,22 @@
+# OS
+.DS_Store
+
+# Logs
+*.log
+
+# Editor / backup
+*~
+.#*
+\#*
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Local Claude state (per-user; shared settings.json is tracked)
+.claude/settings.local.json
+.claude/sessions/
+.claude/tasks/
+.claude/scheduled_tasks.lock
+.handoffs/
