@@ -1,22 +1,22 @@
-# OS
-.DS_Store
+# Dependencies / virtualenvs
+node_modules/
+.venv/
+venv/
 
-# Logs
-*.log
+# Build artifacts
+build/
+target/
+dist/
+.gradle/
+.idea/
 
-# Secrets (also enforced via permissions.deny)
-.env
-.env.*
-!.env.example
+# Generated code
+**/*.pb.go
+**/*_pb2.py
+**/*_pb2_grpc.py
+**/generated/
 
-# Local Claude state
-.claude/settings.local.json
-.claude/sessions/
-.claude/tasks/
-.claude/scheduled_tasks.lock
-.handoffs/
-
-# Backup
-*~
-.#*
-\#*
+# Large test fixtures
+**/testdata/
+**/fixtures/
+*.orc
