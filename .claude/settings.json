@@ -1,19 +1,21 @@
 {
-  "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "permissions": {
     "deny": [
-      "Read(./.env)",
-      "Read(./.env.*)",
-      "Read(**/.env)",
-      "Read(**/.env.*)",
-      "Read(**/secrets/**)",
-      "Read(**/*.pem)",
-      "Read(**/*.key)",
-      "Read(**/id_rsa)",
-      "Read(**/id_ed25519)",
-      "Read(**/credentials)",
-      "Read(**/credentials.json)",
-      "Read(**/.aws/credentials)"
+      "Read(node_modules/**)",
+      "Read(.venv/**)",
+      "Read(venv/**)",
+      "Read(build/**)",
+      "Read(target/**)",
+      "Read(dist/**)",
+      "Read(.gradle/**)",
+      "Read(.idea/**)",
+      "Read(**/*.pb.go)",
+      "Read(**/*_pb2.py)",
+      "Read(**/*_pb2_grpc.py)",
+      "Read(**/generated/**)",
+      "Read(**/testdata/**)",
+      "Read(**/fixtures/**)",
+      "Read(**/*.orc)"
     ]
   }
 }
