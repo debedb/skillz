@@ -25,6 +25,7 @@ environments and older Codex versions.
   - [codex-continuous-learning](#codex-continuous-learning-codex-only)
 - [Validation](#validation)
 - [Related code-review approaches](#related-code-review-approaches)
+- [PR review workflow stack](#pr-review-workflow-stack)
 
 ## Catalog
 
@@ -496,3 +497,14 @@ See also: [claudskills](https://claudskills.com/) registry,
 [Anthropic Claude Code skills docs](https://docs.claude.com/en/docs/claude-code/skills.md),
 [vercel-labs/skills](https://github.com/vercel-labs/skills) (upstream
 profile catalog used by `npx skills add`).
+
+## PR review workflow stack
+
+The skills here are the **workflow** layer. They compose with
+subagents, Agent Teams, and the Agent SDK rather than competing with
+them. [`docs/pr-review-workflow.md`](./docs/pr-review-workflow.md)
+writes that down: which layer does which job, the rule that subagents
+cannot spawn subagents (so `review-pr-loop` must run in the main
+session when it delegates a specialist sweep), how to use PR Review
+Toolkit agents as advisory-only subagents, when an Agent Team is worth
+the overhead, the SDK boundary, and the same-identity reviewer caveat.
