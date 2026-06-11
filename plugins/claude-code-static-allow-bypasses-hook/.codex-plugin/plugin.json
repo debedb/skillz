@@ -1,0 +1,11 @@
+{
+  "name": "claude-code-static-allow-bypasses-hook",
+  "version": "1.0.0",
+  "description": "Diagnose a Claude Code PreToolUse hook that never fires for some commands: static permissions.allow Bash globs short-circuit the hook before it runs.",
+  "author": "voitta-ai",
+  "homepage": "https://github.com/voitta-ai/skillz",
+  "repository": "https://github.com/voitta-ai/skillz",
+  "license": "MIT",
+  "keywords": ["claude", "codex", "skills", "claude-code", "hooks", "permissions"],
+  "skills": "./skills/"
+}

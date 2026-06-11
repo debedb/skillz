@@ -1,0 +1,11 @@
+{
+  "name": "gh-git-heredoc-body-file",
+  "version": "1.0.0",
+  "description": "Use a body-file so gh CLI and git stop mangling multi-line bodies that contain backticks, code blocks, or $(...) substitutions.",
+  "author": "voitta-ai",
+  "homepage": "https://github.com/voitta-ai/skillz",
+  "repository": "https://github.com/voitta-ai/skillz",
+  "license": "MIT",
+  "keywords": ["claude", "codex", "skills", "gh", "git", "heredoc", "body-file"],
+  "skills": "./skills/"
+}
