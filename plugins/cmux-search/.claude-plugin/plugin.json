@@ -1,6 +1,6 @@
 {
-  "name": "skillz",
-  "description": "Full skillz bundle: every skill in the catalog (work-on-pr, review-pr-loop, continuous-learning, cmux-search).",
+  "name": "cmux-search",
+  "description": "Search all open cmux workspaces/tabs/panes - live scrollback (tree --all + read-screen) plus agent transcripts.",
   "version": "1.0.0",
   "author": {
     "name": "voitta-ai"

@@ -72,6 +72,14 @@
       "summary": "Single-skill plugin: review-pr-loop."
     },
     {
+      "name": "cmux-search",
+      "claude_manifest": "plugins/cmux-search/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/cmux-search/.codex-plugin/plugin.json",
+      "hosts": ["claude", "codex"],
+      "skills": ["cmux-search"],
+      "summary": "Single-skill plugin: cmux-search."
+    },
+    {
       "name": "continuous-learning",
       "codex_manifest": "plugins/continuous-learning/.codex-plugin/plugin.json",
       "hosts": ["codex"],
