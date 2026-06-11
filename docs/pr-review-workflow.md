@@ -198,6 +198,20 @@ Otherwise treat the reviewer loop as advisory. See `review-pr-loop`'s
 "Reviewing your own PR" notes for how the paired `work-on-pr` skill reads
 that intent.
 
+There is a second, subtler consequence of a shared identity: the
+**comment-filtering** step in both loops. `work-on-pr` and
+`review-pr-loop` decide "what's new since I last acted" by filtering
+each comment / review to `author != self`. That test is implemented by
+GitHub **login**, so under a shared identity it filters out the *other*
+loop's posts too — the author loop stops seeing the reviewer's reviews,
+and the reviewer loop stops seeing the author's replies. The watch loop
+then looks permanently idle even while feedback is landing. Under a
+shared identity, discriminate by `timestamp > anchor` plus the model
+tag (`[claude]` vs `[codex]`) in the body rather than by login; reserve
+the login-based `author != self` filter for genuinely separate
+identities. Both skills document this in their "Determine what's new"
+step.
+
 ## Decision rule
 
 ```text

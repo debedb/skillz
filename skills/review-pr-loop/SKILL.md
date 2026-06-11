@@ -3,7 +3,7 @@ name: review-pr-loop
 description: |
   Iteratively review a GitHub pull request across multiple rounds. Each round, read the linked issue(s), prior review comments, issue comments, and inline threads before reviewing only the new diff or the author's latest response. If no author response exists yet, wait and re-check instead of exiting. Leave structured feedback (REQUEST_CHANGES, COMMENT, or APPROVE) and continue until you approve, the PR is merged or closed, or the user stops the loop. Use when you are the reviewer on a non-trivial PR and want the agent to own the back-and-forth review cycle rather than doing a one-shot review.
 author: Claude Code
-version: 1.4.0
+version: 1.4.1
 date: 2026-06-11
 source: https://github.com/voitta-ai/skillz
 source_file: skills/review-pr-loop/SKILL.md
@@ -155,6 +155,20 @@ iteration:
    - From `gh api repos/:owner/:repo/pulls/<N>/commits`, list
      commits added after `anchor`. These define the new diff scope.
    - From comment surfaces, list author responses since `anchor`.
+   - **Shared-identity caveat (do not identify "author responses" by
+     login alone).** Distinguishing the author's posts from your own
+     by GitHub login only works when the author and you post under
+     *distinct* identities. When one operator drives both this loop
+     and the paired `work-on-pr` under the **same** GitHub login (you
+     tag `[codex]`, the author side tags `[claude]`, both posting as
+     the same user), a `select(.user.login != "<me>")` filter hides
+     the author's replies and the loop never sees them. Under shared
+     identity, discriminate by `timestamp > anchor` **plus** the model
+     tag (`[claude]` vs `[codex]`) in the body, not by login: anything
+     newer than your anchor that you did not just post is an author
+     response. Reserve the login-based filter for genuinely separate
+     identities. See the `docs/pr-review-workflow.md` "GitHub identity
+     caveat" and [[work-on-pr]].
    - If there are no new commits and no new author responses since
      `anchor`, skip the review steps for this pass and go to step 10.
 
