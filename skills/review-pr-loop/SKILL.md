@@ -264,8 +264,16 @@ iteration:
 - Only print `next=<delaySeconds>s` when the next wake-up is real:
   either a durable wake-up was scheduled or the current invocation is
   definitely staying alive to sleep and re-poll. If neither is true,
-  and the host is not forcing termination, do another in-process
-  sleep/poll cycle instead of reporting completion.
+  branch on *why*, do not gate on whether the host is "forcing
+  termination":
+  - a host that CAN stay alive in-process does another sleep/poll
+    cycle instead of reporting completion;
+  - a host that can neither schedule a wake-up nor stay alive (for
+    example Codex App, which ends the turn on yield without a hard
+    kill) takes the resumable-suspend path in "Hosts that cannot
+    self-schedule" and hands back `watch suspended:host cannot
+    self-schedule; resume with /review-pr-loop <N>` — never the
+    impossible in-process loop.
 - The user can override by passing an explicit interval to /loop
   or by saying "slow down to <N>s"; keep using that override on
   subsequent passes until changed.
