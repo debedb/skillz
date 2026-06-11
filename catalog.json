@@ -26,6 +26,24 @@
       "path": "skills/cmux-search/SKILL.md",
       "hosts": ["claude", "codex"],
       "summary": "Search all open cmux workspaces/tabs/panes - live scrollback + agent transcripts."
+    },
+    {
+      "name": "gh-git-heredoc-body-file",
+      "path": "skills/gh-git-heredoc-body-file/SKILL.md",
+      "hosts": ["claude", "codex"],
+      "summary": "Use a body-file so gh CLI and git stop mangling multi-line bodies with backticks, code blocks, or $(...)."
+    },
+    {
+      "name": "claude-code-static-allow-bypasses-hook",
+      "path": "skills/claude-code-static-allow-bypasses-hook/SKILL.md",
+      "hosts": ["claude", "codex"],
+      "summary": "Why a Claude Code PreToolUse hook never fires for some commands: static permissions.allow Bash globs short-circuit it."
+    },
+    {
+      "name": "python-ast-static-analyzer-scoping",
+      "path": "skills/python-ast-static-analyzer-scoping/SKILL.md",
+      "hosts": ["claude", "codex"],
+      "summary": "Build a Python ast analyzer that resolves import aliases and models module-load vs deferred execution."
     }
   ],
   "collections": [
@@ -44,7 +62,7 @@
       "claude_marketplace": ".claude-plugin/marketplace.json",
       "codex_marketplace": ".codex-plugin/marketplace.json",
       "hosts": ["claude", "codex"],
-      "skills": ["work-on-pr", "review-pr-loop", "continuous-learning", "cmux-search"],
+      "skills": ["work-on-pr", "review-pr-loop", "continuous-learning", "cmux-search", "gh-git-heredoc-body-file", "claude-code-static-allow-bypasses-hook", "python-ast-static-analyzer-scoping"],
       "summary": "Full repo bundle: every skill in one plugin."
     },
     {
@@ -78,6 +96,30 @@
       "hosts": ["claude", "codex"],
       "skills": ["cmux-search"],
       "summary": "Single-skill plugin: cmux-search."
+    },
+    {
+      "name": "gh-git-heredoc-body-file",
+      "claude_manifest": "plugins/gh-git-heredoc-body-file/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/gh-git-heredoc-body-file/.codex-plugin/plugin.json",
+      "hosts": ["claude", "codex"],
+      "skills": ["gh-git-heredoc-body-file"],
+      "summary": "Single-skill plugin: gh-git-heredoc-body-file."
+    },
+    {
+      "name": "claude-code-static-allow-bypasses-hook",
+      "claude_manifest": "plugins/claude-code-static-allow-bypasses-hook/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/claude-code-static-allow-bypasses-hook/.codex-plugin/plugin.json",
+      "hosts": ["claude", "codex"],
+      "skills": ["claude-code-static-allow-bypasses-hook"],
+      "summary": "Single-skill plugin: claude-code-static-allow-bypasses-hook."
+    },
+    {
+      "name": "python-ast-static-analyzer-scoping",
+      "claude_manifest": "plugins/python-ast-static-analyzer-scoping/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/python-ast-static-analyzer-scoping/.codex-plugin/plugin.json",
+      "hosts": ["claude", "codex"],
+      "skills": ["python-ast-static-analyzer-scoping"],
+      "summary": "Single-skill plugin: python-ast-static-analyzer-scoping."
     },
     {
       "name": "continuous-learning",

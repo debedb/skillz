@@ -35,11 +35,17 @@ environments and older Codex versions.
 | [review-pr-loop](./skills/review-pr-loop/SKILL.md) | skill | Claude, Codex | Reviewer-side PR iteration loop |
 | [continuous-learning](./skills/continuous-learning/SKILL.md) | skill | Codex | End-of-task retrospective: extract reusable, verified learnings as Codex skills |
 | [cmux-search](./skills/cmux-search/SKILL.md) | skill | Claude, Codex | Search all open cmux workspaces/tabs/panes - live scrollback + agent transcripts |
+| [gh-git-heredoc-body-file](./skills/gh-git-heredoc-body-file/SKILL.md) | skill | Claude, Codex | Body-file pattern: stop gh/git mangling multi-line bodies (backticks, code fences, `$(...)`) |
+| [claude-code-static-allow-bypasses-hook](./skills/claude-code-static-allow-bypasses-hook/SKILL.md) | skill | Claude, Codex | Why a Claude Code PreToolUse hook never fires for some commands (static allow short-circuits it) |
+| [python-ast-static-analyzer-scoping](./skills/python-ast-static-analyzer-scoping/SKILL.md) | skill | Claude, Codex | Build a Python `ast` analyzer: import-alias resolution + load-time vs deferred scoping |
 | [`skillz` plugin](./plugins/skillz/) | plugin | Claude, Codex | Full repo bundle: every skill |
 | [`pr-loop` plugin](./plugins/pr-loop/) | plugin | Claude, Codex | Paired author + reviewer PR-loop skills |
 | [`work-on-pr` plugin](./plugins/work-on-pr/) | plugin | Claude, Codex | Single-skill plugin: work-on-pr |
 | [`review-pr-loop` plugin](./plugins/review-pr-loop/) | plugin | Claude, Codex | Single-skill plugin: review-pr-loop |
 | [`cmux-search` plugin](./plugins/cmux-search/) | plugin | Claude, Codex | Single-skill plugin: search all open cmux panes |
+| [`gh-git-heredoc-body-file` plugin](./plugins/gh-git-heredoc-body-file/) | plugin | Claude, Codex | Single-skill plugin: gh-git-heredoc-body-file |
+| [`claude-code-static-allow-bypasses-hook` plugin](./plugins/claude-code-static-allow-bypasses-hook/) | plugin | Claude, Codex | Single-skill plugin: claude-code-static-allow-bypasses-hook |
+| [`python-ast-static-analyzer-scoping` plugin](./plugins/python-ast-static-analyzer-scoping/) | plugin | Claude, Codex | Single-skill plugin: python-ast-static-analyzer-scoping |
 | [`continuous-learning` plugin](./plugins/continuous-learning/) | plugin | Codex | Single-skill plugin (no hooks) |
 | [`codex-continuous-learning` plugin](./plugins/codex-continuous-learning/) | plugin | Codex | continuous-learning skill plus UserPromptSubmit + Stop hooks |
 | [pr-loop](./collections/pr-loop.json) | collection (legacy) | Claude, Codex | `install.sh` selector. Prefer the `pr-loop` plugin entry. |
@@ -59,6 +65,9 @@ skills/                            # canonical skill content
   review-pr-loop/SKILL.md
   continuous-learning/SKILL.md
   cmux-search/SKILL.md
+  gh-git-heredoc-body-file/SKILL.md
+  claude-code-static-allow-bypasses-hook/SKILL.md
+  python-ast-static-analyzer-scoping/SKILL.md
 .claude-plugin/
   marketplace.json                 # Claude Code marketplace (lists all plugin entries)
 .codex-plugin/
@@ -72,6 +81,9 @@ plugins/                           # per-plugin manifests + skill symlinks
       review-pr-loop -> ../../../skills/review-pr-loop
       continuous-learning -> ../../../skills/continuous-learning
       cmux-search -> ../../../skills/cmux-search
+      gh-git-heredoc-body-file -> ../../../skills/gh-git-heredoc-body-file
+      claude-code-static-allow-bypasses-hook -> ../../../skills/claude-code-static-allow-bypasses-hook
+      python-ast-static-analyzer-scoping -> ../../../skills/python-ast-static-analyzer-scoping
   pr-loop/                         # work-on-pr + review-pr-loop only
     .claude-plugin/plugin.json
     .codex-plugin/plugin.json
@@ -90,6 +102,18 @@ plugins/                           # per-plugin manifests + skill symlinks
     .claude-plugin/plugin.json
     .codex-plugin/plugin.json
     skills/cmux-search -> ../../../skills/cmux-search
+  gh-git-heredoc-body-file/        # single-skill plugin
+    .claude-plugin/plugin.json
+    .codex-plugin/plugin.json
+    skills/gh-git-heredoc-body-file -> ../../../skills/gh-git-heredoc-body-file
+  claude-code-static-allow-bypasses-hook/   # single-skill plugin
+    .claude-plugin/plugin.json
+    .codex-plugin/plugin.json
+    skills/claude-code-static-allow-bypasses-hook -> ../../../skills/claude-code-static-allow-bypasses-hook
+  python-ast-static-analyzer-scoping/       # single-skill plugin
+    .claude-plugin/plugin.json
+    .codex-plugin/plugin.json
+    skills/python-ast-static-analyzer-scoping -> ../../../skills/python-ast-static-analyzer-scoping
   continuous-learning/             # Codex-only single-skill plugin (no hooks)
     .codex-plugin/plugin.json
     skills/continuous-learning -> ../../../skills/continuous-learning
