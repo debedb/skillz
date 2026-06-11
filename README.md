@@ -34,6 +34,7 @@ environments and older Codex versions.
 | [work-on-pr](./skills/work-on-pr/SKILL.md) | skill | Claude, Codex | Author-side PR iteration loop |
 | [review-pr-loop](./skills/review-pr-loop/SKILL.md) | skill | Claude, Codex | Reviewer-side PR iteration loop |
 | [continuous-learning](./skills/continuous-learning/SKILL.md) | skill | Codex | End-of-task retrospective: extract reusable, verified learnings as Codex skills |
+| [cmux-search](./skills/cmux-search/SKILL.md) | skill | Claude, Codex | Search all open cmux workspaces/tabs/panes - live scrollback + agent transcripts |
 | [`skillz` plugin](./plugins/skillz/) | plugin | Claude, Codex | Full repo bundle: every skill |
 | [`pr-loop` plugin](./plugins/pr-loop/) | plugin | Claude, Codex | Paired author + reviewer PR-loop skills |
 | [`work-on-pr` plugin](./plugins/work-on-pr/) | plugin | Claude, Codex | Single-skill plugin: work-on-pr |
@@ -56,6 +57,7 @@ skills/                            # canonical skill content
   work-on-pr/SKILL.md
   review-pr-loop/SKILL.md
   continuous-learning/SKILL.md
+  cmux-search/SKILL.md
 .claude-plugin/
   marketplace.json                 # Claude Code marketplace (lists all plugin entries)
 .codex-plugin/
@@ -68,6 +70,7 @@ plugins/                           # per-plugin manifests + skill symlinks
       work-on-pr -> ../../../skills/work-on-pr
       review-pr-loop -> ../../../skills/review-pr-loop
       continuous-learning -> ../../../skills/continuous-learning
+      cmux-search -> ../../../skills/cmux-search
   pr-loop/                         # work-on-pr + review-pr-loop only
     .claude-plugin/plugin.json
     .codex-plugin/plugin.json

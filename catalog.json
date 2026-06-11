@@ -20,6 +20,12 @@
       "path": "skills/continuous-learning/SKILL.md",
       "hosts": ["codex"],
       "summary": "End-of-task retrospective: extract reusable, verified learnings as Codex skills."
+    },
+    {
+      "name": "cmux-search",
+      "path": "skills/cmux-search/SKILL.md",
+      "hosts": ["claude", "codex"],
+      "summary": "Search all open cmux workspaces/tabs/panes - live scrollback + agent transcripts."
     }
   ],
   "collections": [
@@ -38,7 +44,7 @@
       "claude_marketplace": ".claude-plugin/marketplace.json",
       "codex_marketplace": ".codex-plugin/marketplace.json",
       "hosts": ["claude", "codex"],
-      "skills": ["work-on-pr", "review-pr-loop", "continuous-learning"],
+      "skills": ["work-on-pr", "review-pr-loop", "continuous-learning", "cmux-search"],
       "summary": "Full repo bundle: every skill in one plugin."
     },
     {
