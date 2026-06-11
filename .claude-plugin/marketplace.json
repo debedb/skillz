@@ -9,7 +9,7 @@
     {
       "name": "skillz",
       "source": "./plugins/skillz/",
-      "description": "Full bundle: every skill in the catalog (work-on-pr, review-pr-loop, continuous-learning)."
+      "description": "Full bundle: every skill in the catalog (work-on-pr, review-pr-loop, continuous-learning, cmux-search)."
     },
     {
       "name": "pr-loop",
@@ -25,6 +25,11 @@
       "name": "review-pr-loop",
       "source": "./plugins/review-pr-loop/",
       "description": "Reviewer-side PR iteration loop only."
+    },
+    {
+      "name": "cmux-search",
+      "source": "./plugins/cmux-search/",
+      "description": "Search all open cmux workspaces/tabs/panes (live scrollback + agent transcripts)."
     }
   ]
 }

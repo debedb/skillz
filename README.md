@@ -34,10 +34,12 @@ environments and older Codex versions.
 | [work-on-pr](./skills/work-on-pr/SKILL.md) | skill | Claude, Codex | Author-side PR iteration loop |
 | [review-pr-loop](./skills/review-pr-loop/SKILL.md) | skill | Claude, Codex | Reviewer-side PR iteration loop |
 | [continuous-learning](./skills/continuous-learning/SKILL.md) | skill | Codex | End-of-task retrospective: extract reusable, verified learnings as Codex skills |
+| [cmux-search](./skills/cmux-search/SKILL.md) | skill | Claude, Codex | Search all open cmux workspaces/tabs/panes - live scrollback + agent transcripts |
 | [`skillz` plugin](./plugins/skillz/) | plugin | Claude, Codex | Full repo bundle: every skill |
 | [`pr-loop` plugin](./plugins/pr-loop/) | plugin | Claude, Codex | Paired author + reviewer PR-loop skills |
 | [`work-on-pr` plugin](./plugins/work-on-pr/) | plugin | Claude, Codex | Single-skill plugin: work-on-pr |
 | [`review-pr-loop` plugin](./plugins/review-pr-loop/) | plugin | Claude, Codex | Single-skill plugin: review-pr-loop |
+| [`cmux-search` plugin](./plugins/cmux-search/) | plugin | Claude, Codex | Single-skill plugin: search all open cmux panes |
 | [`continuous-learning` plugin](./plugins/continuous-learning/) | plugin | Codex | Single-skill plugin (no hooks) |
 | [`codex-continuous-learning` plugin](./plugins/codex-continuous-learning/) | plugin | Codex | continuous-learning skill plus UserPromptSubmit + Stop hooks |
 | [pr-loop](./collections/pr-loop.json) | collection (legacy) | Claude, Codex | `install.sh` selector. Prefer the `pr-loop` plugin entry. |
@@ -56,6 +58,7 @@ skills/                            # canonical skill content
   work-on-pr/SKILL.md
   review-pr-loop/SKILL.md
   continuous-learning/SKILL.md
+  cmux-search/SKILL.md
 .claude-plugin/
   marketplace.json                 # Claude Code marketplace (lists all plugin entries)
 .codex-plugin/
@@ -68,6 +71,7 @@ plugins/                           # per-plugin manifests + skill symlinks
       work-on-pr -> ../../../skills/work-on-pr
       review-pr-loop -> ../../../skills/review-pr-loop
       continuous-learning -> ../../../skills/continuous-learning
+      cmux-search -> ../../../skills/cmux-search
   pr-loop/                         # work-on-pr + review-pr-loop only
     .claude-plugin/plugin.json
     .codex-plugin/plugin.json
@@ -82,6 +86,10 @@ plugins/                           # per-plugin manifests + skill symlinks
     .claude-plugin/plugin.json
     .codex-plugin/plugin.json
     skills/review-pr-loop -> ../../../skills/review-pr-loop
+  cmux-search/                     # single-skill plugin
+    .claude-plugin/plugin.json
+    .codex-plugin/plugin.json
+    skills/cmux-search -> ../../../skills/cmux-search
   continuous-learning/             # Codex-only single-skill plugin (no hooks)
     .codex-plugin/plugin.json
     skills/continuous-learning -> ../../../skills/continuous-learning
