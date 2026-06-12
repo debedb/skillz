@@ -1,0 +1,11 @@
+{
+  "name": "gh-workflow-run-matching",
+  "version": "1.0.0",
+  "description": "Match a gh workflow run to its trigger when multiple runs share one workflow name.",
+  "author": "voitta-ai",
+  "homepage": "https://github.com/voitta-ai/skillz",
+  "repository": "https://github.com/voitta-ai/skillz",
+  "license": "MIT",
+  "keywords": ["claude", "codex", "skills", "gh", "workflow", "run", "matching"],
+  "skills": "./skills/"
+}

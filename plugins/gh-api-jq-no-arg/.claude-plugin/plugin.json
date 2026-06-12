@@ -1,0 +1,12 @@
+{
+  "name": "gh-api-jq-no-arg",
+  "description": "gh api --jq needs its filter as the argument; a misplaced/empty --jq silently drops the filter.",
+  "version": "1.0.0",
+  "author": {
+    "name": "voitta-ai"
+  },
+  "homepage": "https://github.com/voitta-ai/skillz",
+  "repository": "https://github.com/voitta-ai/skillz",
+  "license": "MIT",
+  "skills": "./skills/"
+}

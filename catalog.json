@@ -145,6 +145,60 @@
         "codex"
       ],
       "summary": "Identify which Neon project backs a Vercel app and migrate/split it; pg_dump>=server; safe non-destructive cutover."
+    },
+    {
+      "name": "gh-api-f-vs-F-body-file",
+      "path": "skills/gh-api-f-vs-F-body-file/SKILL.md",
+      "hosts": ["claude", "codex"],
+      "summary": "gh api -F (uppercase) reads @file into the field; -f sends the value as a literal string."
+    },
+    {
+      "name": "gh-api-jq-no-arg",
+      "path": "skills/gh-api-jq-no-arg/SKILL.md",
+      "hosts": ["claude", "codex"],
+      "summary": "gh api --jq needs its filter as the argument; a misplaced/empty --jq silently drops the filter."
+    },
+    {
+      "name": "gh-fork-issues-disabled",
+      "path": "skills/gh-fork-issues-disabled/SKILL.md",
+      "hosts": ["claude", "codex"],
+      "summary": "gh issue create fails on a fork because GitHub disables the Issues tab on forks by default."
+    },
+    {
+      "name": "gh-pr-graphql-401-rest-fallback",
+      "path": "skills/gh-pr-graphql-401-rest-fallback/SKILL.md",
+      "hosts": ["claude", "codex"],
+      "summary": "When gh PR GraphQL calls return 401, fall back to the REST PR endpoints."
+    },
+    {
+      "name": "gh-pr-merge-delete-branch-closes-dependent-pr",
+      "path": "skills/gh-pr-merge-delete-branch-closes-dependent-pr/SKILL.md",
+      "hosts": ["claude", "codex"],
+      "summary": "Deleting the branch on gh pr merge can auto-close a dependent PR stacked on it."
+    },
+    {
+      "name": "gh-workflow-run-matching",
+      "path": "skills/gh-workflow-run-matching/SKILL.md",
+      "hosts": ["claude", "codex"],
+      "summary": "Match a gh workflow run to its trigger when multiple runs share one workflow name."
+    },
+    {
+      "name": "github-api-list-endpoint-staleness-fresh-pr",
+      "path": "skills/github-api-list-endpoint-staleness-fresh-pr/SKILL.md",
+      "hosts": ["claude", "codex"],
+      "summary": "GitHub list endpoints serve stale empty results on a fresh PR; use the timeline / single-resource fetch."
+    },
+    {
+      "name": "github-closing-keywords-default-branch-only",
+      "path": "skills/github-closing-keywords-default-branch-only/SKILL.md",
+      "hosts": ["claude", "codex"],
+      "summary": "GitHub closing keywords (Closes #N) only auto-close when the PR merges into the default branch."
+    },
+    {
+      "name": "github-private-repo-readme-image-rendering",
+      "path": "skills/github-private-repo-readme-image-rendering/SKILL.md",
+      "hosts": ["claude", "codex"],
+      "summary": "Images in a private-repo README need authenticated or relative paths to render."
     }
   ],
   "collections": [
@@ -185,7 +239,16 @@
         "gist-to-repo-migration",
         "vercel-token-deploy-branch-domains",
         "s3-presigned-upload-fails-nonexistent-bucket",
-        "neon-vercel-db-identify-and-migrate"
+        "neon-vercel-db-identify-and-migrate",
+        "gh-api-f-vs-F-body-file",
+        "gh-api-jq-no-arg",
+        "gh-fork-issues-disabled",
+        "gh-pr-graphql-401-rest-fallback",
+        "gh-pr-merge-delete-branch-closes-dependent-pr",
+        "gh-workflow-run-matching",
+        "github-api-list-endpoint-staleness-fresh-pr",
+        "github-closing-keywords-default-branch-only",
+        "github-private-repo-readme-image-rendering"
       ],
       "summary": "Full repo bundle: every skill in one plugin."
     },
@@ -397,6 +460,78 @@
         "neon-vercel-db-identify-and-migrate"
       ],
       "summary": "Single-skill plugin: neon-vercel-db-identify-and-migrate."
+    },
+    {
+      "name": "gh-api-f-vs-F-body-file",
+      "claude_manifest": "plugins/gh-api-f-vs-F-body-file/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/gh-api-f-vs-F-body-file/.codex-plugin/plugin.json",
+      "hosts": ["claude", "codex"],
+      "skills": ["gh-api-f-vs-F-body-file"],
+      "summary": "Single-skill plugin: gh-api-f-vs-F-body-file."
+    },
+    {
+      "name": "gh-api-jq-no-arg",
+      "claude_manifest": "plugins/gh-api-jq-no-arg/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/gh-api-jq-no-arg/.codex-plugin/plugin.json",
+      "hosts": ["claude", "codex"],
+      "skills": ["gh-api-jq-no-arg"],
+      "summary": "Single-skill plugin: gh-api-jq-no-arg."
+    },
+    {
+      "name": "gh-fork-issues-disabled",
+      "claude_manifest": "plugins/gh-fork-issues-disabled/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/gh-fork-issues-disabled/.codex-plugin/plugin.json",
+      "hosts": ["claude", "codex"],
+      "skills": ["gh-fork-issues-disabled"],
+      "summary": "Single-skill plugin: gh-fork-issues-disabled."
+    },
+    {
+      "name": "gh-pr-graphql-401-rest-fallback",
+      "claude_manifest": "plugins/gh-pr-graphql-401-rest-fallback/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/gh-pr-graphql-401-rest-fallback/.codex-plugin/plugin.json",
+      "hosts": ["claude", "codex"],
+      "skills": ["gh-pr-graphql-401-rest-fallback"],
+      "summary": "Single-skill plugin: gh-pr-graphql-401-rest-fallback."
+    },
+    {
+      "name": "gh-pr-merge-delete-branch-closes-dependent-pr",
+      "claude_manifest": "plugins/gh-pr-merge-delete-branch-closes-dependent-pr/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/gh-pr-merge-delete-branch-closes-dependent-pr/.codex-plugin/plugin.json",
+      "hosts": ["claude", "codex"],
+      "skills": ["gh-pr-merge-delete-branch-closes-dependent-pr"],
+      "summary": "Single-skill plugin: gh-pr-merge-delete-branch-closes-dependent-pr."
+    },
+    {
+      "name": "gh-workflow-run-matching",
+      "claude_manifest": "plugins/gh-workflow-run-matching/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/gh-workflow-run-matching/.codex-plugin/plugin.json",
+      "hosts": ["claude", "codex"],
+      "skills": ["gh-workflow-run-matching"],
+      "summary": "Single-skill plugin: gh-workflow-run-matching."
+    },
+    {
+      "name": "github-api-list-endpoint-staleness-fresh-pr",
+      "claude_manifest": "plugins/github-api-list-endpoint-staleness-fresh-pr/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/github-api-list-endpoint-staleness-fresh-pr/.codex-plugin/plugin.json",
+      "hosts": ["claude", "codex"],
+      "skills": ["github-api-list-endpoint-staleness-fresh-pr"],
+      "summary": "Single-skill plugin: github-api-list-endpoint-staleness-fresh-pr."
+    },
+    {
+      "name": "github-closing-keywords-default-branch-only",
+      "claude_manifest": "plugins/github-closing-keywords-default-branch-only/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/github-closing-keywords-default-branch-only/.codex-plugin/plugin.json",
+      "hosts": ["claude", "codex"],
+      "skills": ["github-closing-keywords-default-branch-only"],
+      "summary": "Single-skill plugin: github-closing-keywords-default-branch-only."
+    },
+    {
+      "name": "github-private-repo-readme-image-rendering",
+      "claude_manifest": "plugins/github-private-repo-readme-image-rendering/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/github-private-repo-readme-image-rendering/.codex-plugin/plugin.json",
+      "hosts": ["claude", "codex"],
+      "skills": ["github-private-repo-readme-image-rendering"],
+      "summary": "Single-skill plugin: github-private-repo-readme-image-rendering."
     },
     {
       "name": "continuous-learning",

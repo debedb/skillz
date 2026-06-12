@@ -9,7 +9,7 @@
     {
       "name": "skillz",
       "source": "./plugins/skillz/",
-      "description": "Full bundle: every skill in the catalog (work-on-pr, review-pr-loop, continuous-learning, cmux-search, gh-git-heredoc-body-file, claude-code-static-allow-bypasses-hook, python-ast-static-analyzer-scoping, wordpress-com-publish, git-add-u-rename-pitfall, git-branch-cleanup-script-races, git-graft-worktree-onto-remote, multi-phase-feature-pr-worktrees, gist-to-repo-migration, vercel-token-deploy-branch-domains, s3-presigned-upload-fails-nonexistent-bucket, neon-vercel-db-identify-and-migrate)."
+      "description": "Full bundle: every skill in the catalog (work-on-pr, review-pr-loop, continuous-learning, cmux-search, gh-git-heredoc-body-file, claude-code-static-allow-bypasses-hook, python-ast-static-analyzer-scoping, wordpress-com-publish, git-add-u-rename-pitfall, git-branch-cleanup-script-races, git-graft-worktree-onto-remote, multi-phase-feature-pr-worktrees, gist-to-repo-migration, vercel-token-deploy-branch-domains, s3-presigned-upload-fails-nonexistent-bucket, neon-vercel-db-identify-and-migrate, gh-api-f-vs-F-body-file, gh-api-jq-no-arg, gh-fork-issues-disabled, gh-pr-graphql-401-rest-fallback, gh-pr-merge-delete-branch-closes-dependent-pr, gh-workflow-run-matching, github-api-list-endpoint-staleness-fresh-pr, github-closing-keywords-default-branch-only, github-private-repo-readme-image-rendering)."
     },
     {
       "name": "pr-loop",
@@ -90,6 +90,51 @@
       "name": "neon-vercel-db-identify-and-migrate",
       "source": "./plugins/neon-vercel-db-identify-and-migrate/",
       "description": "Identify which Neon project backs a Vercel app and migrate/split it; pg_dump>=server; safe non-destructive cutover."
+    },
+    {
+      "name": "gh-api-f-vs-F-body-file",
+      "source": "./plugins/gh-api-f-vs-F-body-file/",
+      "description": "gh api -F (uppercase) reads @file into the field; -f sends the value as a literal string."
+    },
+    {
+      "name": "gh-api-jq-no-arg",
+      "source": "./plugins/gh-api-jq-no-arg/",
+      "description": "gh api --jq needs its filter as the argument; a misplaced/empty --jq silently drops the filter."
+    },
+    {
+      "name": "gh-fork-issues-disabled",
+      "source": "./plugins/gh-fork-issues-disabled/",
+      "description": "gh issue create fails on a fork because GitHub disables the Issues tab on forks by default."
+    },
+    {
+      "name": "gh-pr-graphql-401-rest-fallback",
+      "source": "./plugins/gh-pr-graphql-401-rest-fallback/",
+      "description": "When gh PR GraphQL calls return 401, fall back to the REST PR endpoints."
+    },
+    {
+      "name": "gh-pr-merge-delete-branch-closes-dependent-pr",
+      "source": "./plugins/gh-pr-merge-delete-branch-closes-dependent-pr/",
+      "description": "Deleting the branch on gh pr merge can auto-close a dependent PR stacked on it."
+    },
+    {
+      "name": "gh-workflow-run-matching",
+      "source": "./plugins/gh-workflow-run-matching/",
+      "description": "Match a gh workflow run to its trigger when multiple runs share one workflow name."
+    },
+    {
+      "name": "github-api-list-endpoint-staleness-fresh-pr",
+      "source": "./plugins/github-api-list-endpoint-staleness-fresh-pr/",
+      "description": "GitHub list endpoints serve stale empty results on a fresh PR; use the timeline / single-resource fetch."
+    },
+    {
+      "name": "github-closing-keywords-default-branch-only",
+      "source": "./plugins/github-closing-keywords-default-branch-only/",
+      "description": "GitHub closing keywords (Closes #N) only auto-close when the PR merges into the default branch."
+    },
+    {
+      "name": "github-private-repo-readme-image-rendering",
+      "source": "./plugins/github-private-repo-readme-image-rendering/",
+      "description": "Images in a private-repo README need authenticated or relative paths to render."
     }
   ]
 }

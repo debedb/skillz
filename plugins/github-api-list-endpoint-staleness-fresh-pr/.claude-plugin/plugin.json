@@ -1,0 +1,12 @@
+{
+  "name": "github-api-list-endpoint-staleness-fresh-pr",
+  "description": "GitHub list endpoints serve stale empty results on a fresh PR; use the timeline / single-resource fetch.",
+  "version": "1.0.0",
+  "author": {
+    "name": "voitta-ai"
+  },
+  "homepage": "https://github.com/voitta-ai/skillz",
+  "repository": "https://github.com/voitta-ai/skillz",
+  "license": "MIT",
+  "skills": "./skills/"
+}

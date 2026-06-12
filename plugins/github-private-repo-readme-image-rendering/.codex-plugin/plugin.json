@@ -1,0 +1,11 @@
+{
+  "name": "github-private-repo-readme-image-rendering",
+  "version": "1.0.0",
+  "description": "Images in a private-repo README need authenticated or relative paths to render.",
+  "author": "voitta-ai",
+  "homepage": "https://github.com/voitta-ai/skillz",
+  "repository": "https://github.com/voitta-ai/skillz",
+  "license": "MIT",
+  "keywords": ["claude", "codex", "skills", "github", "private", "repo", "readme"],
+  "skills": "./skills/"
+}
