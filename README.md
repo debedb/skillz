@@ -39,6 +39,11 @@ environments and older Codex versions.
 | [claude-code-static-allow-bypasses-hook](./skills/claude-code-static-allow-bypasses-hook/SKILL.md) | skill | Claude, Codex | Why a Claude Code PreToolUse hook never fires for some commands (static allow short-circuits it) |
 | [python-ast-static-analyzer-scoping](./skills/python-ast-static-analyzer-scoping/SKILL.md) | skill | Claude, Codex | Build a Python `ast` analyzer: import-alias resolution + load-time vs deferred scoping |
 | [wordpress-com-publish](./skills/wordpress-com-publish/SKILL.md) | skill | Claude, Codex | Acquire a WordPress.com OAuth2 token (authorization-code flow) and publish/update posts |
+| [git-add-u-rename-pitfall](./skills/git-add-u-rename-pitfall/SKILL.md) | skill | Claude, Codex | `git add -u` can miss a rename (old path staged as deleted); stage the new path |
+| [git-branch-cleanup-script-races](./skills/git-branch-cleanup-script-races/SKILL.md) | skill | Claude, Codex | Branch-cleanup scripts race concurrent ref updates; snapshot refs first |
+| [git-graft-worktree-onto-remote](./skills/git-graft-worktree-onto-remote/SKILL.md) | skill | Claude, Codex | Graft a local worktree's commits onto a remote branch without re-cloning |
+| [multi-phase-feature-pr-worktrees](./skills/multi-phase-feature-pr-worktrees/SKILL.md) | skill | Claude, Codex | Run a multi-phase feature as stacked worktree PRs, each reviewed independently |
+| [gist-to-repo-migration](./skills/gist-to-repo-migration/SKILL.md) | skill | Claude, Codex | Migrate a gist's full revision history into a real git repo |
 | [`skillz` plugin](./plugins/skillz/) | plugin | Claude, Codex | Full repo bundle: every skill |
 | [`pr-loop` plugin](./plugins/pr-loop/) | plugin | Claude, Codex | Paired author + reviewer PR-loop skills |
 | [`work-on-pr` plugin](./plugins/work-on-pr/) | plugin | Claude, Codex | Single-skill plugin: work-on-pr |
@@ -48,6 +53,11 @@ environments and older Codex versions.
 | [`claude-code-static-allow-bypasses-hook` plugin](./plugins/claude-code-static-allow-bypasses-hook/) | plugin | Claude, Codex | Single-skill plugin: claude-code-static-allow-bypasses-hook |
 | [`python-ast-static-analyzer-scoping` plugin](./plugins/python-ast-static-analyzer-scoping/) | plugin | Claude, Codex | Single-skill plugin: python-ast-static-analyzer-scoping |
 | [`wordpress-com-publish` plugin](./plugins/wordpress-com-publish/) | plugin | Claude, Codex | Single-skill plugin: WordPress.com token + publish |
+| [`git-add-u-rename-pitfall` plugin](./plugins/git-add-u-rename-pitfall/) | plugin | Claude, Codex | Single-skill plugin: git-add-u-rename-pitfall |
+| [`git-branch-cleanup-script-races` plugin](./plugins/git-branch-cleanup-script-races/) | plugin | Claude, Codex | Single-skill plugin: git-branch-cleanup-script-races |
+| [`git-graft-worktree-onto-remote` plugin](./plugins/git-graft-worktree-onto-remote/) | plugin | Claude, Codex | Single-skill plugin: git-graft-worktree-onto-remote |
+| [`multi-phase-feature-pr-worktrees` plugin](./plugins/multi-phase-feature-pr-worktrees/) | plugin | Claude, Codex | Single-skill plugin: multi-phase-feature-pr-worktrees |
+| [`gist-to-repo-migration` plugin](./plugins/gist-to-repo-migration/) | plugin | Claude, Codex | Single-skill plugin: gist-to-repo-migration |
 | [`continuous-learning` plugin](./plugins/continuous-learning/) | plugin | Codex | Single-skill plugin (no hooks) |
 | [`codex-continuous-learning` plugin](./plugins/codex-continuous-learning/) | plugin | Codex | continuous-learning skill plus UserPromptSubmit + Stop hooks |
 | [pr-loop](./collections/pr-loop.json) | collection (legacy) | Claude, Codex | `install.sh` selector. Prefer the `pr-loop` plugin entry. |
@@ -70,6 +80,12 @@ skills/                            # canonical skill content
   gh-git-heredoc-body-file/SKILL.md
   claude-code-static-allow-bypasses-hook/SKILL.md
   python-ast-static-analyzer-scoping/SKILL.md
+  wordpress-com-publish/SKILL.md
+  git-add-u-rename-pitfall/SKILL.md
+  git-branch-cleanup-script-races/SKILL.md
+  git-graft-worktree-onto-remote/SKILL.md
+  multi-phase-feature-pr-worktrees/SKILL.md
+  gist-to-repo-migration/SKILL.md
 .claude-plugin/
   marketplace.json                 # Claude Code marketplace (lists all plugin entries)
 .codex-plugin/
@@ -87,6 +103,11 @@ plugins/                           # per-plugin manifests + skill symlinks
       claude-code-static-allow-bypasses-hook -> ../../../skills/claude-code-static-allow-bypasses-hook
       python-ast-static-analyzer-scoping -> ../../../skills/python-ast-static-analyzer-scoping
       wordpress-com-publish -> ../../../skills/wordpress-com-publish
+      git-add-u-rename-pitfall -> ../../../skills/git-add-u-rename-pitfall
+      git-branch-cleanup-script-races -> ../../../skills/git-branch-cleanup-script-races
+      git-graft-worktree-onto-remote -> ../../../skills/git-graft-worktree-onto-remote
+      multi-phase-feature-pr-worktrees -> ../../../skills/multi-phase-feature-pr-worktrees
+      gist-to-repo-migration -> ../../../skills/gist-to-repo-migration
   pr-loop/                         # work-on-pr + review-pr-loop only
     .claude-plugin/plugin.json
     .codex-plugin/plugin.json
@@ -121,6 +142,26 @@ plugins/                           # per-plugin manifests + skill symlinks
     .claude-plugin/plugin.json
     .codex-plugin/plugin.json
     skills/wordpress-com-publish -> ../../../skills/wordpress-com-publish
+  git-add-u-rename-pitfall/        # single-skill plugin
+    .claude-plugin/plugin.json
+    .codex-plugin/plugin.json
+    skills/git-add-u-rename-pitfall -> ../../../skills/git-add-u-rename-pitfall
+  git-branch-cleanup-script-races/ # single-skill plugin
+    .claude-plugin/plugin.json
+    .codex-plugin/plugin.json
+    skills/git-branch-cleanup-script-races -> ../../../skills/git-branch-cleanup-script-races
+  git-graft-worktree-onto-remote/  # single-skill plugin
+    .claude-plugin/plugin.json
+    .codex-plugin/plugin.json
+    skills/git-graft-worktree-onto-remote -> ../../../skills/git-graft-worktree-onto-remote
+  multi-phase-feature-pr-worktrees/ # single-skill plugin
+    .claude-plugin/plugin.json
+    .codex-plugin/plugin.json
+    skills/multi-phase-feature-pr-worktrees -> ../../../skills/multi-phase-feature-pr-worktrees
+  gist-to-repo-migration/          # single-skill plugin
+    .claude-plugin/plugin.json
+    .codex-plugin/plugin.json
+    skills/gist-to-repo-migration -> ../../../skills/gist-to-repo-migration
   continuous-learning/             # Codex-only single-skill plugin (no hooks)
     .codex-plugin/plugin.json
     skills/continuous-learning -> ../../../skills/continuous-learning
