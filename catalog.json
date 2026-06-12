@@ -44,6 +44,12 @@
       "path": "skills/python-ast-static-analyzer-scoping/SKILL.md",
       "hosts": ["claude", "codex"],
       "summary": "Build a Python ast analyzer that resolves import aliases and models module-load vs deferred execution."
+    },
+    {
+      "name": "wordpress-com-publish",
+      "path": "skills/wordpress-com-publish/SKILL.md",
+      "hosts": ["claude", "codex"],
+      "summary": "Acquire a WordPress.com OAuth2 token (authorization-code flow) and publish/update posts via public-api.wordpress.com."
     }
   ],
   "collections": [
@@ -62,7 +68,7 @@
       "claude_marketplace": ".claude-plugin/marketplace.json",
       "codex_marketplace": ".codex-plugin/marketplace.json",
       "hosts": ["claude", "codex"],
-      "skills": ["work-on-pr", "review-pr-loop", "continuous-learning", "cmux-search", "gh-git-heredoc-body-file", "claude-code-static-allow-bypasses-hook", "python-ast-static-analyzer-scoping"],
+      "skills": ["work-on-pr", "review-pr-loop", "continuous-learning", "cmux-search", "gh-git-heredoc-body-file", "claude-code-static-allow-bypasses-hook", "python-ast-static-analyzer-scoping", "wordpress-com-publish"],
       "summary": "Full repo bundle: every skill in one plugin."
     },
     {
@@ -120,6 +126,14 @@
       "hosts": ["claude", "codex"],
       "skills": ["python-ast-static-analyzer-scoping"],
       "summary": "Single-skill plugin: python-ast-static-analyzer-scoping."
+    },
+    {
+      "name": "wordpress-com-publish",
+      "claude_manifest": "plugins/wordpress-com-publish/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/wordpress-com-publish/.codex-plugin/plugin.json",
+      "hosts": ["claude", "codex"],
+      "skills": ["wordpress-com-publish"],
+      "summary": "Single-skill plugin: wordpress-com-publish."
     },
     {
       "name": "continuous-learning",
