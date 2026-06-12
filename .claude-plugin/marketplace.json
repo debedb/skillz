@@ -9,7 +9,7 @@
     {
       "name": "skillz",
       "source": "./plugins/skillz/",
-      "description": "Full bundle: every skill in the catalog (work-on-pr, review-pr-loop, continuous-learning, cmux-search, gh-git-heredoc-body-file, claude-code-static-allow-bypasses-hook, python-ast-static-analyzer-scoping)."
+      "description": "Full bundle: every skill in the catalog (work-on-pr, review-pr-loop, continuous-learning, cmux-search, gh-git-heredoc-body-file, claude-code-static-allow-bypasses-hook, python-ast-static-analyzer-scoping, wordpress-com-publish)."
     },
     {
       "name": "pr-loop",
@@ -45,6 +45,11 @@
       "name": "python-ast-static-analyzer-scoping",
       "source": "./plugins/python-ast-static-analyzer-scoping/",
       "description": "Build a Python ast analyzer: import-alias resolution plus module-load vs deferred execution scoping."
+    },
+    {
+      "name": "wordpress-com-publish",
+      "source": "./plugins/wordpress-com-publish/",
+      "description": "Acquire a WordPress.com OAuth2 token (authorization-code flow) and publish/update posts via public-api.wordpress.com."
     }
   ]
 }
