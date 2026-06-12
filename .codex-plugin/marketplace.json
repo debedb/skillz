@@ -9,7 +9,7 @@
     {
       "name": "skillz",
       "source": "./plugins/skillz/",
-      "description": "Full bundle: every skill in the catalog (work-on-pr, review-pr-loop, continuous-learning, cmux-search, gh-git-heredoc-body-file, claude-code-static-allow-bypasses-hook, python-ast-static-analyzer-scoping, wordpress-com-publish)."
+      "description": "Full bundle: every skill in the catalog (work-on-pr, review-pr-loop, continuous-learning, cmux-search, gh-git-heredoc-body-file, claude-code-static-allow-bypasses-hook, python-ast-static-analyzer-scoping, wordpress-com-publish, git-add-u-rename-pitfall, git-branch-cleanup-script-races, git-graft-worktree-onto-remote, multi-phase-feature-pr-worktrees, gist-to-repo-migration)."
     },
     {
       "name": "pr-loop",
@@ -50,6 +50,31 @@
       "name": "wordpress-com-publish",
       "source": "./plugins/wordpress-com-publish/",
       "description": "Acquire a WordPress.com OAuth2 token (authorization-code flow) and publish/update posts via public-api.wordpress.com."
+    },
+    {
+      "name": "git-add-u-rename-pitfall",
+      "source": "./plugins/git-add-u-rename-pitfall/",
+      "description": "git add -u can miss a rename, leaving the old path staged as deleted; stage the new path explicitly."
+    },
+    {
+      "name": "git-branch-cleanup-script-races",
+      "source": "./plugins/git-branch-cleanup-script-races/",
+      "description": "Branch-cleanup scripts race against concurrent ref updates; snapshot refs before deleting."
+    },
+    {
+      "name": "git-graft-worktree-onto-remote",
+      "source": "./plugins/git-graft-worktree-onto-remote/",
+      "description": "Graft a local worktree's commits onto a remote branch without re-cloning."
+    },
+    {
+      "name": "multi-phase-feature-pr-worktrees",
+      "source": "./plugins/multi-phase-feature-pr-worktrees/",
+      "description": "Run a multi-phase feature as stacked worktree PRs so each phase reviews independently."
+    },
+    {
+      "name": "gist-to-repo-migration",
+      "source": "./plugins/gist-to-repo-migration/",
+      "description": "Migrate a gist's full revision history into a real git repo, preserving commits."
     },
     {
       "name": "continuous-learning",
