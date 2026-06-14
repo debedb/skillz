@@ -71,8 +71,8 @@ README of a private repo. Pushing them to a separate branch + raw URL was
 considered to avoid branch protection, but camo can't auth the private raw URL,
 so that path renders broken. The only way to get inline-on-`main` badges was to
 commit the SVGs to `main` (relative path) — which in turn required a workflow to
-push to the protected branch, leading into the ruleset-bypass problem in
-`github-ruleset-integration-bypass-needs-org`.
+push to the protected branch, leading into a separate ruleset-bypass problem
+(a workflow integration needs an org-level bypass to push to a protected branch).
 
 ## Notes
 - This is about **inline image rendering**, not about whether the file is
@@ -85,4 +85,3 @@ push to the protected branch, leading into the ruleset-bypass problem in
 
 ## References
 - About anonymized image URLs (Camo): https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/about-anonymized-urls
-- Related: `github-ruleset-integration-bypass-needs-org` (the push-to-protected-branch consequence)

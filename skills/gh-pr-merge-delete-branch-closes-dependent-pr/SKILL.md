@@ -168,7 +168,5 @@ which is usually expected on a stacked workflow anyway.
 
 ## Related skills
 
-- `git-squash-merge-branch-hygiene` — local-side branch cleanup after
-  squash-merges; complements the remote-side concern this skill covers.
 - `multi-phase-feature-pr-worktrees` — stacked-PR worktree
   conventions where this trap is most likely to appear.
