@@ -63,12 +63,12 @@ After `gh repo edit ... --enable-issues`:
 ## Example
 
 ```
-$ gh issue create --repo voitta-ai/goal-kit --title "sdk-harness: ship or delete" --body-file /tmp/issue.md
-the 'voitta-ai/goal-kit' repository has disabled issues
+$ gh issue create --repo OWNER/FORK --title "Some issue title" --body-file /tmp/issue.md
+the 'OWNER/FORK' repository has disabled issues
 
-$ gh repo edit voitta-ai/goal-kit --enable-issues
-$ gh issue create --repo voitta-ai/goal-kit --title "sdk-harness: ship or delete" --body-file /tmp/issue.md
-https://github.com/voitta-ai/goal-kit/issues/1
+$ gh repo edit OWNER/FORK --enable-issues
+$ gh issue create --repo OWNER/FORK --title "Some issue title" --body-file /tmp/issue.md
+https://github.com/OWNER/FORK/issues/1
 ```
 
 ## Notes

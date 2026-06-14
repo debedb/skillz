@@ -217,19 +217,19 @@ pattern — investigate the watch loop's filtering logic instead
 
 ## Example
 
-PR voitta-ai/skillz#32 was opened at `19:50:32Z`. A `LGTM`
-comment by `debedb` was posted at `19:57:05Z`.
+PR OWNER/REPO#N was opened at `19:50:32Z`. A `LGTM`
+comment by a maintainer was posted at `19:57:05Z`.
 
 ```
-20:05Z poll: gh api repos/voitta-ai/skillz/issues/32/comments
+20:05Z poll: gh api repos/OWNER/REPO/issues/N/comments
   → []
-20:08Z poll: gh api repos/voitta-ai/skillz/issues/32/comments
+20:08Z poll: gh api repos/OWNER/REPO/issues/N/comments
   → []
 (user pastes the comment URL)
-20:13Z direct: gh api repos/voitta-ai/skillz/issues/comments/4472326824
-  → {"id": 4472326824, "body": "LGTM", "user": {"login":"debedb"}, ...}
-20:13Z poll: gh api repos/voitta-ai/skillz/issues/32/comments
-  → [{"id": 4472326824, ...}]
+20:13Z direct: gh api repos/OWNER/REPO/issues/comments/<comment-id>
+  → {"id": <comment-id>, "body": "LGTM", "user": {"login":"<maintainer>"}, ...}
+20:13Z poll: gh api repos/OWNER/REPO/issues/N/comments
+  → [{"id": <comment-id>, ...}]
 ```
 
 The list endpoint served `[]` for ~16 minutes after the comment
@@ -264,18 +264,18 @@ user's manual nudge it would have continued waiting.
 - **Watch-loop-skill integration.** Both `work-on-pr` and
   `review-pr-loop` should run the timeline fallback when any of
   their three list endpoints return `[]` on a PR younger than
-  ~30 minutes. Tracked in voitta-ai/skillz#33. Note the
-  age gate is a heuristic, not a guarantee — see the next bullet
-  for why an *anchor-relative* gate is safer than a PR-age gate.
-- **Staleness keys on write-freshness, not PR age (observed
-  voitta-yolt#51, 2026-06-11).** PR #51 was ~6 hours old when a
+  ~30 minutes. Note the age gate is a heuristic, not a guarantee
+  — see the next bullet for why an *anchor-relative* gate is safer
+  than a PR-age gate.
+- **Staleness keys on write-freshness, not PR age (observed in
+  practice).** A PR was ~6 hours old when a
   `[codex] LGTM` approving review was submitted at 04:11:38Z. A
   poll a few minutes later ran
-  `gh api pulls/51/reviews --jq '[.[]|select(.submitted_at>ANCHOR)]'`
+  `gh api pulls/N/reviews --jq '[.[]|select(.submitted_at>ANCHOR)]'`
   and got `0` new — the list endpoint still served only the older
   COMMENTED review — while
-  `gh api issues/51/timeline` already carried the new `reviewed`
-  event, hydratable via `pulls/51/reviews/<rid>`. The approval
+  `gh api issues/N/timeline` already carried the new `reviewed`
+  event, hydratable via `pulls/N/reviews/<rid>`. The approval
   would have stayed invisible if the loop had trusted the empty
   list because "the PR is old." Lesson: gate the timeline fallback
   on `anchor_ts` age (did anything happen since my last action?),
@@ -288,7 +288,7 @@ user's manual nudge it would have continued waiting.
   `.commit.committer.date`) that produced an empty anchor
   timestamp. That bug is distinct from this caching pattern —
   check both when an anchor + new-since-anchor comparison
-  silently misbehaves. Tracked in voitta-ai/skillz#34.
+  silently misbehaves.
 
 ## References
 

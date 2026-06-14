@@ -95,23 +95,23 @@ just use `gh api`.
 
 ## Example
 
-From a work-on-pr loop on voitta-yolt#42:
+From a work-on-pr loop on OWNER/REPO#N:
 
 ```
-$ gh pr comment 42 --body-file /tmp/reply.md
+$ gh pr comment N --body-file /tmp/reply.md
 HTTP 401: Requires authentication (https://api.github.com/graphql)
 
-$ gh api repos/voitta-ai/voitta-yolt/issues/42/comments -X POST -F body=@/tmp/reply.md
-{"id":4672022289, ... "html_url":".../pull/42#issuecomment-4672022289"}   # posted
+$ gh api repos/OWNER/REPO/issues/N/comments -X POST -F body=@/tmp/reply.md
+{"id":<comment-id>, ... "html_url":".../pull/N#issuecomment-<comment-id>"}   # posted
 
-$ gh pr merge 42 --squash --delete-branch
+$ gh pr merge N --squash --delete-branch
 non-200 OK status code: 401 Unauthorized body: "{ "message": "Requires authentication" ... }"
 
-$ FULL=$(gh api repos/voitta-ai/voitta-yolt/pulls/42 --jq .head.sha)
-$ gh api -X PUT repos/voitta-ai/voitta-yolt/pulls/42/merge -f merge_method=squash -f sha="$FULL"
-{"sha":"c091178...","merged":true,"message":"Pull Request successfully merged"}
+$ FULL=$(gh api repos/OWNER/REPO/pulls/N --jq .head.sha)
+$ gh api -X PUT repos/OWNER/REPO/pulls/N/merge -f merge_method=squash -f sha="$FULL"
+{"sha":"<merge-sha>","merged":true,"message":"Pull Request successfully merged"}
 
-$ gh api -X DELETE repos/voitta-ai/voitta-yolt/git/refs/heads/feature/issue-28-unsafe-write-targets
+$ gh api -X DELETE repos/OWNER/REPO/git/refs/heads/feature/<branch>
 # remote branch gone; then clean up worktree + local branch
 ```
 

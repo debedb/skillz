@@ -173,7 +173,7 @@ with `-F`.
 
 ## Example
 
-Real-world hit (voitta-ai/skillz PR #39, 2026-05-19):
+Real-world hit (a `work-on-pr` inline-reply loop, `OWNER/REPO` PR #N):
 
 The `work-on-pr` skill's step 6f recipe documented:
 
@@ -183,12 +183,12 @@ gh api repos/:owner/:repo/pulls/<N>/comments/<comment_id>/replies \
 ```
 
 Agent followed the doc. POST returned 201 with
-`id=3264135793`. Skill loop continued, scheduled next wakeup, ended
+`id=<comment-id>`. Skill loop continued, scheduled next wakeup, ended
 turn.
 
 Next iteration polled the thread and noticed "one new inline comment"
 — turned out to be the bot's own malformed reply containing the
-literal text `@/tmp/pr-39-reply-inline-3262115052.md` rather than
+literal text `@/tmp/pr-N-reply-inline-<id>.md` rather than
 the intended Markdown body.
 
 Recovery sequence:
@@ -196,10 +196,10 @@ Recovery sequence:
 ```
 # 1. Patch the live comment with correct body (no delete, no repost).
 gh api -X PATCH \
-  repos/voitta-ai/skillz/pulls/comments/3264135793 \
-  -F body=@/tmp/pr-39-reply-inline-3262115052.md \
+  repos/OWNER/REPO/pulls/comments/<comment-id> \
+  -F body=@/tmp/pr-N-reply-inline-<id>.md \
   --jq '{id, body: (.body | tostring | .[0:80])}'
-# => {"id":3264135793,"body":"[claude] Addressed in 8b3ec7b.\n\nYou're right..."}
+# => {"id":<comment-id>,"body":"[claude] Addressed in <sha>.\n\nYou're right..."}
 
 # 2. Fix the skill recipe so future runs don't re-trip.
 #    work-on-pr/SKILL.md step 6f: change `-f body=@...` to `-F body=@...`,
@@ -209,8 +209,8 @@ gh api -X PATCH \
 
 # 4. Post a top-level follow-up comment explaining the self-correction
 #    (so the human reviewer sees what happened in-thread).
-gh pr comment 39 --repo voitta-ai/skillz \
-  --body-file /tmp/pr-39-comment-r3.md
+gh pr comment N --repo OWNER/REPO \
+  --body-file /tmp/pr-N-comment-r3.md
 ```
 
 No comment IDs lost, no thread re-anchoring needed, no
@@ -252,8 +252,8 @@ delete-and-repost.
 
 - [`gh api` manual](https://cli.github.com/manual/gh_api) — see the
   `-f, --raw-field` vs `-F, --field` distinction.
-- voitta-ai/skillz PR #39 — original session where the bug
-  surfaced; see commit `cc26873` ("work-on-pr: -F (not -f) for gh
-  api body-file POSTs") for the fix to the canonical skill recipe.
+- The `work-on-pr` inline-reply loop was the original session where
+  this bug surfaced; the fix changed the canonical skill recipe to
+  use `-F` (not `-f`) for `gh api` body-file POSTs.
 - Related skills: [[work-on-pr]] / [[review-pr-loop]] — both rely
   on `gh api ... -F body=@...` for inline review-thread writes.
