@@ -6,80 +6,145 @@
     {
       "name": "work-on-pr",
       "path": "skills/work-on-pr/SKILL.md",
-      "hosts": ["claude", "codex"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
       "summary": "Author-side PR iteration loop."
     },
     {
       "name": "review-pr-loop",
       "path": "skills/review-pr-loop/SKILL.md",
-      "hosts": ["claude", "codex"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
       "summary": "Reviewer-side PR iteration loop."
     },
     {
       "name": "continuous-learning",
       "path": "skills/continuous-learning/SKILL.md",
-      "hosts": ["codex"],
+      "hosts": [
+        "codex"
+      ],
       "summary": "End-of-task retrospective: extract reusable, verified learnings as Codex skills."
     },
     {
       "name": "cmux-search",
       "path": "skills/cmux-search/SKILL.md",
-      "hosts": ["claude", "codex"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
       "summary": "Search all open cmux workspaces/tabs/panes - live scrollback + agent transcripts."
     },
     {
       "name": "gh-git-heredoc-body-file",
       "path": "skills/gh-git-heredoc-body-file/SKILL.md",
-      "hosts": ["claude", "codex"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
       "summary": "Use a body-file so gh CLI and git stop mangling multi-line bodies with backticks, code blocks, or $(...)."
     },
     {
       "name": "claude-code-static-allow-bypasses-hook",
       "path": "skills/claude-code-static-allow-bypasses-hook/SKILL.md",
-      "hosts": ["claude", "codex"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
       "summary": "Why a Claude Code PreToolUse hook never fires for some commands: static permissions.allow Bash globs short-circuit it."
     },
     {
       "name": "python-ast-static-analyzer-scoping",
       "path": "skills/python-ast-static-analyzer-scoping/SKILL.md",
-      "hosts": ["claude", "codex"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
       "summary": "Build a Python ast analyzer that resolves import aliases and models module-load vs deferred execution."
     },
     {
       "name": "wordpress-com-publish",
       "path": "skills/wordpress-com-publish/SKILL.md",
-      "hosts": ["claude", "codex"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
       "summary": "Acquire a WordPress.com OAuth2 token (authorization-code flow) and publish/update posts via public-api.wordpress.com."
     },
     {
       "name": "git-add-u-rename-pitfall",
       "path": "skills/git-add-u-rename-pitfall/SKILL.md",
-      "hosts": ["claude", "codex"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
       "summary": "git add -u can miss a rename, leaving the old path staged as deleted; stage the new path explicitly."
     },
     {
       "name": "git-branch-cleanup-script-races",
       "path": "skills/git-branch-cleanup-script-races/SKILL.md",
-      "hosts": ["claude", "codex"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
       "summary": "Branch-cleanup scripts race against concurrent ref updates; snapshot refs before deleting."
     },
     {
       "name": "git-graft-worktree-onto-remote",
       "path": "skills/git-graft-worktree-onto-remote/SKILL.md",
-      "hosts": ["claude", "codex"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
       "summary": "Graft a local worktree's commits onto a remote branch without re-cloning."
     },
     {
       "name": "multi-phase-feature-pr-worktrees",
       "path": "skills/multi-phase-feature-pr-worktrees/SKILL.md",
-      "hosts": ["claude", "codex"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
       "summary": "Run a multi-phase feature as stacked worktree PRs so each phase reviews independently."
     },
     {
       "name": "gist-to-repo-migration",
       "path": "skills/gist-to-repo-migration/SKILL.md",
-      "hosts": ["claude", "codex"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
       "summary": "Migrate a gist's full revision history into a real git repo, preserving commits."
+    },
+    {
+      "name": "vercel-token-deploy-branch-domains",
+      "path": "skills/vercel-token-deploy-branch-domains/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Token-only per-branch Vercel deploys to fixed custom domains; gitBranch domain pin; preview custom-domain SSO 401."
+    },
+    {
+      "name": "s3-presigned-upload-fails-nonexistent-bucket",
+      "path": "skills/s3-presigned-upload-fails-nonexistent-bucket/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Presigned S3 upload fails because the bucket is wrong/missing; HeadBucket 404-vs-403; CloudFront origin reveals real bucket."
+    },
+    {
+      "name": "neon-vercel-db-identify-and-migrate",
+      "path": "skills/neon-vercel-db-identify-and-migrate/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Identify which Neon project backs a Vercel app and migrate/split it; pg_dump>=server; safe non-destructive cutover."
     }
   ],
   "collections": [
@@ -87,7 +152,10 @@
       "name": "pr-loop",
       "path": "collections/pr-loop.json",
       "summary": "Paired PR-loop skills: work-on-pr (author) + review-pr-loop (reviewer). Legacy install.sh selector; prefer the pr-loop plugin entry.",
-      "skills": ["work-on-pr", "review-pr-loop"]
+      "skills": [
+        "work-on-pr",
+        "review-pr-loop"
+      ]
     }
   ],
   "plugins": [
@@ -97,126 +165,220 @@
       "codex_manifest": "plugins/skillz/.codex-plugin/plugin.json",
       "claude_marketplace": ".claude-plugin/marketplace.json",
       "codex_marketplace": ".codex-plugin/marketplace.json",
-      "hosts": ["claude", "codex"],
-      "skills": ["work-on-pr", "review-pr-loop", "continuous-learning", "cmux-search", "gh-git-heredoc-body-file", "claude-code-static-allow-bypasses-hook", "python-ast-static-analyzer-scoping", "wordpress-com-publish", "git-add-u-rename-pitfall", "git-branch-cleanup-script-races", "git-graft-worktree-onto-remote", "multi-phase-feature-pr-worktrees", "gist-to-repo-migration"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "work-on-pr",
+        "review-pr-loop",
+        "continuous-learning",
+        "cmux-search",
+        "gh-git-heredoc-body-file",
+        "claude-code-static-allow-bypasses-hook",
+        "python-ast-static-analyzer-scoping",
+        "wordpress-com-publish",
+        "git-add-u-rename-pitfall",
+        "git-branch-cleanup-script-races",
+        "git-graft-worktree-onto-remote",
+        "multi-phase-feature-pr-worktrees",
+        "gist-to-repo-migration",
+        "vercel-token-deploy-branch-domains",
+        "s3-presigned-upload-fails-nonexistent-bucket",
+        "neon-vercel-db-identify-and-migrate"
+      ],
       "summary": "Full repo bundle: every skill in one plugin."
     },
     {
       "name": "pr-loop",
       "claude_manifest": "plugins/pr-loop/.claude-plugin/plugin.json",
       "codex_manifest": "plugins/pr-loop/.codex-plugin/plugin.json",
-      "hosts": ["claude", "codex"],
-      "skills": ["work-on-pr", "review-pr-loop"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "work-on-pr",
+        "review-pr-loop"
+      ],
       "summary": "Paired PR-loop plugin: work-on-pr + review-pr-loop."
     },
     {
       "name": "work-on-pr",
       "claude_manifest": "plugins/work-on-pr/.claude-plugin/plugin.json",
       "codex_manifest": "plugins/work-on-pr/.codex-plugin/plugin.json",
-      "hosts": ["claude", "codex"],
-      "skills": ["work-on-pr"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "work-on-pr"
+      ],
       "summary": "Single-skill plugin: work-on-pr."
     },
     {
       "name": "review-pr-loop",
       "claude_manifest": "plugins/review-pr-loop/.claude-plugin/plugin.json",
       "codex_manifest": "plugins/review-pr-loop/.codex-plugin/plugin.json",
-      "hosts": ["claude", "codex"],
-      "skills": ["review-pr-loop"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "review-pr-loop"
+      ],
       "summary": "Single-skill plugin: review-pr-loop."
     },
     {
       "name": "cmux-search",
       "claude_manifest": "plugins/cmux-search/.claude-plugin/plugin.json",
       "codex_manifest": "plugins/cmux-search/.codex-plugin/plugin.json",
-      "hosts": ["claude", "codex"],
-      "skills": ["cmux-search"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "cmux-search"
+      ],
       "summary": "Single-skill plugin: cmux-search."
     },
     {
       "name": "gh-git-heredoc-body-file",
       "claude_manifest": "plugins/gh-git-heredoc-body-file/.claude-plugin/plugin.json",
       "codex_manifest": "plugins/gh-git-heredoc-body-file/.codex-plugin/plugin.json",
-      "hosts": ["claude", "codex"],
-      "skills": ["gh-git-heredoc-body-file"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "gh-git-heredoc-body-file"
+      ],
       "summary": "Single-skill plugin: gh-git-heredoc-body-file."
     },
     {
       "name": "claude-code-static-allow-bypasses-hook",
       "claude_manifest": "plugins/claude-code-static-allow-bypasses-hook/.claude-plugin/plugin.json",
       "codex_manifest": "plugins/claude-code-static-allow-bypasses-hook/.codex-plugin/plugin.json",
-      "hosts": ["claude", "codex"],
-      "skills": ["claude-code-static-allow-bypasses-hook"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "claude-code-static-allow-bypasses-hook"
+      ],
       "summary": "Single-skill plugin: claude-code-static-allow-bypasses-hook."
     },
     {
       "name": "python-ast-static-analyzer-scoping",
       "claude_manifest": "plugins/python-ast-static-analyzer-scoping/.claude-plugin/plugin.json",
       "codex_manifest": "plugins/python-ast-static-analyzer-scoping/.codex-plugin/plugin.json",
-      "hosts": ["claude", "codex"],
-      "skills": ["python-ast-static-analyzer-scoping"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "python-ast-static-analyzer-scoping"
+      ],
       "summary": "Single-skill plugin: python-ast-static-analyzer-scoping."
     },
     {
       "name": "wordpress-com-publish",
       "claude_manifest": "plugins/wordpress-com-publish/.claude-plugin/plugin.json",
       "codex_manifest": "plugins/wordpress-com-publish/.codex-plugin/plugin.json",
-      "hosts": ["claude", "codex"],
-      "skills": ["wordpress-com-publish"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "wordpress-com-publish"
+      ],
       "summary": "Single-skill plugin: wordpress-com-publish."
     },
     {
       "name": "git-add-u-rename-pitfall",
       "claude_manifest": "plugins/git-add-u-rename-pitfall/.claude-plugin/plugin.json",
       "codex_manifest": "plugins/git-add-u-rename-pitfall/.codex-plugin/plugin.json",
-      "hosts": ["claude", "codex"],
-      "skills": ["git-add-u-rename-pitfall"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "git-add-u-rename-pitfall"
+      ],
       "summary": "Single-skill plugin: git-add-u-rename-pitfall."
     },
     {
       "name": "git-branch-cleanup-script-races",
       "claude_manifest": "plugins/git-branch-cleanup-script-races/.claude-plugin/plugin.json",
       "codex_manifest": "plugins/git-branch-cleanup-script-races/.codex-plugin/plugin.json",
-      "hosts": ["claude", "codex"],
-      "skills": ["git-branch-cleanup-script-races"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "git-branch-cleanup-script-races"
+      ],
       "summary": "Single-skill plugin: git-branch-cleanup-script-races."
     },
     {
       "name": "git-graft-worktree-onto-remote",
       "claude_manifest": "plugins/git-graft-worktree-onto-remote/.claude-plugin/plugin.json",
       "codex_manifest": "plugins/git-graft-worktree-onto-remote/.codex-plugin/plugin.json",
-      "hosts": ["claude", "codex"],
-      "skills": ["git-graft-worktree-onto-remote"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "git-graft-worktree-onto-remote"
+      ],
       "summary": "Single-skill plugin: git-graft-worktree-onto-remote."
     },
     {
       "name": "multi-phase-feature-pr-worktrees",
       "claude_manifest": "plugins/multi-phase-feature-pr-worktrees/.claude-plugin/plugin.json",
       "codex_manifest": "plugins/multi-phase-feature-pr-worktrees/.codex-plugin/plugin.json",
-      "hosts": ["claude", "codex"],
-      "skills": ["multi-phase-feature-pr-worktrees"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "multi-phase-feature-pr-worktrees"
+      ],
       "summary": "Single-skill plugin: multi-phase-feature-pr-worktrees."
     },
     {
       "name": "gist-to-repo-migration",
       "claude_manifest": "plugins/gist-to-repo-migration/.claude-plugin/plugin.json",
       "codex_manifest": "plugins/gist-to-repo-migration/.codex-plugin/plugin.json",
-      "hosts": ["claude", "codex"],
-      "skills": ["gist-to-repo-migration"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "gist-to-repo-migration"
+      ],
       "summary": "Single-skill plugin: gist-to-repo-migration."
     },
     {
       "name": "continuous-learning",
       "codex_manifest": "plugins/continuous-learning/.codex-plugin/plugin.json",
-      "hosts": ["codex"],
-      "skills": ["continuous-learning"],
+      "hosts": [
+        "codex"
+      ],
+      "skills": [
+        "continuous-learning"
+      ],
       "summary": "Codex-only single-skill plugin: continuous-learning (no hooks)."
     },
     {
       "name": "codex-continuous-learning",
       "codex_manifest": "plugins/codex-continuous-learning/.codex-plugin/plugin.json",
-      "hosts": ["codex"],
-      "skills": ["continuous-learning"],
+      "hosts": [
+        "codex"
+      ],
+      "skills": [
+        "continuous-learning"
+      ],
       "summary": "Codex-only plugin bundle: continuous-learning skill plus UserPromptSubmit + Stop hooks that drive an end-of-task retrospective."
     }
   ],
