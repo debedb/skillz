@@ -44,6 +44,9 @@ environments and older Codex versions.
 | [git-graft-worktree-onto-remote](./skills/git-graft-worktree-onto-remote/SKILL.md) | skill | Claude, Codex | Graft a local worktree's commits onto a remote branch without re-cloning |
 | [multi-phase-feature-pr-worktrees](./skills/multi-phase-feature-pr-worktrees/SKILL.md) | skill | Claude, Codex | Run a multi-phase feature as stacked worktree PRs, each reviewed independently |
 | [gist-to-repo-migration](./skills/gist-to-repo-migration/SKILL.md) | skill | Claude, Codex | Migrate a gist's full revision history into a real git repo |
+| [vercel-token-deploy-branch-domains](./skills/vercel-token-deploy-branch-domains/SKILL.md) | skill | Claude, Codex | Token-only per-branch Vercel deploys to fixed custom domains; gitBranch domain pin; preview SSO 401 |
+| [s3-presigned-upload-fails-nonexistent-bucket](./skills/s3-presigned-upload-fails-nonexistent-bucket/SKILL.md) | skill | Claude, Codex | Presigned S3 upload fails on wrong/missing bucket; HeadBucket 404-vs-403; CloudFront origin reveals real bucket |
+| [neon-vercel-db-identify-and-migrate](./skills/neon-vercel-db-identify-and-migrate/SKILL.md) | skill | Claude, Codex | Identify which Neon project backs a Vercel app and migrate/split it; safe non-destructive cutover |
 | [`skillz` plugin](./plugins/skillz/) | plugin | Claude, Codex | Full repo bundle: every skill |
 | [`pr-loop` plugin](./plugins/pr-loop/) | plugin | Claude, Codex | Paired author + reviewer PR-loop skills |
 | [`work-on-pr` plugin](./plugins/work-on-pr/) | plugin | Claude, Codex | Single-skill plugin: work-on-pr |
@@ -58,6 +61,9 @@ environments and older Codex versions.
 | [`git-graft-worktree-onto-remote` plugin](./plugins/git-graft-worktree-onto-remote/) | plugin | Claude, Codex | Single-skill plugin: git-graft-worktree-onto-remote |
 | [`multi-phase-feature-pr-worktrees` plugin](./plugins/multi-phase-feature-pr-worktrees/) | plugin | Claude, Codex | Single-skill plugin: multi-phase-feature-pr-worktrees |
 | [`gist-to-repo-migration` plugin](./plugins/gist-to-repo-migration/) | plugin | Claude, Codex | Single-skill plugin: gist-to-repo-migration |
+| [`vercel-token-deploy-branch-domains` plugin](./plugins/vercel-token-deploy-branch-domains/) | plugin | Claude, Codex | Single-skill plugin: vercel-token-deploy-branch-domains |
+| [`s3-presigned-upload-fails-nonexistent-bucket` plugin](./plugins/s3-presigned-upload-fails-nonexistent-bucket/) | plugin | Claude, Codex | Single-skill plugin: s3-presigned-upload-fails-nonexistent-bucket |
+| [`neon-vercel-db-identify-and-migrate` plugin](./plugins/neon-vercel-db-identify-and-migrate/) | plugin | Claude, Codex | Single-skill plugin: neon-vercel-db-identify-and-migrate |
 | [`continuous-learning` plugin](./plugins/continuous-learning/) | plugin | Codex | Single-skill plugin (no hooks) |
 | [`codex-continuous-learning` plugin](./plugins/codex-continuous-learning/) | plugin | Codex | continuous-learning skill plus UserPromptSubmit + Stop hooks |
 | [pr-loop](./collections/pr-loop.json) | collection (legacy) | Claude, Codex | `install.sh` selector. Prefer the `pr-loop` plugin entry. |
@@ -86,6 +92,9 @@ skills/                            # canonical skill content
   git-graft-worktree-onto-remote/SKILL.md
   multi-phase-feature-pr-worktrees/SKILL.md
   gist-to-repo-migration/SKILL.md
+  vercel-token-deploy-branch-domains/SKILL.md
+  s3-presigned-upload-fails-nonexistent-bucket/SKILL.md
+  neon-vercel-db-identify-and-migrate/SKILL.md
 .claude-plugin/
   marketplace.json                 # Claude Code marketplace (lists all plugin entries)
 .codex-plugin/
@@ -108,6 +117,9 @@ plugins/                           # per-plugin manifests + skill symlinks
       git-graft-worktree-onto-remote -> ../../../skills/git-graft-worktree-onto-remote
       multi-phase-feature-pr-worktrees -> ../../../skills/multi-phase-feature-pr-worktrees
       gist-to-repo-migration -> ../../../skills/gist-to-repo-migration
+      vercel-token-deploy-branch-domains -> ../../../skills/vercel-token-deploy-branch-domains
+      s3-presigned-upload-fails-nonexistent-bucket -> ../../../skills/s3-presigned-upload-fails-nonexistent-bucket
+      neon-vercel-db-identify-and-migrate -> ../../../skills/neon-vercel-db-identify-and-migrate
   pr-loop/                         # work-on-pr + review-pr-loop only
     .claude-plugin/plugin.json
     .codex-plugin/plugin.json
@@ -162,6 +174,18 @@ plugins/                           # per-plugin manifests + skill symlinks
     .claude-plugin/plugin.json
     .codex-plugin/plugin.json
     skills/gist-to-repo-migration -> ../../../skills/gist-to-repo-migration
+  vercel-token-deploy-branch-domains/       # single-skill plugin
+    .claude-plugin/plugin.json
+    .codex-plugin/plugin.json
+    skills/vercel-token-deploy-branch-domains -> ../../../skills/vercel-token-deploy-branch-domains
+  s3-presigned-upload-fails-nonexistent-bucket/  # single-skill plugin
+    .claude-plugin/plugin.json
+    .codex-plugin/plugin.json
+    skills/s3-presigned-upload-fails-nonexistent-bucket -> ../../../skills/s3-presigned-upload-fails-nonexistent-bucket
+  neon-vercel-db-identify-and-migrate/      # single-skill plugin
+    .claude-plugin/plugin.json
+    .codex-plugin/plugin.json
+    skills/neon-vercel-db-identify-and-migrate -> ../../../skills/neon-vercel-db-identify-and-migrate
   continuous-learning/             # Codex-only single-skill plugin (no hooks)
     .codex-plugin/plugin.json
     skills/continuous-learning -> ../../../skills/continuous-learning

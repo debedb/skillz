@@ -9,7 +9,7 @@
     {
       "name": "skillz",
       "source": "./plugins/skillz/",
-      "description": "Full bundle: every skill in the catalog (work-on-pr, review-pr-loop, continuous-learning, cmux-search, gh-git-heredoc-body-file, claude-code-static-allow-bypasses-hook, python-ast-static-analyzer-scoping, wordpress-com-publish, git-add-u-rename-pitfall, git-branch-cleanup-script-races, git-graft-worktree-onto-remote, multi-phase-feature-pr-worktrees, gist-to-repo-migration)."
+      "description": "Full bundle: every skill in the catalog (work-on-pr, review-pr-loop, continuous-learning, cmux-search, gh-git-heredoc-body-file, claude-code-static-allow-bypasses-hook, python-ast-static-analyzer-scoping, wordpress-com-publish, git-add-u-rename-pitfall, git-branch-cleanup-script-races, git-graft-worktree-onto-remote, multi-phase-feature-pr-worktrees, gist-to-repo-migration, vercel-token-deploy-branch-domains, s3-presigned-upload-fails-nonexistent-bucket, neon-vercel-db-identify-and-migrate)."
     },
     {
       "name": "pr-loop",
@@ -75,6 +75,21 @@
       "name": "gist-to-repo-migration",
       "source": "./plugins/gist-to-repo-migration/",
       "description": "Migrate a gist's full revision history into a real git repo, preserving commits."
+    },
+    {
+      "name": "vercel-token-deploy-branch-domains",
+      "source": "./plugins/vercel-token-deploy-branch-domains/",
+      "description": "Token-only per-branch Vercel deploys to fixed custom domains; gitBranch domain pin; preview custom-domain SSO 401."
+    },
+    {
+      "name": "s3-presigned-upload-fails-nonexistent-bucket",
+      "source": "./plugins/s3-presigned-upload-fails-nonexistent-bucket/",
+      "description": "Presigned S3 upload fails because the bucket is wrong/missing; HeadBucket 404-vs-403; CloudFront origin reveals real bucket."
+    },
+    {
+      "name": "neon-vercel-db-identify-and-migrate",
+      "source": "./plugins/neon-vercel-db-identify-and-migrate/",
+      "description": "Identify which Neon project backs a Vercel app and migrate/split it; pg_dump>=server; safe non-destructive cutover."
     }
   ]
 }
