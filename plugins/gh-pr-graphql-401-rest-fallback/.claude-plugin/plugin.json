@@ -1,0 +1,12 @@
+{
+  "name": "gh-pr-graphql-401-rest-fallback",
+  "description": "When gh PR GraphQL calls return 401, fall back to the REST PR endpoints.",
+  "version": "1.0.0",
+  "author": {
+    "name": "voitta-ai"
+  },
+  "homepage": "https://github.com/voitta-ai/skillz",
+  "repository": "https://github.com/voitta-ai/skillz",
+  "license": "MIT",
+  "skills": "./skills/"
+}

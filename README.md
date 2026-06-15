@@ -47,6 +47,15 @@ environments and older Codex versions.
 | [vercel-token-deploy-branch-domains](./skills/vercel-token-deploy-branch-domains/SKILL.md) | skill | Claude, Codex | Token-only per-branch Vercel deploys to fixed custom domains; gitBranch domain pin; preview SSO 401 |
 | [s3-presigned-upload-fails-nonexistent-bucket](./skills/s3-presigned-upload-fails-nonexistent-bucket/SKILL.md) | skill | Claude, Codex | Presigned S3 upload fails on wrong/missing bucket; HeadBucket 404-vs-403; CloudFront origin reveals real bucket |
 | [neon-vercel-db-identify-and-migrate](./skills/neon-vercel-db-identify-and-migrate/SKILL.md) | skill | Claude, Codex | Identify which Neon project backs a Vercel app and migrate/split it; safe non-destructive cutover |
+| [gh-api-f-vs-F-body-file](./skills/gh-api-f-vs-F-body-file/SKILL.md) | skill | Claude, Codex | `gh api -F` reads `@file`; `-f` sends it as a literal string |
+| [gh-api-jq-no-arg](./skills/gh-api-jq-no-arg/SKILL.md) | skill | Claude, Codex | `gh api --jq` needs its filter as the arg; a misplaced/empty `--jq` drops it |
+| [gh-fork-issues-disabled](./skills/gh-fork-issues-disabled/SKILL.md) | skill | Claude, Codex | `gh issue create` fails on a fork (Issues tab disabled by default) |
+| [gh-pr-graphql-401-rest-fallback](./skills/gh-pr-graphql-401-rest-fallback/SKILL.md) | skill | Claude, Codex | gh PR GraphQL 401 -> fall back to the REST PR endpoints |
+| [gh-pr-merge-delete-branch-closes-dependent-pr](./skills/gh-pr-merge-delete-branch-closes-dependent-pr/SKILL.md) | skill | Claude, Codex | Deleting the branch on `gh pr merge` can auto-close a dependent stacked PR |
+| [gh-workflow-run-matching](./skills/gh-workflow-run-matching/SKILL.md) | skill | Claude, Codex | Match a `gh` workflow run to its trigger when runs share a name |
+| [github-api-list-endpoint-staleness-fresh-pr](./skills/github-api-list-endpoint-staleness-fresh-pr/SKILL.md) | skill | Claude, Codex | GitHub list endpoints serve stale `[]` on a fresh PR; use the timeline endpoint |
+| [github-closing-keywords-default-branch-only](./skills/github-closing-keywords-default-branch-only/SKILL.md) | skill | Claude, Codex | `Closes #N` only auto-closes when the PR merges into the default branch |
+| [github-private-repo-readme-image-rendering](./skills/github-private-repo-readme-image-rendering/SKILL.md) | skill | Claude, Codex | Private-repo README images need authenticated/relative paths to render |
 | [`skillz` plugin](./plugins/skillz/) | plugin | Claude, Codex | Full repo bundle: every skill |
 | [`pr-loop` plugin](./plugins/pr-loop/) | plugin | Claude, Codex | Paired author + reviewer PR-loop skills |
 | [`work-on-pr` plugin](./plugins/work-on-pr/) | plugin | Claude, Codex | Single-skill plugin: work-on-pr |
@@ -64,6 +73,15 @@ environments and older Codex versions.
 | [`vercel-token-deploy-branch-domains` plugin](./plugins/vercel-token-deploy-branch-domains/) | plugin | Claude, Codex | Single-skill plugin: vercel-token-deploy-branch-domains |
 | [`s3-presigned-upload-fails-nonexistent-bucket` plugin](./plugins/s3-presigned-upload-fails-nonexistent-bucket/) | plugin | Claude, Codex | Single-skill plugin: s3-presigned-upload-fails-nonexistent-bucket |
 | [`neon-vercel-db-identify-and-migrate` plugin](./plugins/neon-vercel-db-identify-and-migrate/) | plugin | Claude, Codex | Single-skill plugin: neon-vercel-db-identify-and-migrate |
+| [`gh-api-f-vs-F-body-file` plugin](./plugins/gh-api-f-vs-F-body-file/) | plugin | Claude, Codex | Single-skill plugin: gh-api-f-vs-F-body-file |
+| [`gh-api-jq-no-arg` plugin](./plugins/gh-api-jq-no-arg/) | plugin | Claude, Codex | Single-skill plugin: gh-api-jq-no-arg |
+| [`gh-fork-issues-disabled` plugin](./plugins/gh-fork-issues-disabled/) | plugin | Claude, Codex | Single-skill plugin: gh-fork-issues-disabled |
+| [`gh-pr-graphql-401-rest-fallback` plugin](./plugins/gh-pr-graphql-401-rest-fallback/) | plugin | Claude, Codex | Single-skill plugin: gh-pr-graphql-401-rest-fallback |
+| [`gh-pr-merge-delete-branch-closes-dependent-pr` plugin](./plugins/gh-pr-merge-delete-branch-closes-dependent-pr/) | plugin | Claude, Codex | Single-skill plugin: gh-pr-merge-delete-branch-closes-dependent-pr |
+| [`gh-workflow-run-matching` plugin](./plugins/gh-workflow-run-matching/) | plugin | Claude, Codex | Single-skill plugin: gh-workflow-run-matching |
+| [`github-api-list-endpoint-staleness-fresh-pr` plugin](./plugins/github-api-list-endpoint-staleness-fresh-pr/) | plugin | Claude, Codex | Single-skill plugin: github-api-list-endpoint-staleness-fresh-pr |
+| [`github-closing-keywords-default-branch-only` plugin](./plugins/github-closing-keywords-default-branch-only/) | plugin | Claude, Codex | Single-skill plugin: github-closing-keywords-default-branch-only |
+| [`github-private-repo-readme-image-rendering` plugin](./plugins/github-private-repo-readme-image-rendering/) | plugin | Claude, Codex | Single-skill plugin: github-private-repo-readme-image-rendering |
 | [`continuous-learning` plugin](./plugins/continuous-learning/) | plugin | Codex | Single-skill plugin (no hooks) |
 | [`codex-continuous-learning` plugin](./plugins/codex-continuous-learning/) | plugin | Codex | continuous-learning skill plus UserPromptSubmit + Stop hooks |
 | [pr-loop](./collections/pr-loop.json) | collection (legacy) | Claude, Codex | `install.sh` selector. Prefer the `pr-loop` plugin entry. |
@@ -95,6 +113,15 @@ skills/                            # canonical skill content
   vercel-token-deploy-branch-domains/SKILL.md
   s3-presigned-upload-fails-nonexistent-bucket/SKILL.md
   neon-vercel-db-identify-and-migrate/SKILL.md
+  gh-api-f-vs-F-body-file/SKILL.md
+  gh-api-jq-no-arg/SKILL.md
+  gh-fork-issues-disabled/SKILL.md
+  gh-pr-graphql-401-rest-fallback/SKILL.md
+  gh-pr-merge-delete-branch-closes-dependent-pr/SKILL.md
+  gh-workflow-run-matching/SKILL.md
+  github-api-list-endpoint-staleness-fresh-pr/SKILL.md
+  github-closing-keywords-default-branch-only/SKILL.md
+  github-private-repo-readme-image-rendering/SKILL.md
 .claude-plugin/
   marketplace.json                 # Claude Code marketplace (lists all plugin entries)
 .codex-plugin/
@@ -120,6 +147,15 @@ plugins/                           # per-plugin manifests + skill symlinks
       vercel-token-deploy-branch-domains -> ../../../skills/vercel-token-deploy-branch-domains
       s3-presigned-upload-fails-nonexistent-bucket -> ../../../skills/s3-presigned-upload-fails-nonexistent-bucket
       neon-vercel-db-identify-and-migrate -> ../../../skills/neon-vercel-db-identify-and-migrate
+      gh-api-f-vs-F-body-file -> ../../../skills/gh-api-f-vs-F-body-file
+      gh-api-jq-no-arg -> ../../../skills/gh-api-jq-no-arg
+      gh-fork-issues-disabled -> ../../../skills/gh-fork-issues-disabled
+      gh-pr-graphql-401-rest-fallback -> ../../../skills/gh-pr-graphql-401-rest-fallback
+      gh-pr-merge-delete-branch-closes-dependent-pr -> ../../../skills/gh-pr-merge-delete-branch-closes-dependent-pr
+      gh-workflow-run-matching -> ../../../skills/gh-workflow-run-matching
+      github-api-list-endpoint-staleness-fresh-pr -> ../../../skills/github-api-list-endpoint-staleness-fresh-pr
+      github-closing-keywords-default-branch-only -> ../../../skills/github-closing-keywords-default-branch-only
+      github-private-repo-readme-image-rendering -> ../../../skills/github-private-repo-readme-image-rendering
   pr-loop/                         # work-on-pr + review-pr-loop only
     .claude-plugin/plugin.json
     .codex-plugin/plugin.json
@@ -186,6 +222,42 @@ plugins/                           # per-plugin manifests + skill symlinks
     .claude-plugin/plugin.json
     .codex-plugin/plugin.json
     skills/neon-vercel-db-identify-and-migrate -> ../../../skills/neon-vercel-db-identify-and-migrate
+  gh-api-f-vs-F-body-file/         # single-skill plugin
+    .claude-plugin/plugin.json
+    .codex-plugin/plugin.json
+    skills/gh-api-f-vs-F-body-file -> ../../../skills/gh-api-f-vs-F-body-file
+  gh-api-jq-no-arg/                # single-skill plugin
+    .claude-plugin/plugin.json
+    .codex-plugin/plugin.json
+    skills/gh-api-jq-no-arg -> ../../../skills/gh-api-jq-no-arg
+  gh-fork-issues-disabled/         # single-skill plugin
+    .claude-plugin/plugin.json
+    .codex-plugin/plugin.json
+    skills/gh-fork-issues-disabled -> ../../../skills/gh-fork-issues-disabled
+  gh-pr-graphql-401-rest-fallback/ # single-skill plugin
+    .claude-plugin/plugin.json
+    .codex-plugin/plugin.json
+    skills/gh-pr-graphql-401-rest-fallback -> ../../../skills/gh-pr-graphql-401-rest-fallback
+  gh-pr-merge-delete-branch-closes-dependent-pr/ # single-skill plugin
+    .claude-plugin/plugin.json
+    .codex-plugin/plugin.json
+    skills/gh-pr-merge-delete-branch-closes-dependent-pr -> ../../../skills/gh-pr-merge-delete-branch-closes-dependent-pr
+  gh-workflow-run-matching/        # single-skill plugin
+    .claude-plugin/plugin.json
+    .codex-plugin/plugin.json
+    skills/gh-workflow-run-matching -> ../../../skills/gh-workflow-run-matching
+  github-api-list-endpoint-staleness-fresh-pr/ # single-skill plugin
+    .claude-plugin/plugin.json
+    .codex-plugin/plugin.json
+    skills/github-api-list-endpoint-staleness-fresh-pr -> ../../../skills/github-api-list-endpoint-staleness-fresh-pr
+  github-closing-keywords-default-branch-only/ # single-skill plugin
+    .claude-plugin/plugin.json
+    .codex-plugin/plugin.json
+    skills/github-closing-keywords-default-branch-only -> ../../../skills/github-closing-keywords-default-branch-only
+  github-private-repo-readme-image-rendering/ # single-skill plugin
+    .claude-plugin/plugin.json
+    .codex-plugin/plugin.json
+    skills/github-private-repo-readme-image-rendering -> ../../../skills/github-private-repo-readme-image-rendering
   continuous-learning/             # Codex-only single-skill plugin (no hooks)
     .codex-plugin/plugin.json
     skills/continuous-learning -> ../../../skills/continuous-learning

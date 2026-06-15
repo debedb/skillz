@@ -1,0 +1,11 @@
+{
+  "name": "gh-fork-issues-disabled",
+  "version": "1.0.0",
+  "description": "gh issue create fails on a fork because GitHub disables the Issues tab on forks by default.",
+  "author": "voitta-ai",
+  "homepage": "https://github.com/voitta-ai/skillz",
+  "repository": "https://github.com/voitta-ai/skillz",
+  "license": "MIT",
+  "keywords": ["claude", "codex", "skills", "gh", "fork", "issues", "disabled"],
+  "skills": "./skills/"
+}
