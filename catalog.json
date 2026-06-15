@@ -360,6 +360,45 @@
       "summary": "Single-skill plugin: gist-to-repo-migration."
     },
     {
+      "name": "vercel-token-deploy-branch-domains",
+      "claude_manifest": "plugins/vercel-token-deploy-branch-domains/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/vercel-token-deploy-branch-domains/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "vercel-token-deploy-branch-domains"
+      ],
+      "summary": "Single-skill plugin: vercel-token-deploy-branch-domains."
+    },
+    {
+      "name": "s3-presigned-upload-fails-nonexistent-bucket",
+      "claude_manifest": "plugins/s3-presigned-upload-fails-nonexistent-bucket/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/s3-presigned-upload-fails-nonexistent-bucket/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "s3-presigned-upload-fails-nonexistent-bucket"
+      ],
+      "summary": "Single-skill plugin: s3-presigned-upload-fails-nonexistent-bucket."
+    },
+    {
+      "name": "neon-vercel-db-identify-and-migrate",
+      "claude_manifest": "plugins/neon-vercel-db-identify-and-migrate/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/neon-vercel-db-identify-and-migrate/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "neon-vercel-db-identify-and-migrate"
+      ],
+      "summary": "Single-skill plugin: neon-vercel-db-identify-and-migrate."
+    },
+    {
       "name": "continuous-learning",
       "codex_manifest": "plugins/continuous-learning/.codex-plugin/plugin.json",
       "hosts": [

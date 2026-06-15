@@ -1,0 +1,12 @@
+{
+  "name": "vercel-token-deploy-branch-domains",
+  "description": "Token-only per-branch Vercel deploys to fixed custom domains; gitBranch domain pin; preview custom-domain SSO 401.",
+  "version": "1.0.0",
+  "author": {
+    "name": "voitta-ai"
+  },
+  "homepage": "https://github.com/voitta-ai/skillz",
+  "repository": "https://github.com/voitta-ai/skillz",
+  "license": "MIT",
+  "skills": "./skills/"
+}

@@ -1,0 +1,11 @@
+{
+  "name": "s3-presigned-upload-fails-nonexistent-bucket",
+  "version": "1.0.0",
+  "description": "Presigned S3 upload fails because the bucket is wrong/missing; HeadBucket 404-vs-403; CloudFront origin reveals real bucket.",
+  "author": "voitta-ai",
+  "homepage": "https://github.com/voitta-ai/skillz",
+  "repository": "https://github.com/voitta-ai/skillz",
+  "license": "MIT",
+  "keywords": ["claude", "codex", "skills", "s3", "presigned", "upload", "fails"],
+  "skills": "./skills/"
+}
