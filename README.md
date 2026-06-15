@@ -56,6 +56,7 @@ environments and older Codex versions.
 | [github-api-list-endpoint-staleness-fresh-pr](./skills/github-api-list-endpoint-staleness-fresh-pr/SKILL.md) | skill | Claude, Codex | GitHub list endpoints serve stale `[]` on a fresh PR; use the timeline endpoint |
 | [github-closing-keywords-default-branch-only](./skills/github-closing-keywords-default-branch-only/SKILL.md) | skill | Claude, Codex | `Closes #N` only auto-closes when the PR merges into the default branch |
 | [github-private-repo-readme-image-rendering](./skills/github-private-repo-readme-image-rendering/SKILL.md) | skill | Claude, Codex | Private-repo README images need authenticated/relative paths to render |
+| [claudeception](./skills/claudeception/SKILL.md) | skill | Claude | Continuous-learning meta-skill: procedures become catalog skills via PR; specifics go to memory (local or shared vault) |
 | [`skillz` plugin](./plugins/skillz/) | plugin | Claude, Codex | Full repo bundle: every skill |
 | [`pr-loop` plugin](./plugins/pr-loop/) | plugin | Claude, Codex | Paired author + reviewer PR-loop skills |
 | [`work-on-pr` plugin](./plugins/work-on-pr/) | plugin | Claude, Codex | Single-skill plugin: work-on-pr |

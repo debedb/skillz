@@ -199,6 +199,14 @@
       "path": "skills/github-private-repo-readme-image-rendering/SKILL.md",
       "hosts": ["claude", "codex"],
       "summary": "Images in a private-repo README need authenticated or relative paths to render."
+    },
+    {
+      "name": "claudeception",
+      "path": "skills/claudeception/SKILL.md",
+      "hosts": [
+        "claude"
+      ],
+      "summary": "Continuous-learning meta-skill: extract verified, reusable knowledge. Repeatable procedures become catalog skills via PR; specific recollections go to memory (local or a shared git-backed vault)."
     }
   ],
   "collections": [
@@ -248,7 +256,8 @@
         "gh-workflow-run-matching",
         "github-api-list-endpoint-staleness-fresh-pr",
         "github-closing-keywords-default-branch-only",
-        "github-private-repo-readme-image-rendering"
+        "github-private-repo-readme-image-rendering",
+        "claudeception"
       ],
       "summary": "Full repo bundle: every skill in one plugin."
     },
