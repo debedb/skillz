@@ -12,8 +12,8 @@ description: |
   flow, store the token, then publish. NOT for self-hosted WordPress using
   application-password REST - this targets public-api.wordpress.com.
 author: Claude Code
-version: 1.1.0
-date: 2026-06-12
+version: 1.1.2
+date: 2026-06-15
 source: https://github.com/voitta-ai/skillz
 source_file: skills/wordpress-com-publish/SKILL.md
 ---
@@ -134,7 +134,7 @@ BODY="${2:-}"; STATUS="${3:-draft}"
 SITE="${4:-${WPCOM_SITE:?set WPCOM_SITE or pass site as 4th arg}}"
 
 post() { curl -sS -X POST "$API/rest/v1.1/sites/$SITE/posts/new" \
-           -H "Authorization: Bearer $1" \
+           -H "Authorization: Bearer ${1}" \
            --data-urlencode "title=$TITLE" --data-urlencode "content=$BODY" \
            --data-urlencode "status=$STATUS"; }
 
@@ -168,6 +168,13 @@ print(d["URL"]) if d.get("URL") else (print(json.dumps(d)) or sys.exit(1))'
 - **401 / `authorization_required` on publish**: token was revoked - re-run the
   auth flow (the script does this automatically once).
 - **Markdown does not render.** `content` is treated as HTML.
+- **Invoked as a slash command (`/wordpress-com-publish ...`)?** The command
+  framework substitutes bare positional placeholders (`$1`..`$9`, `$ARGUMENTS`)
+  in this SKILL.md when it injects the body, so a bare `$1` in the embedded
+  script renders as empty (e.g. `Authorization: Bearer ` with no token). Brace
+  forms (`${1}`, `${1:?...}`, `${1:-}`) survive untouched - the script uses
+  `${1}` for exactly this reason. If you copy the script out of a rendered
+  invocation, confirm the `Bearer ${1}` token did not get blanked.
 
 ## Quick reference
 
