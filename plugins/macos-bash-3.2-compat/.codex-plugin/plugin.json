@@ -1,0 +1,11 @@
+{
+  "name": "macos-bash-3.2-compat",
+  "version": "1.0.0",
+  "description": "Fix bash scripts that fail on macOS's stock bash 3.2 (declare -A, mapfile, and other bash-4-only constructs).",
+  "author": "voitta-ai",
+  "homepage": "https://github.com/voitta-ai/skillz",
+  "repository": "https://github.com/voitta-ai/skillz",
+  "license": "MIT",
+  "keywords": ["claude", "codex", "skills", "macos", "bash", "3.2", "compat"],
+  "skills": "./skills/"
+}

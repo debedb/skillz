@@ -241,6 +241,24 @@
       "path": "skills/claude-json-mcp-migration-slice/SKILL.md",
       "hosts": ["claude", "codex"],
       "summary": "Identify the exact ~/.claude.json slice that carries MCP config for cross-machine migration vs session bookkeeping."
+    },
+    {
+      "name": "macos-bash-3.2-compat",
+      "path": "skills/macos-bash-3.2-compat/SKILL.md",
+      "hosts": ["claude", "codex"],
+      "summary": "Fix bash scripts that fail on macOS's stock bash 3.2 (declare -A, mapfile, and other bash-4-only constructs)."
+    },
+    {
+      "name": "emacs-batch-package-verify-pitfalls",
+      "path": "skills/emacs-batch-package-verify-pitfalls/SKILL.md",
+      "hosts": ["claude", "codex"],
+      "summary": "Avoid false-negative failures when verifying an Emacs package install with emacs --batch (no ELPA auto-activation on load-path; use-package deferred loading skips :config)."
+    },
+    {
+      "name": "python-symtable-no-col-offset-pairing",
+      "path": "skills/python-symtable-no-col-offset-pairing/SKILL.md",
+      "hosts": ["claude", "codex"],
+      "summary": "Pair Python symtable scope entries with AST nodes when symtable exposes no col_offset, via (lineno, name) grouping."
     }
   ],
   "collections": [
@@ -297,7 +315,10 @@
         "claude-code-plugin-from-existing-repo",
         "claude-code-plugin-python-bootstrap",
         "claude-code-plugin-update-flow",
-        "claude-json-mcp-migration-slice"
+        "claude-json-mcp-migration-slice",
+        "macos-bash-3.2-compat",
+        "emacs-batch-package-verify-pitfalls",
+        "python-symtable-no-col-offset-pairing"
       ],
       "summary": "Full repo bundle: every skill in one plugin."
     },
@@ -637,6 +658,30 @@
       "hosts": ["claude", "codex"],
       "skills": ["claude-json-mcp-migration-slice"],
       "summary": "Single-skill plugin: claude-json-mcp-migration-slice."
+    },
+    {
+      "name": "macos-bash-3.2-compat",
+      "claude_manifest": "plugins/macos-bash-3.2-compat/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/macos-bash-3.2-compat/.codex-plugin/plugin.json",
+      "hosts": ["claude", "codex"],
+      "skills": ["macos-bash-3.2-compat"],
+      "summary": "Single-skill plugin: macos-bash-3.2-compat."
+    },
+    {
+      "name": "emacs-batch-package-verify-pitfalls",
+      "claude_manifest": "plugins/emacs-batch-package-verify-pitfalls/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/emacs-batch-package-verify-pitfalls/.codex-plugin/plugin.json",
+      "hosts": ["claude", "codex"],
+      "skills": ["emacs-batch-package-verify-pitfalls"],
+      "summary": "Single-skill plugin: emacs-batch-package-verify-pitfalls."
+    },
+    {
+      "name": "python-symtable-no-col-offset-pairing",
+      "claude_manifest": "plugins/python-symtable-no-col-offset-pairing/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/python-symtable-no-col-offset-pairing/.codex-plugin/plugin.json",
+      "hosts": ["claude", "codex"],
+      "skills": ["python-symtable-no-col-offset-pairing"],
+      "summary": "Single-skill plugin: python-symtable-no-col-offset-pairing."
     },
     {
       "name": "continuous-learning",
