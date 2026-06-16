@@ -136,8 +136,11 @@ repo distributes to both ecosystems.
   each other.
 - Worked example: a plugin's repo added `scripts/release.sh` in one PR
   (version bump + tag for the shared pin-on-version model) and a metadata-only
-  `.codex-plugin/plugin.json` scaffold in a follow-up PR, deliberately leaving
-  the `hooks` pointer out pending the `${PLUGIN_ROOT}` rewrite + protocol check.
+  `.codex-plugin/plugin.json` scaffold in a follow-up PR, leaving the `hooks`
+  pointer out pending only hook runtime-protocol verification. No env-var
+  rewrite is needed first: the `CLAUDE_PLUGIN_ROOT` compatibility alias means
+  the existing `hooks.json` resolves under Codex, so switching to
+  `${PLUGIN_ROOT}` is an optional native-style change, not a prerequisite.
 
 ## References
 
