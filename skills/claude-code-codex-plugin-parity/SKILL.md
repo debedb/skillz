@@ -7,13 +7,13 @@ description: |
   marketplace.json + hooks/hooks.json) and want it to also work under Codex
   CLI, (2) you are writing a .codex-plugin/plugin.json and wonder if you can
   reuse the existing hooks.json, (3) a ported plugin installs under Codex but
-  its hooks misbehave or do nothing, (4) ${CLAUDE_PLUGIN_ROOT} is empty when a
-  hook runs under Codex, (5) you need to know whether "submit to the official
-  marketplace" has a Codex equivalent. Covers the manifest/marketplace parity,
-  the version-pin release discipline shared by both, the PLUGIN_ROOT env-var
-  trap, and the runtime-protocol caveat.
+  its hooks misbehave or do nothing, (4) you need to confirm which plugin-root
+  env vars a hook sees under Codex, (5) you need to know whether "submit to the
+  official marketplace" has a Codex equivalent. Covers the manifest/marketplace
+  parity, the version-pin release discipline shared by both, the plugin-root
+  env-var compatibility aliases, and the runtime-protocol caveat.
 author: Claude Code
-version: 1.0.0
+version: 1.1.0
 date: 2026-06-11
 ---
 
@@ -22,12 +22,13 @@ date: 2026-06-11
 ## Problem
 
 Codex CLI (plugins added ~v0.117) ships a plugin system that looks almost
-identical to Claude Code's. The similarity is close enough that you assume a
-Claude Code plugin drops into Codex unchanged - then the manifest installs
-fine but the hooks silently do nothing, because two small things differ
-(the plugin-root env var and the hook runtime protocol). This skill is the
-map of what is shared vs what is not, so a port is a 20-minute job, not a
-day of guessing.
+identical to Claude Code's - close enough that you assume a Claude Code plugin
+drops into Codex unchanged. The manifest and the hook *registration* shape do
+port directly, and Codex even sets compatibility env-var aliases so a
+`${CLAUDE_PLUGIN_ROOT}` hook path still resolves. The one thing that can still
+bite is the hook *runtime protocol* (the stdin payload and the stdout/exit
+decision contract). This skill is the map of what is shared vs what is not, so
+a port is a 20-minute job, not a day of guessing.
 
 ## Context / Trigger Conditions
 
@@ -35,7 +36,8 @@ day of guessing.
 - Writing a `.codex-plugin/plugin.json` alongside an existing
   `.claude-plugin/plugin.json`.
 - A hook works under Claude Code but does nothing under Codex.
-- `${CLAUDE_PLUGIN_ROOT}` resolves empty when a hook runs under Codex.
+- A ported hook misbehaves under Codex and you suspect an env-var or
+  hook-protocol difference.
 - Deciding how to distribute / release a plugin for both runtimes.
 
 ## What is IDENTICAL (copy almost verbatim)
@@ -62,59 +64,73 @@ repo distributes to both ecosystems.
 
 ## What DIFFERS (the actual port work)
 
-1. **Plugin-root env var.** Claude Code hook commands reference
-   `${CLAUDE_PLUGIN_ROOT}`. Codex sets a **different** variable named
-   **`PLUGIN_ROOT`** ("a Codex-specific extension that points to the
-   installed plugin root", per the Codex hooks doc). `${CLAUDE_PLUGIN_ROOT}`
-   is simply unset under Codex, so a hooks.json copied verbatim runs a
-   command with an empty path and fails silently. You **cannot alias the
-   same hooks.json across both runtimes** unless every command path is
-   runtime-portable. Practical fix: ship a separate Codex hooks file (the
-   community uses a `hooks.codex.json`-style variant) that uses
-   `${PLUGIN_ROOT}`, and point the Codex manifest's `hooks` pointer at it.
+1. **Plugin-root env var (now a compatibility alias, not a trap).** Codex's
+   native variable is **`PLUGIN_ROOT`** ("a Codex-specific extension that
+   points to the installed plugin root", per the Codex hooks doc), but Codex
+   **also sets `CLAUDE_PLUGIN_ROOT` "for compatibility with existing plugin
+   hooks"** (and likewise exposes `PLUGIN_DATA` with a `CLAUDE_PLUGIN_DATA`
+   alias). So a `hooks.json` that references `${CLAUDE_PLUGIN_ROOT}` **does
+   resolve under Codex** - you do NOT need to fork a separate Codex hooks file
+   just for the env var, and the same `hooks.json` can be aliased across both
+   runtimes. Prefer the native `${PLUGIN_ROOT}` in new Codex-only hooks, but a
+   ported Claude hook keeps working via the alias.
 
-2. **Hook runtime protocol is unverified-equal.** Matching *registration*
-   shape (same event names, same `matcher`, same `type: command`) does NOT
-   guarantee *behavioral* parity. The stdin event JSON the hook receives and
-   the decision/permission output contract it must emit (e.g. how Claude
-   Code's PreToolUse allow/ask/deny decision is expressed) may differ between
-   the two runtimes. Verify the actual stdin payload and expected stdout/exit
-   contract under Codex before claiming a hook is ported - don't infer it
-   from the manifest.
+2. **Hook runtime protocol is the real divergence to check.** Matching
+   *registration* shape (same event names, same `matcher`, same
+   `type: command`) does NOT by itself guarantee *behavioral* parity. Codex
+   documents its own hook I/O contract: stdin carries `session_id`,
+   `transcript_path`, `cwd`, `hook_event_name`, `model`, `permission_mode`
+   plus event-specific fields (`tool_name` / `tool_input` for `PreToolUse`);
+   on stdout, exit 0 + JSON applies decisions (`continue`, `systemMessage`,
+   and event-specific fields like `PreToolUse`'s `permissionDecision` /
+   `updatedInput`), exit 0 + plain text is added as context
+   (`SessionStart`, `UserPromptSubmit`), and **exit 2 signals block/deny with
+   the stderr message recorded as the reason**. This is close to Claude Code's
+   contract but verify the exact fields your hook emits against the Codex
+   hooks doc before declaring parity.
 
 3. **No self-serve official Codex marketplace (yet).** Anthropic has an
    official-marketplace submission form (claude.ai/settings/plugins/submit,
-   platform.claude.com/plugins/submit). Codex has **no public self-serve
-   marketplace submission**: distribute via a repo-hosted `marketplace.json`
-   + `codex plugin add`, or via Codex-app workspace sharing to named
-   teammates. So "submit to the official marketplace" has a Claude Code path
-   but, as of mid-2026, no Codex equivalent - only the repo/CLI path maps.
+   platform.claude.com/plugins/submit). The Codex docs say an official Plugin
+   Directory and self-serve publishing are "coming soon"; for now you
+   distribute via a repo- or user-scoped `marketplace.json`
+   (`.agents/plugins/marketplace.json` or `~/.agents/plugins/marketplace.json`)
+   added with `codex plugin marketplace add <owner/repo>`, or via Codex-app
+   workspace sharing to named teammates. So "submit to the official
+   marketplace" has a Claude Code path but, as of mid-2026, no Codex
+   equivalent - only the repo/marketplace path maps.
 
 ## Solution (port checklist, CC -> Codex)
 
 1. Add `.codex-plugin/plugin.json` mirroring `.claude-plugin/plugin.json`
    (same name/version/description/author/homepage/repository/license;
    add `keywords` for discovery).
-2. Do NOT point the Codex `hooks` pointer at the Claude hooks.json if that
-   file uses `${CLAUDE_PLUGIN_ROOT}`. Either make the command paths portable
-   or ship a Codex-specific hooks file using `${PLUGIN_ROOT}`.
+2. You CAN point the Codex `hooks` pointer at the same `hooks.json`: Codex's
+   `CLAUDE_PLUGIN_ROOT` compatibility alias means a `${CLAUDE_PLUGIN_ROOT}`
+   command path resolves. Use `${PLUGIN_ROOT}` only when you want the native
+   Codex name in a Codex-specific hooks file.
 3. Verify the hook's stdin/stdout/exit contract under an actual Codex run
-   before declaring parity.
+   before declaring parity (see the documented contract above).
 4. Keep both manifests' `version` in lockstep; bump both per release.
-5. Distribute via repo `marketplace.json` + `codex plugin add`; there is no
+5. Distribute via a repo- or user-scoped `marketplace.json` added with
+   `codex plugin marketplace add <owner/repo>`; there is no
    official-marketplace submission to do.
 
 ## Verification
 
-- `codex plugin add <source>` then `codex plugin list --json` shows the
-  plugin with the expected `name`, `version`, `installed`, `enabled`.
-- Trigger the hooked event and confirm the hook command actually runs
-  (echo `$PLUGIN_ROOT` from the hook to confirm it is populated under Codex).
+- `codex plugin marketplace add <owner/repo>` then `codex plugin marketplace
+  list` shows the marketplace; open the `codex plugin` browser to install the
+  plugin and confirm its `name` / `version` / enabled state.
+- Trigger the hooked event and confirm the hook command actually runs - echo
+  `$PLUGIN_ROOT` (and `$CLAUDE_PLUGIN_ROOT`, which should match) from the hook
+  to confirm both are populated under Codex.
 
 ## Notes
 
-- Codex plugin CLI: `codex plugin add`, `codex plugin list` (both support
-  `--json`). Plugins can bundle skills, MCP servers, apps, and hooks.
+- Codex plugin CLI: `codex plugin marketplace add|list|upgrade|remove` manages
+  marketplaces; `codex plugin` opens an interactive browser to install /
+  enable / disable individual plugins. Plugins can bundle skills, MCP servers,
+  apps, and hooks.
 - Cross-pollination already exists: OpenAI ships `codex@openai-codex` as a
   *Claude Code* plugin (the rescue bridge), so the two marketplaces reference
   each other.
@@ -127,7 +143,7 @@ repo distributes to both ecosystems.
 
 - Codex plugins overview: https://developers.openai.com/codex/plugins
 - Codex build plugins (manifest, marketplace, distribution): https://developers.openai.com/codex/plugins/build
-- Codex hooks (confirms `PLUGIN_ROOT` env var): https://developers.openai.com/codex/hooks
+- Codex hooks (PLUGIN_ROOT + CLAUDE_PLUGIN_ROOT compat alias; hook I/O contract): https://developers.openai.com/codex/hooks
 - Codex changelog (plugin feature history): https://developers.openai.com/codex/changelog
 - Community plugin list + "no self-serve marketplace submission" note: https://github.com/hashgraph-online/awesome-codex-plugins
 - Claude Code plugin marketplaces (version resolution / SHA pinning): https://code.claude.com/docs/en/plugin-marketplaces
