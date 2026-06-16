@@ -282,6 +282,12 @@
       "path": "skills/python-symtable-no-col-offset-pairing/SKILL.md",
       "hosts": ["claude", "codex"],
       "summary": "Pair Python symtable scope entries with AST nodes when symtable exposes no col_offset, via (lineno, name) grouping."
+    },
+    {
+      "name": "playwright-mcp-upload-hidden-file-input",
+      "path": "skills/playwright-mcp-upload-hidden-file-input/SKILL.md",
+      "hosts": ["claude", "codex"],
+      "summary": "Upload a file via Playwright MCP when the input is hidden: unhide+tag via evaluate, upload by id, verify via CDN/S3 URL."
     }
   ],
   "collections": [
@@ -343,7 +349,8 @@
         "claude-json-mcp-migration-slice",
         "macos-bash-3.2-compat",
         "emacs-batch-package-verify-pitfalls",
-        "python-symtable-no-col-offset-pairing"
+        "python-symtable-no-col-offset-pairing",
+        "playwright-mcp-upload-hidden-file-input"
       ],
       "summary": "Full repo bundle: every skill in one plugin."
     },
@@ -720,6 +727,14 @@
       "hosts": ["claude", "codex"],
       "skills": ["python-symtable-no-col-offset-pairing"],
       "summary": "Single-skill plugin: python-symtable-no-col-offset-pairing."
+    },
+    {
+      "name": "playwright-mcp-upload-hidden-file-input",
+      "claude_manifest": "plugins/playwright-mcp-upload-hidden-file-input/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/playwright-mcp-upload-hidden-file-input/.codex-plugin/plugin.json",
+      "hosts": ["claude", "codex"],
+      "skills": ["playwright-mcp-upload-hidden-file-input"],
+      "summary": "Single-skill plugin: playwright-mcp-upload-hidden-file-input."
     },
     {
       "name": "continuous-learning",
