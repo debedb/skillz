@@ -57,6 +57,8 @@ for s in skills:
     if not re.search(r"(?m)^description\s*:", fm):
         errors.append(f"skill '{name}' frontmatter missing `description:`")
 
+skill_hosts = {s.get("name"): s.get("hosts", []) for s in skills}
+
 # Inline collections in catalog.json
 for c in catalog.get("collections", []):
     cname = c.get("name", "<unnamed>")
@@ -88,51 +90,81 @@ for p in catalog.get("plugins", []):
         if rel and not os.path.isfile(os.path.join(root, rel)):
             errors.append(f"plugin '{pname}' missing {key}: {rel}")
 
-    # For each plugin manifest under plugins/<name>/, verify the sibling
-    # skills/ dir exists and every symlink in it resolves to a real skill
-    # directory under skills/.
-    declared_skills = set(p.get("skills", []))
-    plugin_dirs = set()
-    for key in ("claude_manifest", "codex_manifest"):
+    # For each host manifest (claude_manifest -> claude, codex_manifest ->
+    # codex), read that manifest's own `skills` path and verify the dir it
+    # points at holds exactly the host-applicable subset of the plugin's
+    # declared skills. A claude-only skill must not appear in the codex
+    # manifest's dir, and vice versa. Every symlink must resolve under
+    # skills/.
+    declared_skills = list(p.get("skills", []))
+    for key, host in (("claude_manifest", "claude"), ("codex_manifest", "codex")):
         rel = p.get(key)
-        if rel and rel.startswith("plugins/"):
-            plugin_dirs.add(os.path.dirname(os.path.dirname(rel)))
-    for pdir in plugin_dirs:
-        skills_dir = os.path.join(root, pdir, "skills")
-        if not os.path.isdir(skills_dir):
-            errors.append(f"plugin '{pname}' missing skills/ dir: {pdir}/skills")
+        if not rel or not rel.startswith("plugins/"):
             continue
+        manifest_path = os.path.join(root, rel)
+        if not os.path.isfile(manifest_path):
+            continue  # missing-manifest already reported above
+        plugin_root = os.path.dirname(os.path.dirname(rel))
+        try:
+            with open(manifest_path) as mf:
+                manifest = json.load(mf)
+        except ValueError as e:
+            errors.append(f"plugin '{pname}' {key} is not valid JSON: {e}")
+            continue
+        skills_field = manifest.get("skills", "./skills/")
+        skills_paths = (
+            skills_field if isinstance(skills_field, list) else [skills_field]
+        )
+        # Claude Code always also scans a default skills/ dir alongside any
+        # listed dir, so a leftover skills/ would re-expose every skill even
+        # when the manifest points elsewhere. Guard against that.
+        norm_paths = {pp.strip("./").rstrip("/") for pp in skills_paths}
+        if "skills" not in norm_paths and os.path.isdir(
+            os.path.join(root, plugin_root, "skills")
+        ):
+            errors.append(
+                f"plugin '{pname}' {key} points at {skills_paths} but a "
+                f"default {plugin_root}/skills/ dir still exists "
+                f"(always-scanned; would re-expose skills)"
+            )
+        expected = {s for s in declared_skills if host in skill_hosts.get(s, [])}
         symlink_skills = set()
-        for entry in sorted(os.listdir(skills_dir)):
-            link_path = os.path.join(skills_dir, entry)
-            if not os.path.islink(link_path):
+        for sp in skills_paths:
+            skills_dir = os.path.normpath(os.path.join(root, plugin_root, sp))
+            reldir = os.path.relpath(skills_dir, root)
+            if not os.path.isdir(skills_dir):
+                errors.append(f"plugin '{pname}' {key} skills dir missing: {reldir}")
                 continue
-            target = os.path.realpath(link_path)
-            expected_prefix = os.path.realpath(os.path.join(root, "skills"))
-            if not target.startswith(expected_prefix):
-                errors.append(
-                    f"plugin '{pname}' symlink {pdir}/skills/{entry} -> "
-                    f"{target} escapes skills/"
-                )
-                continue
-            if not os.path.isdir(target):
-                errors.append(
-                    f"plugin '{pname}' symlink {pdir}/skills/{entry} broken: "
-                    f"{target} not a directory"
-                )
-                continue
-            symlink_skills.add(entry)
-        if declared_skills and symlink_skills != declared_skills:
-            missing = declared_skills - symlink_skills
-            extra = symlink_skills - declared_skills
+            for entry in sorted(os.listdir(skills_dir)):
+                link_path = os.path.join(skills_dir, entry)
+                if not os.path.islink(link_path):
+                    continue
+                target = os.path.realpath(link_path)
+                expected_prefix = os.path.realpath(os.path.join(root, "skills"))
+                if not target.startswith(expected_prefix):
+                    errors.append(
+                        f"plugin '{pname}' symlink {reldir}/{entry} -> "
+                        f"{target} escapes skills/"
+                    )
+                    continue
+                if not os.path.isdir(target):
+                    errors.append(
+                        f"plugin '{pname}' symlink {reldir}/{entry} broken: "
+                        f"{target} not a directory"
+                    )
+                    continue
+                symlink_skills.add(entry)
+        if declared_skills and symlink_skills != expected:
+            missing = expected - symlink_skills
+            extra = symlink_skills - expected
             if missing:
                 errors.append(
-                    f"plugin '{pname}' skills/ missing symlinks for: "
+                    f"plugin '{pname}' {key} dir missing symlinks for: "
                     f"{sorted(missing)}"
                 )
             if extra:
                 errors.append(
-                    f"plugin '{pname}' skills/ has unexpected symlinks: "
+                    f"plugin '{pname}' {key} dir has unexpected symlinks: "
                     f"{sorted(extra)}"
                 )
 

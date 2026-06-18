@@ -8,5 +8,5 @@
   "homepage": "https://github.com/voitta-ai/skillz",
   "repository": "https://github.com/voitta-ai/skillz",
   "license": "MIT",
-  "skills": "./skills/"
+  "skills": "./skills-claude/"
 }

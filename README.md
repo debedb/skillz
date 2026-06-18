@@ -158,45 +158,17 @@ skills/                            # canonical skill content
 .codex-plugin/
   marketplace.json                 # Codex marketplace (lists all plugin entries)
 plugins/                           # per-plugin manifests + skill symlinks
-  skillz/                          # full bundle
-    .claude-plugin/plugin.json
-    .codex-plugin/plugin.json
-    skills/
+  skillz/                          # full bundle (per-host skill dirs)
+    .claude-plugin/plugin.json     # "skills": "./skills-claude/"
+    .codex-plugin/plugin.json      # "skills": "./skills-codex/"
+    skills-claude/                 # every claude-hosted skill (excludes continuous-learning, codex-only)
       work-on-pr -> ../../../skills/work-on-pr
-      review-pr-loop -> ../../../skills/review-pr-loop
+      claudeception -> ../../../skills/claudeception
+      ...                          # symlink per claude-hosted catalog skill
+    skills-codex/                  # every codex-hosted skill (excludes claudeception, claude-only)
+      work-on-pr -> ../../../skills/work-on-pr
       continuous-learning -> ../../../skills/continuous-learning
-      cmux-search -> ../../../skills/cmux-search
-      gh-git-heredoc-body-file -> ../../../skills/gh-git-heredoc-body-file
-      claude-code-static-allow-bypasses-hook -> ../../../skills/claude-code-static-allow-bypasses-hook
-      python-ast-static-analyzer-scoping -> ../../../skills/python-ast-static-analyzer-scoping
-      wordpress-com-publish -> ../../../skills/wordpress-com-publish
-      git-add-u-rename-pitfall -> ../../../skills/git-add-u-rename-pitfall
-      git-branch-cleanup-script-races -> ../../../skills/git-branch-cleanup-script-races
-      git-graft-worktree-onto-remote -> ../../../skills/git-graft-worktree-onto-remote
-      multi-phase-feature-pr-worktrees -> ../../../skills/multi-phase-feature-pr-worktrees
-      gist-to-repo-migration -> ../../../skills/gist-to-repo-migration
-      vercel-token-deploy-branch-domains -> ../../../skills/vercel-token-deploy-branch-domains
-      s3-presigned-upload-fails-nonexistent-bucket -> ../../../skills/s3-presigned-upload-fails-nonexistent-bucket
-      neon-vercel-db-identify-and-migrate -> ../../../skills/neon-vercel-db-identify-and-migrate
-      gh-api-f-vs-F-body-file -> ../../../skills/gh-api-f-vs-F-body-file
-      gh-api-jq-no-arg -> ../../../skills/gh-api-jq-no-arg
-      gh-fork-issues-disabled -> ../../../skills/gh-fork-issues-disabled
-      gh-pr-graphql-401-rest-fallback -> ../../../skills/gh-pr-graphql-401-rest-fallback
-      gh-pr-merge-delete-branch-closes-dependent-pr -> ../../../skills/gh-pr-merge-delete-branch-closes-dependent-pr
-      gh-workflow-run-matching -> ../../../skills/gh-workflow-run-matching
-      github-api-list-endpoint-staleness-fresh-pr -> ../../../skills/github-api-list-endpoint-staleness-fresh-pr
-      github-closing-keywords-default-branch-only -> ../../../skills/github-closing-keywords-default-branch-only
-      github-private-repo-readme-image-rendering -> ../../../skills/github-private-repo-readme-image-rendering
-      claude-code-claudemd-symlink-write-refused -> ../../../skills/claude-code-claudemd-symlink-write-refused
-      claude-code-codex-plugin-parity -> ../../../skills/claude-code-codex-plugin-parity
-      claude-code-piebald-lsp-binary-on-path -> ../../../skills/claude-code-piebald-lsp-binary-on-path
-      claude-code-plugin-from-existing-repo -> ../../../skills/claude-code-plugin-from-existing-repo
-      claude-code-plugin-python-bootstrap -> ../../../skills/claude-code-plugin-python-bootstrap
-      claude-code-plugin-update-flow -> ../../../skills/claude-code-plugin-update-flow
-      claude-json-mcp-migration-slice -> ../../../skills/claude-json-mcp-migration-slice
-      macos-bash-3.2-compat -> ../../../skills/macos-bash-3.2-compat
-      emacs-batch-package-verify-pitfalls -> ../../../skills/emacs-batch-package-verify-pitfalls
-      python-symtable-no-col-offset-pairing -> ../../../skills/python-symtable-no-col-offset-pairing
+      ...                          # symlink per codex-hosted catalog skill
   pr-loop/                         # work-on-pr + review-pr-loop only
     .claude-plugin/plugin.json
     .codex-plugin/plugin.json
@@ -413,7 +385,11 @@ plus two Codex-only entries:
 /plugins
 ```
 
-- `skillz` — full bundle
+- `skillz` — full bundle (host-aware: the Claude manifest loads
+  `skills-claude/`, the Codex manifest loads `skills-codex/`, so a
+  claude-only skill like `claudeception` never lands in a Codex
+  install and a codex-only skill like `continuous-learning` never
+  lands in a Claude install)
 - `pr-loop` — work-on-pr + review-pr-loop
 - `work-on-pr` — single skill
 - `review-pr-loop` — single skill
