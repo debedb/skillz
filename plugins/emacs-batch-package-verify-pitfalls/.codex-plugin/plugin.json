@@ -1,0 +1,11 @@
+{
+  "name": "emacs-batch-package-verify-pitfalls",
+  "version": "1.0.0",
+  "description": "Avoid false-negative failures when verifying an Emacs package install with emacs --batch (no ELPA auto-activation on load-path; use-package deferred loading skips :config).",
+  "author": "voitta-ai",
+  "homepage": "https://github.com/voitta-ai/skillz",
+  "repository": "https://github.com/voitta-ai/skillz",
+  "license": "MIT",
+  "keywords": ["claude", "codex", "skills", "emacs", "batch", "package", "verify"],
+  "skills": "./skills/"
+}

@@ -207,6 +207,72 @@
         "claude"
       ],
       "summary": "Continuous-learning meta-skill: extract verified, reusable knowledge. Repeatable procedures become catalog skills via PR; specific recollections go to memory (local or a shared git-backed vault)."
+    },
+    {
+      "name": "claude-code-claudemd-symlink-write-refused",
+      "path": "skills/claude-code-claudemd-symlink-write-refused/SKILL.md",
+      "hosts": ["claude", "codex"],
+      "summary": "Fix Edit/Write 'Refusing to write through symlink' on ~/.claude/CLAUDE.md by resolving the symlink to its real target path."
+    },
+    {
+      "name": "claude-code-codex-plugin-parity",
+      "path": "skills/claude-code-codex-plugin-parity/SKILL.md",
+      "hosts": ["claude", "codex"],
+      "summary": "Port a Claude Code plugin to the Codex CLI (or back); where the two plugin systems match vs diverge, and the shared hooks.json caveats."
+    },
+    {
+      "name": "claude-code-piebald-lsp-binary-on-path",
+      "path": "skills/claude-code-piebald-lsp-binary-on-path/SKILL.md",
+      "hosts": ["claude", "codex"],
+      "summary": "Piebald LSP plugins surface the LSP tool but the language-server binary isn't on PATH; install and expose the server binary."
+    },
+    {
+      "name": "claude-code-plugin-from-existing-repo",
+      "path": "skills/claude-code-plugin-from-existing-repo/SKILL.md",
+      "hosts": ["claude", "codex"],
+      "summary": "Convert a repo that ships Claude Code commands/hooks (manual copy-in) into an installable plugin without breaking manual install."
+    },
+    {
+      "name": "claude-code-plugin-python-bootstrap",
+      "path": "skills/claude-code-plugin-python-bootstrap/SKILL.md",
+      "hosts": ["claude", "codex"],
+      "summary": "Bootstrap Python deps from a Claude Code plugin hook so /plugin install is one-click on systems lacking them (PEP 668-safe)."
+    },
+    {
+      "name": "claude-code-plugin-update-flow",
+      "path": "skills/claude-code-plugin-update-flow/SKILL.md",
+      "hosts": ["claude", "codex"],
+      "summary": "Update an installed Claude Code plugin via /plugin marketplace update + /reload-plugins, not the discovery-picker /plugin update."
+    },
+    {
+      "name": "claude-json-mcp-migration-slice",
+      "path": "skills/claude-json-mcp-migration-slice/SKILL.md",
+      "hosts": ["claude", "codex"],
+      "summary": "Identify the exact ~/.claude.json slice that carries MCP config for cross-machine migration vs session bookkeeping."
+    },
+    {
+      "name": "macos-bash-3.2-compat",
+      "path": "skills/macos-bash-3.2-compat/SKILL.md",
+      "hosts": ["claude", "codex"],
+      "summary": "Fix bash scripts that fail on macOS's stock bash 3.2 (declare -A, mapfile, and other bash-4-only constructs)."
+    },
+    {
+      "name": "emacs-batch-package-verify-pitfalls",
+      "path": "skills/emacs-batch-package-verify-pitfalls/SKILL.md",
+      "hosts": ["claude", "codex"],
+      "summary": "Avoid false-negative failures when verifying an Emacs package install with emacs --batch (no ELPA auto-activation on load-path; use-package deferred loading skips :config)."
+    },
+    {
+      "name": "claude-code-el-macos-home-trust-exit1",
+      "path": "skills/claude-code-el-macos-home-trust-exit1/SKILL.md",
+      "hosts": ["claude", "codex"],
+      "summary": "Fix M-x claude-code (claude-code.el) dying with \"exited abnormally with code 1\" at the HOME trust prompt: pre-trust the dir via ~/.claude.json hasTrustDialogAccepted (or launch in a trusted project); plus desktop-save-mode to restore Emacs buffers after reboot."
+    },
+    {
+      "name": "python-symtable-no-col-offset-pairing",
+      "path": "skills/python-symtable-no-col-offset-pairing/SKILL.md",
+      "hosts": ["claude", "codex"],
+      "summary": "Pair Python symtable scope entries with AST nodes when symtable exposes no col_offset, via (lineno, name) grouping."
     }
   ],
   "collections": [
@@ -257,7 +323,17 @@
         "github-api-list-endpoint-staleness-fresh-pr",
         "github-closing-keywords-default-branch-only",
         "github-private-repo-readme-image-rendering",
-        "claudeception"
+        "claudeception",
+        "claude-code-claudemd-symlink-write-refused",
+        "claude-code-codex-plugin-parity",
+        "claude-code-piebald-lsp-binary-on-path",
+        "claude-code-plugin-from-existing-repo",
+        "claude-code-plugin-python-bootstrap",
+        "claude-code-plugin-update-flow",
+        "claude-json-mcp-migration-slice",
+        "macos-bash-3.2-compat",
+        "emacs-batch-package-verify-pitfalls",
+        "python-symtable-no-col-offset-pairing"
       ],
       "summary": "Full repo bundle: every skill in one plugin."
     },
@@ -541,6 +617,86 @@
       "hosts": ["claude", "codex"],
       "skills": ["github-private-repo-readme-image-rendering"],
       "summary": "Single-skill plugin: github-private-repo-readme-image-rendering."
+    },
+    {
+      "name": "claude-code-claudemd-symlink-write-refused",
+      "claude_manifest": "plugins/claude-code-claudemd-symlink-write-refused/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/claude-code-claudemd-symlink-write-refused/.codex-plugin/plugin.json",
+      "hosts": ["claude", "codex"],
+      "skills": ["claude-code-claudemd-symlink-write-refused"],
+      "summary": "Single-skill plugin: claude-code-claudemd-symlink-write-refused."
+    },
+    {
+      "name": "claude-code-codex-plugin-parity",
+      "claude_manifest": "plugins/claude-code-codex-plugin-parity/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/claude-code-codex-plugin-parity/.codex-plugin/plugin.json",
+      "hosts": ["claude", "codex"],
+      "skills": ["claude-code-codex-plugin-parity"],
+      "summary": "Single-skill plugin: claude-code-codex-plugin-parity."
+    },
+    {
+      "name": "claude-code-piebald-lsp-binary-on-path",
+      "claude_manifest": "plugins/claude-code-piebald-lsp-binary-on-path/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/claude-code-piebald-lsp-binary-on-path/.codex-plugin/plugin.json",
+      "hosts": ["claude", "codex"],
+      "skills": ["claude-code-piebald-lsp-binary-on-path"],
+      "summary": "Single-skill plugin: claude-code-piebald-lsp-binary-on-path."
+    },
+    {
+      "name": "claude-code-plugin-from-existing-repo",
+      "claude_manifest": "plugins/claude-code-plugin-from-existing-repo/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/claude-code-plugin-from-existing-repo/.codex-plugin/plugin.json",
+      "hosts": ["claude", "codex"],
+      "skills": ["claude-code-plugin-from-existing-repo"],
+      "summary": "Single-skill plugin: claude-code-plugin-from-existing-repo."
+    },
+    {
+      "name": "claude-code-plugin-python-bootstrap",
+      "claude_manifest": "plugins/claude-code-plugin-python-bootstrap/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/claude-code-plugin-python-bootstrap/.codex-plugin/plugin.json",
+      "hosts": ["claude", "codex"],
+      "skills": ["claude-code-plugin-python-bootstrap"],
+      "summary": "Single-skill plugin: claude-code-plugin-python-bootstrap."
+    },
+    {
+      "name": "claude-code-plugin-update-flow",
+      "claude_manifest": "plugins/claude-code-plugin-update-flow/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/claude-code-plugin-update-flow/.codex-plugin/plugin.json",
+      "hosts": ["claude", "codex"],
+      "skills": ["claude-code-plugin-update-flow"],
+      "summary": "Single-skill plugin: claude-code-plugin-update-flow."
+    },
+    {
+      "name": "claude-json-mcp-migration-slice",
+      "claude_manifest": "plugins/claude-json-mcp-migration-slice/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/claude-json-mcp-migration-slice/.codex-plugin/plugin.json",
+      "hosts": ["claude", "codex"],
+      "skills": ["claude-json-mcp-migration-slice"],
+      "summary": "Single-skill plugin: claude-json-mcp-migration-slice."
+    },
+    {
+      "name": "macos-bash-3.2-compat",
+      "claude_manifest": "plugins/macos-bash-3.2-compat/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/macos-bash-3.2-compat/.codex-plugin/plugin.json",
+      "hosts": ["claude", "codex"],
+      "skills": ["macos-bash-3.2-compat"],
+      "summary": "Single-skill plugin: macos-bash-3.2-compat."
+    },
+    {
+      "name": "emacs-batch-package-verify-pitfalls",
+      "claude_manifest": "plugins/emacs-batch-package-verify-pitfalls/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/emacs-batch-package-verify-pitfalls/.codex-plugin/plugin.json",
+      "hosts": ["claude", "codex"],
+      "skills": ["emacs-batch-package-verify-pitfalls"],
+      "summary": "Single-skill plugin: emacs-batch-package-verify-pitfalls."
+    },
+    {
+      "name": "python-symtable-no-col-offset-pairing",
+      "claude_manifest": "plugins/python-symtable-no-col-offset-pairing/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/python-symtable-no-col-offset-pairing/.codex-plugin/plugin.json",
+      "hosts": ["claude", "codex"],
+      "skills": ["python-symtable-no-col-offset-pairing"],
+      "summary": "Single-skill plugin: python-symtable-no-col-offset-pairing."
     },
     {
       "name": "continuous-learning",

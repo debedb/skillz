@@ -1,0 +1,11 @@
+{
+  "name": "python-symtable-no-col-offset-pairing",
+  "version": "1.0.0",
+  "description": "Pair Python symtable scope entries with AST nodes when symtable exposes no col_offset, via (lineno, name) grouping.",
+  "author": "voitta-ai",
+  "homepage": "https://github.com/voitta-ai/skillz",
+  "repository": "https://github.com/voitta-ai/skillz",
+  "license": "MIT",
+  "keywords": ["claude", "codex", "skills", "python", "symtable", "no", "col"],
+  "skills": "./skills/"
+}

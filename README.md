@@ -57,6 +57,16 @@ environments and older Codex versions.
 | [github-closing-keywords-default-branch-only](./skills/github-closing-keywords-default-branch-only/SKILL.md) | skill | Claude, Codex | `Closes #N` only auto-closes when the PR merges into the default branch |
 | [github-private-repo-readme-image-rendering](./skills/github-private-repo-readme-image-rendering/SKILL.md) | skill | Claude, Codex | Private-repo README images need authenticated/relative paths to render |
 | [claudeception](./skills/claudeception/SKILL.md) | skill | Claude | Continuous-learning meta-skill: procedures become catalog skills via PR; specifics go to memory (local or shared vault) |
+| [claude-code-claudemd-symlink-write-refused](./skills/claude-code-claudemd-symlink-write-refused/SKILL.md) | skill | Claude, Codex | Fix Edit/Write "Refusing to write through symlink" on `~/.claude/CLAUDE.md` by resolving to the real target |
+| [claude-code-codex-plugin-parity](./skills/claude-code-codex-plugin-parity/SKILL.md) | skill | Claude, Codex | Port a Claude Code plugin to the Codex CLI (or back); where the two systems match vs diverge |
+| [claude-code-piebald-lsp-binary-on-path](./skills/claude-code-piebald-lsp-binary-on-path/SKILL.md) | skill | Claude, Codex | Piebald LSP plugins surface the LSP tool but the language-server binary isn't on PATH |
+| [claude-code-plugin-from-existing-repo](./skills/claude-code-plugin-from-existing-repo/SKILL.md) | skill | Claude, Codex | Convert a repo that ships CC commands/hooks (manual copy-in) into an installable plugin |
+| [claude-code-plugin-python-bootstrap](./skills/claude-code-plugin-python-bootstrap/SKILL.md) | skill | Claude, Codex | Bootstrap Python deps from a CC plugin hook so `/plugin install` is one-click (PEP 668-safe) |
+| [claude-code-plugin-update-flow](./skills/claude-code-plugin-update-flow/SKILL.md) | skill | Claude, Codex | Update a CC plugin via `/plugin marketplace update` + `/reload-plugins`, not the picker `/plugin update` |
+| [claude-json-mcp-migration-slice](./skills/claude-json-mcp-migration-slice/SKILL.md) | skill | Claude, Codex | The exact `~/.claude.json` slice that carries MCP config for migration vs session bookkeeping |
+| [macos-bash-3.2-compat](./skills/macos-bash-3.2-compat/SKILL.md) | skill | Claude, Codex | Fix bash scripts that fail on macOS's stock bash 3.2 (`declare -A`, `mapfile`, other bash-4-only constructs) |
+| [emacs-batch-package-verify-pitfalls](./skills/emacs-batch-package-verify-pitfalls/SKILL.md) | skill | Claude, Codex | Avoid false negatives when verifying an Emacs package with `emacs --batch` (no ELPA auto-activation; `use-package` defers `:config`) |
+| [python-symtable-no-col-offset-pairing](./skills/python-symtable-no-col-offset-pairing/SKILL.md) | skill | Claude, Codex | Pair Python `symtable` scopes with AST nodes when symtable has no `col_offset`, via (lineno, name) grouping |
 | [`skillz` plugin](./plugins/skillz/) | plugin | Claude, Codex | Full repo bundle: every skill |
 | [`pr-loop` plugin](./plugins/pr-loop/) | plugin | Claude, Codex | Paired author + reviewer PR-loop skills |
 | [`work-on-pr` plugin](./plugins/work-on-pr/) | plugin | Claude, Codex | Single-skill plugin: work-on-pr |
@@ -83,6 +93,16 @@ environments and older Codex versions.
 | [`github-api-list-endpoint-staleness-fresh-pr` plugin](./plugins/github-api-list-endpoint-staleness-fresh-pr/) | plugin | Claude, Codex | Single-skill plugin: github-api-list-endpoint-staleness-fresh-pr |
 | [`github-closing-keywords-default-branch-only` plugin](./plugins/github-closing-keywords-default-branch-only/) | plugin | Claude, Codex | Single-skill plugin: github-closing-keywords-default-branch-only |
 | [`github-private-repo-readme-image-rendering` plugin](./plugins/github-private-repo-readme-image-rendering/) | plugin | Claude, Codex | Single-skill plugin: github-private-repo-readme-image-rendering |
+| [`claude-code-claudemd-symlink-write-refused` plugin](./plugins/claude-code-claudemd-symlink-write-refused/) | plugin | Claude, Codex | Single-skill plugin: claude-code-claudemd-symlink-write-refused |
+| [`claude-code-codex-plugin-parity` plugin](./plugins/claude-code-codex-plugin-parity/) | plugin | Claude, Codex | Single-skill plugin: claude-code-codex-plugin-parity |
+| [`claude-code-piebald-lsp-binary-on-path` plugin](./plugins/claude-code-piebald-lsp-binary-on-path/) | plugin | Claude, Codex | Single-skill plugin: claude-code-piebald-lsp-binary-on-path |
+| [`claude-code-plugin-from-existing-repo` plugin](./plugins/claude-code-plugin-from-existing-repo/) | plugin | Claude, Codex | Single-skill plugin: claude-code-plugin-from-existing-repo |
+| [`claude-code-plugin-python-bootstrap` plugin](./plugins/claude-code-plugin-python-bootstrap/) | plugin | Claude, Codex | Single-skill plugin: claude-code-plugin-python-bootstrap |
+| [`claude-code-plugin-update-flow` plugin](./plugins/claude-code-plugin-update-flow/) | plugin | Claude, Codex | Single-skill plugin: claude-code-plugin-update-flow |
+| [`claude-json-mcp-migration-slice` plugin](./plugins/claude-json-mcp-migration-slice/) | plugin | Claude, Codex | Single-skill plugin: claude-json-mcp-migration-slice |
+| [`macos-bash-3.2-compat` plugin](./plugins/macos-bash-3.2-compat/) | plugin | Claude, Codex | Single-skill plugin: macos-bash-3.2-compat |
+| [`emacs-batch-package-verify-pitfalls` plugin](./plugins/emacs-batch-package-verify-pitfalls/) | plugin | Claude, Codex | Single-skill plugin: emacs-batch-package-verify-pitfalls |
+| [`python-symtable-no-col-offset-pairing` plugin](./plugins/python-symtable-no-col-offset-pairing/) | plugin | Claude, Codex | Single-skill plugin: python-symtable-no-col-offset-pairing |
 | [`continuous-learning` plugin](./plugins/continuous-learning/) | plugin | Codex | Single-skill plugin (no hooks) |
 | [`codex-continuous-learning` plugin](./plugins/codex-continuous-learning/) | plugin | Codex | continuous-learning skill plus UserPromptSubmit + Stop hooks |
 | [pr-loop](./collections/pr-loop.json) | collection (legacy) | Claude, Codex | `install.sh` selector. Prefer the `pr-loop` plugin entry. |
@@ -123,6 +143,16 @@ skills/                            # canonical skill content
   github-api-list-endpoint-staleness-fresh-pr/SKILL.md
   github-closing-keywords-default-branch-only/SKILL.md
   github-private-repo-readme-image-rendering/SKILL.md
+  claude-code-claudemd-symlink-write-refused/SKILL.md
+  claude-code-codex-plugin-parity/SKILL.md
+  claude-code-piebald-lsp-binary-on-path/SKILL.md
+  claude-code-plugin-from-existing-repo/SKILL.md
+  claude-code-plugin-python-bootstrap/SKILL.md
+  claude-code-plugin-update-flow/SKILL.md
+  claude-json-mcp-migration-slice/SKILL.md
+  macos-bash-3.2-compat/SKILL.md
+  emacs-batch-package-verify-pitfalls/SKILL.md
+  python-symtable-no-col-offset-pairing/SKILL.md
 .claude-plugin/
   marketplace.json                 # Claude Code marketplace (lists all plugin entries)
 .codex-plugin/
@@ -157,6 +187,16 @@ plugins/                           # per-plugin manifests + skill symlinks
       github-api-list-endpoint-staleness-fresh-pr -> ../../../skills/github-api-list-endpoint-staleness-fresh-pr
       github-closing-keywords-default-branch-only -> ../../../skills/github-closing-keywords-default-branch-only
       github-private-repo-readme-image-rendering -> ../../../skills/github-private-repo-readme-image-rendering
+      claude-code-claudemd-symlink-write-refused -> ../../../skills/claude-code-claudemd-symlink-write-refused
+      claude-code-codex-plugin-parity -> ../../../skills/claude-code-codex-plugin-parity
+      claude-code-piebald-lsp-binary-on-path -> ../../../skills/claude-code-piebald-lsp-binary-on-path
+      claude-code-plugin-from-existing-repo -> ../../../skills/claude-code-plugin-from-existing-repo
+      claude-code-plugin-python-bootstrap -> ../../../skills/claude-code-plugin-python-bootstrap
+      claude-code-plugin-update-flow -> ../../../skills/claude-code-plugin-update-flow
+      claude-json-mcp-migration-slice -> ../../../skills/claude-json-mcp-migration-slice
+      macos-bash-3.2-compat -> ../../../skills/macos-bash-3.2-compat
+      emacs-batch-package-verify-pitfalls -> ../../../skills/emacs-batch-package-verify-pitfalls
+      python-symtable-no-col-offset-pairing -> ../../../skills/python-symtable-no-col-offset-pairing
   pr-loop/                         # work-on-pr + review-pr-loop only
     .claude-plugin/plugin.json
     .codex-plugin/plugin.json
@@ -259,6 +299,46 @@ plugins/                           # per-plugin manifests + skill symlinks
     .claude-plugin/plugin.json
     .codex-plugin/plugin.json
     skills/github-private-repo-readme-image-rendering -> ../../../skills/github-private-repo-readme-image-rendering
+  claude-code-claudemd-symlink-write-refused/ # single-skill plugin
+    .claude-plugin/plugin.json
+    .codex-plugin/plugin.json
+    skills/claude-code-claudemd-symlink-write-refused -> ../../../skills/claude-code-claudemd-symlink-write-refused
+  claude-code-codex-plugin-parity/ # single-skill plugin
+    .claude-plugin/plugin.json
+    .codex-plugin/plugin.json
+    skills/claude-code-codex-plugin-parity -> ../../../skills/claude-code-codex-plugin-parity
+  claude-code-piebald-lsp-binary-on-path/ # single-skill plugin
+    .claude-plugin/plugin.json
+    .codex-plugin/plugin.json
+    skills/claude-code-piebald-lsp-binary-on-path -> ../../../skills/claude-code-piebald-lsp-binary-on-path
+  claude-code-plugin-from-existing-repo/ # single-skill plugin
+    .claude-plugin/plugin.json
+    .codex-plugin/plugin.json
+    skills/claude-code-plugin-from-existing-repo -> ../../../skills/claude-code-plugin-from-existing-repo
+  claude-code-plugin-python-bootstrap/ # single-skill plugin
+    .claude-plugin/plugin.json
+    .codex-plugin/plugin.json
+    skills/claude-code-plugin-python-bootstrap -> ../../../skills/claude-code-plugin-python-bootstrap
+  claude-code-plugin-update-flow/ # single-skill plugin
+    .claude-plugin/plugin.json
+    .codex-plugin/plugin.json
+    skills/claude-code-plugin-update-flow -> ../../../skills/claude-code-plugin-update-flow
+  claude-json-mcp-migration-slice/ # single-skill plugin
+    .claude-plugin/plugin.json
+    .codex-plugin/plugin.json
+    skills/claude-json-mcp-migration-slice -> ../../../skills/claude-json-mcp-migration-slice
+  macos-bash-3.2-compat/ # single-skill plugin
+    .claude-plugin/plugin.json
+    .codex-plugin/plugin.json
+    skills/macos-bash-3.2-compat -> ../../../skills/macos-bash-3.2-compat
+  emacs-batch-package-verify-pitfalls/ # single-skill plugin
+    .claude-plugin/plugin.json
+    .codex-plugin/plugin.json
+    skills/emacs-batch-package-verify-pitfalls -> ../../../skills/emacs-batch-package-verify-pitfalls
+  python-symtable-no-col-offset-pairing/ # single-skill plugin
+    .claude-plugin/plugin.json
+    .codex-plugin/plugin.json
+    skills/python-symtable-no-col-offset-pairing -> ../../../skills/python-symtable-no-col-offset-pairing
   continuous-learning/             # Codex-only single-skill plugin (no hooks)
     .codex-plugin/plugin.json
     skills/continuous-learning -> ../../../skills/continuous-learning
