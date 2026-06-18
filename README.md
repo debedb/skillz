@@ -35,6 +35,7 @@ environments and older Codex versions.
 | [review-pr-loop](./skills/review-pr-loop/SKILL.md) | skill | Claude, Codex | Reviewer-side PR iteration loop |
 | [continuous-learning](./skills/continuous-learning/SKILL.md) | skill | Codex | End-of-task retrospective: extract reusable, verified learnings as Codex skills |
 | [cmux-search](./skills/cmux-search/SKILL.md) | skill | Claude, Codex | Search all open cmux workspaces/tabs/panes - live scrollback + agent transcripts |
+| [cmux-agent-tabs](./skills/cmux-agent-tabs/SKILL.md) | skill | Claude, Codex | Make AI agents show as watchable cmux tabs; Claude needs the `claude-teams` wrapper, Codex via `codex-teams`/hooks |
 | [gh-git-heredoc-body-file](./skills/gh-git-heredoc-body-file/SKILL.md) | skill | Claude, Codex | Body-file pattern: stop gh/git mangling multi-line bodies (backticks, code fences, `$(...)`) |
 | [claude-code-static-allow-bypasses-hook](./skills/claude-code-static-allow-bypasses-hook/SKILL.md) | skill | Claude, Codex | Why a Claude Code PreToolUse hook never fires for some commands (static allow short-circuits it) |
 | [python-ast-static-analyzer-scoping](./skills/python-ast-static-analyzer-scoping/SKILL.md) | skill | Claude, Codex | Build a Python `ast` analyzer: import-alias resolution + load-time vs deferred scoping |
@@ -71,6 +72,7 @@ environments and older Codex versions.
 | [`work-on-pr` plugin](./plugins/work-on-pr/) | plugin | Claude, Codex | Single-skill plugin: work-on-pr |
 | [`review-pr-loop` plugin](./plugins/review-pr-loop/) | plugin | Claude, Codex | Single-skill plugin: review-pr-loop |
 | [`cmux-search` plugin](./plugins/cmux-search/) | plugin | Claude, Codex | Single-skill plugin: search all open cmux panes |
+| [`cmux-agent-tabs` plugin](./plugins/cmux-agent-tabs/) | plugin | Claude, Codex | Single-skill plugin: cmux-agent-tabs |
 | [`gh-git-heredoc-body-file` plugin](./plugins/gh-git-heredoc-body-file/) | plugin | Claude, Codex | Single-skill plugin: gh-git-heredoc-body-file |
 | [`claude-code-static-allow-bypasses-hook` plugin](./plugins/claude-code-static-allow-bypasses-hook/) | plugin | Claude, Codex | Single-skill plugin: claude-code-static-allow-bypasses-hook |
 | [`python-ast-static-analyzer-scoping` plugin](./plugins/python-ast-static-analyzer-scoping/) | plugin | Claude, Codex | Single-skill plugin: python-ast-static-analyzer-scoping |

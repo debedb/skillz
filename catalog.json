@@ -39,6 +39,15 @@
       "summary": "Search all open cmux workspaces/tabs/panes - live scrollback + agent transcripts."
     },
     {
+      "name": "cmux-agent-tabs",
+      "path": "skills/cmux-agent-tabs/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Make AI agents show as watchable cmux tabs; Claude needs the claude-teams wrapper, Codex tabs via codex-teams/hooks."
+    },
+    {
       "name": "gh-git-heredoc-body-file",
       "path": "skills/gh-git-heredoc-body-file/SKILL.md",
       "hosts": [
@@ -294,6 +303,7 @@
         "review-pr-loop",
         "continuous-learning",
         "cmux-search",
+        "cmux-agent-tabs",
         "gh-git-heredoc-body-file",
         "claude-code-static-allow-bypasses-hook",
         "python-ast-static-analyzer-scoping",
@@ -380,6 +390,19 @@
         "cmux-search"
       ],
       "summary": "Single-skill plugin: cmux-search."
+    },
+    {
+      "name": "cmux-agent-tabs",
+      "claude_manifest": "plugins/cmux-agent-tabs/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/cmux-agent-tabs/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "cmux-agent-tabs"
+      ],
+      "summary": "Single-skill plugin: cmux-agent-tabs."
     },
     {
       "name": "gh-git-heredoc-body-file",
