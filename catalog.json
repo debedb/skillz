@@ -255,6 +255,12 @@
       "summary": "Avoid false-negative failures when verifying an Emacs package install with emacs --batch (no ELPA auto-activation on load-path; use-package deferred loading skips :config)."
     },
     {
+      "name": "claude-code-el-macos-home-trust-exit1",
+      "path": "skills/claude-code-el-macos-home-trust-exit1/SKILL.md",
+      "hosts": ["claude", "codex"],
+      "summary": "Fix M-x claude-code (claude-code.el) dying with \"exited abnormally with code 1\" at the HOME trust prompt: pre-trust the dir via ~/.claude.json hasTrustDialogAccepted (or launch in a trusted project); plus desktop-save-mode to restore Emacs buffers after reboot."
+    },
+    {
       "name": "python-symtable-no-col-offset-pairing",
       "path": "skills/python-symtable-no-col-offset-pairing/SKILL.md",
       "hosts": ["claude", "codex"],
