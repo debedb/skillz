@@ -1,0 +1,12 @@
+{
+  "name": "cmux-agent-tabs",
+  "description": "Make AI agents show as watchable cmux tabs: Claude needs the cmux claude-teams wrapper (tmux shim); Codex tabs via codex-teams/hooks.",
+  "version": "1.0.0",
+  "author": {
+    "name": "voitta-ai"
+  },
+  "homepage": "https://github.com/voitta-ai/skillz",
+  "repository": "https://github.com/voitta-ai/skillz",
+  "license": "MIT",
+  "skills": "./skills/"
+}
