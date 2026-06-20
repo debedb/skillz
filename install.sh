@@ -187,7 +187,8 @@ else:
         add(n)
 
 for s in selected:
-    print(f'{s["name"]}\t{s["path"]}')
+    hosts = ",".join(s.get("hosts", []))
+    print(f'{s["name"]}\t{s["path"]}\t{hosts}')
 PY
 }
 
@@ -221,9 +222,22 @@ fetch_to() {
 }
 
 for root in "${DEST_ROOTS[@]}"; do
+  # Label each destination root with the host it serves so we can skip skills
+  # whose declared `hosts` do not include it (e.g. a claude-only skill must not
+  # land in the codex root). An explicit SKILLS_DEST_ROOT has no known host and
+  # installs everything.
+  root_host=""
+  [[ "$root" == "$DEFAULT_CODEX_ROOT" ]] && root_host="codex"
+  [[ "$root" == "$DEFAULT_CLAUDE_ROOT" ]] && root_host="claude"
   for line in "${SKILL_LINES[@]}"; do
     name="${line%%$'\t'*}"
-    src_path="${line#*$'\t'}"
+    rest="${line#*$'\t'}"
+    src_path="${rest%%$'\t'*}"
+    hosts="${rest#*$'\t'}"
+    if [[ -n "$root_host" && -n "$hosts" && ",$hosts," != *",$root_host,"* ]]; then
+      echo "skip: $name (hosts=$hosts) not for $root_host root"
+      continue
+    fi
     dest_dir="$root/$name"
     dest_file="$dest_dir/SKILL.md"
     if (( DRY_RUN )); then

@@ -7,5 +7,5 @@
   "repository": "https://github.com/voitta-ai/skillz",
   "license": "MIT",
   "keywords": ["claude", "codex", "skills", "bundle"],
-  "skills": "./skills/"
+  "skills": "./skills-codex/"
 }
