@@ -3,8 +3,8 @@ name: review-pr-loop
 description: |
   Iteratively review a GitHub pull request across multiple rounds. Each round, read the linked issue(s), prior review comments, issue comments, and inline threads before reviewing only the new diff or the author's latest response. If no author response exists yet, wait and re-check instead of exiting. Leave structured feedback (REQUEST_CHANGES, COMMENT, or APPROVE) and continue until you approve, the PR is merged or closed, or the user stops the loop. Use when you are the reviewer on a non-trivial PR and want the agent to own the back-and-forth review cycle rather than doing a one-shot review.
 author: Claude Code
-version: 1.4.1
-date: 2026-06-11
+version: 1.5.0
+date: 2026-06-22
 source: https://github.com/voitta-ai/skillz
 source_file: skills/review-pr-loop/SKILL.md
 ---
@@ -72,15 +72,20 @@ active:
   primitive) and survives turn end.
 - `watch-mode=in-process-only`: no durable scheduler, but this
   invocation can stay alive across the wait, so it sleeps and
-  re-polls within the same turn.
+  re-polls within the same turn. **Codex (CLI/exec) is in this
+  class:** it executes shell commands, and a blocking shell
+  `sleep <interval>` holds the session open between polls, so the
+  loop keeps polling in-process — it does not need to suspend.
 - `watch-mode=suspend-resumable`: the host has no durable scheduler
-  AND cannot keep the invocation alive past the current turn — the
-  turn ends when the agent yields, so an in-process `sleep` cannot
-  carry the loop to the next poll. The canonical example is the
-  Codex App session. This is the one case where the loop physically
-  cannot poll itself; handle it with the resumable-suspend protocol
-  in "Hosts that cannot self-schedule" below, never with a silent
-  stop.
+  AND cannot keep the invocation alive even with a blocking shell
+  `sleep` — the host kills long-running commands, or ends the turn
+  while a command is still running, so an in-process `sleep` cannot
+  carry the loop to the next poll. This is the only case where the
+  loop physically cannot poll itself; handle it with the
+  resumable-suspend protocol in "Hosts that cannot self-schedule"
+  below, never with a silent stop. Do not assume a host is in this
+  class until a blocking `sleep` has actually been killed — codex is
+  not.
 
 If the active mode is `watch-mode=in-process-only`, a final response
 stops the watcher. Do not choose to end the turn after a small number
@@ -250,7 +255,8 @@ iteration:
       in-process, but only if the invocation is staying alive. An
       in-process sleep does not survive a `final` handoff.
     - If the host has no durable scheduler AND cannot keep this
-      invocation alive past the current turn (for example Codex App),
+      invocation alive even with a blocking `sleep` (the host kills the
+      sleep or ends the turn while it runs — codex does neither),
       do not claim polling will continue and do not silently stop.
       Follow the resumable-suspend protocol in "Hosts that cannot
       self-schedule" below: rule out a host-native trigger first, then
@@ -280,11 +286,12 @@ iteration:
   definitely staying alive to sleep and re-poll. If neither is true,
   branch on *why*, do not gate on whether the host is "forcing
   termination":
-  - a host that CAN stay alive in-process does another sleep/poll
+  - a host that CAN stay alive in-process (codex included — a blocking
+    shell `sleep` holds the session open) does another sleep/poll
     cycle instead of reporting completion;
-  - a host that can neither schedule a wake-up nor stay alive (for
-    example Codex App, which ends the turn on yield without a hard
-    kill) takes the resumable-suspend path in "Hosts that cannot
+  - a host that can neither schedule a wake-up nor stay alive even with
+    a blocking `sleep` (the sleep is killed or the turn ends while it
+    runs) takes the resumable-suspend path in "Hosts that cannot
     self-schedule" and hands back `watch suspended:host cannot
     self-schedule; resume with /review-pr-loop <N>` — never the
     impossible in-process loop.
@@ -294,21 +301,28 @@ iteration:
 - Stop conditions still take precedence over the cadence — never
   reschedule after approve / merge / close / user-stop.
 
-### Hosts that cannot self-schedule (e.g. Codex App)
+### Hosts that cannot self-schedule
 
 Some hosts have neither a durable wake-up scheduler nor the ability to
-keep one invocation alive across the wait. The Codex App session is the
-canonical example: there is no `ScheduleWakeup`, and the turn ends when
-the agent yields, so an in-process `sleep` does not carry the loop to
-the next poll. On such a host the loop cannot poll itself, and the
-earlier instruction to "stay alive in-process" is physically
-impossible. Do not resolve that contradiction by silently stopping —
-that is the failure this skill's originating issue reported (a Codex
-reviewer polled a few rounds, then declared "no durable wake-up
-scheduler, so the in-process watcher is stopped here" and dropped every
-later author update).
+keep one invocation alive across the wait — not even with a blocking
+shell `sleep`, because the host kills long-running commands or ends the
+turn while a command is still running. On such a host the loop cannot
+poll itself. Do not resolve that by silently stopping.
 
-Handle it with the **resumable-suspend protocol**:
+**Codex is not such a host.** Codex executes shell commands, and a
+blocking `sleep <interval>` holds the session open across polls, so
+codex is `watch-mode=in-process-only`: keep polling in-process, never
+suspend. The skill's originating issue reported a Codex reviewer that
+"polled a few rounds, then declared 'no durable wake-up scheduler, so
+the in-process watcher is stopped here' and dropped every later author
+update" — note it had already polled several rounds in one session,
+which proves codex stays alive in-process. The fix for that failure is
+to keep sleeping and re-polling, not to suspend. Reach the
+resumable-suspend protocol below only on a host where a blocking
+`sleep` has actually been killed.
+
+When a host genuinely cannot self-schedule, handle it with the
+**resumable-suspend protocol**:
 
 1. **First, rule out a host-native durable trigger.** Before
    concluding the host cannot self-schedule, check for any scheduling
@@ -372,9 +386,9 @@ right token for why:
   said `LGTM`, the PR merged or closed, or the user stopped the loop.
 - `action=watch suspended:host cannot self-schedule; resume with
   /review-pr-loop <N>` — the host has no durable scheduler and cannot
-  keep the invocation alive (for example Codex App). This is a
-  resumable host limitation, not a terminal stop. See "Hosts that
-  cannot self-schedule".
+  keep the invocation alive even with a blocking `sleep` (not codex —
+  see below). This is a resumable host limitation, not a terminal
+  stop. See "Hosts that cannot self-schedule".
 
 Never emit either token on an idle pass while the invocation is still
 alive and able to re-poll. Lack of a durable wake-up is not itself a
@@ -389,13 +403,15 @@ Before any terminal/final handoff, force this checklist:
 1. Did a real stop condition fire (approve / `LGTM` / merge / close /
    user stop)?
 2. Was a durable wake-up actually scheduled?
-3. Can this invocation stay alive in-process to sleep and re-poll? If
+3. Can this invocation stay alive in-process to sleep and re-poll
+   (codex can — a blocking shell `sleep` holds the session open)? If
    so, do that instead of ending.
 4. Is the host one that can neither schedule a wake-up nor stay alive
-   (for example Codex App)? Then suspend with a resume handle per
-   "Hosts that cannot self-schedule" — rule out a host-native trigger
-   first, then hand back `watch suspended:host cannot self-schedule;
-   resume with /review-pr-loop <N>`. Never silently stop.
+   even with a blocking `sleep` (not codex)? Then suspend with a resume
+   handle per "Hosts that cannot self-schedule" — rule out a
+   host-native trigger first, then hand back `watch suspended:host
+   cannot self-schedule; resume with /review-pr-loop <N>`. Never
+   silently stop.
 5. If none of 1, 2, or 4 applies, do not end the invocation; keep
    polling in-process.
 
@@ -540,11 +556,12 @@ After invoking, expect (per iteration):
   Found F blocking, G non-blocking. Leaving <REQUEST_CHANGES /
   COMMENT / APPROVE>." OR "No author activity since <timestamp>;
   waiting <delay>s before the next check." If no durable wake-up
-  exists but the invocation can stay alive, it polls in-process. On a
-  host that can neither schedule nor stay alive (for example Codex
-  App), expect a `watch suspended:host cannot self-schedule; resume
-  with /review-pr-loop <N>` handoff instead — a resumable host
-  limitation, never a silent stop.
+  exists but the invocation can stay alive, it polls in-process (codex
+  is here — a blocking `sleep` holds the session open). Only on a host
+  that can neither schedule nor stay alive even with a blocking `sleep`
+  expect a `watch suspended:host cannot self-schedule; resume with
+  /review-pr-loop <N>` handoff instead — a resumable host limitation,
+  never a silent stop.
 - One `gh pr review` call.
 - Either a `ScheduleWakeup`, an in-process sleep / poll loop, or
   termination.
@@ -564,10 +581,11 @@ Anti-pattern:
   declaring "no durable wake-up scheduler, so the watcher is stopped"
   (the exact failure this skill's originating issue reported). That
   drops later author updates on the floor. If no durable wake-up
-  exists, the loop either stays alive in-process (hosts that can) or
-  hands back a resumable suspend with an exact `resume with
-  /review-pr-loop <N>` command (hosts that cannot, e.g. Codex App) —
-  never a silent stop.
+  exists, the loop stays alive in-process — codex included, via a
+  blocking shell `sleep` between polls. Hand back a resumable suspend
+  only on a host where a blocking `sleep` is actually killed, with an
+  exact `resume with /review-pr-loop <N>` command — never a silent
+  stop, and never a suspend on codex.
 
 ## Example
 
@@ -643,10 +661,12 @@ Iteration 7:
   per-thread inline comments and for fetching review bodies by ID.
 - **Scheduler fallback**: if `ScheduleWakeup` is unavailable in the
   host agent, keep the current turn alive with `sleep` + re-poll
-  instead of returning early on an idle pass. `watch-mode=in-process-only`
-  only remains valid while that invocation stays alive; a `final`
-  handoff ends it. If the host can do neither — no durable scheduler
-  and the turn ends on yield (Codex App) — use the resumable-suspend
+  instead of returning early on an idle pass. On codex this is the
+  normal mode: a blocking shell `sleep <interval>` holds the session
+  open between polls. `watch-mode=in-process-only` only remains valid
+  while that invocation stays alive; a `final` handoff ends it. Only if
+  the host can do neither — no durable scheduler and a blocking `sleep`
+  is killed or the turn ends while it runs — use the resumable-suspend
   protocol in "Hosts that cannot self-schedule": rule out a host-native
   trigger, then hand back an exact `resume with /review-pr-loop <N>`
   command rather than dropping the loop.
