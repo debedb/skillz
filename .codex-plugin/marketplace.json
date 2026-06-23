@@ -197,6 +197,11 @@
       "description": "Playwright MCP: attach a file to a hidden <input type=file> (unhide+tag via evaluate, upload by id, verify via CDN/S3 URL)."
     },
     {
+      "name": "slack-xoxc-session-client",
+      "source": "./plugins/slack-xoxc-session-client/",
+      "description": "Drive the Slack web API as yourself via a live browser session (xoxc token + httpOnly d cookie) when you cannot install a Slack app. Ships a runnable Python client."
+    },
+    {
       "name": "continuous-learning",
       "source": "./plugins/continuous-learning/",
       "description": "Codex-only: continuous-learning skill (no hooks). For the hook-driven bundle, install codex-continuous-learning."

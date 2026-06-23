@@ -200,6 +200,11 @@
       "name": "agent-team-orchestration",
       "source": "./plugins/agent-team-orchestration/",
       "description": "Run a team of agents over a repo's open issues: architect plans the parallel set, per-issue squads (dev + adversarial reviewer + SDET + productivity engineer), each a watchable cmux tab."
+    },
+    {
+      "name": "slack-xoxc-session-client",
+      "source": "./plugins/slack-xoxc-session-client/",
+      "description": "Drive the Slack web API as yourself via a live browser session (xoxc token + httpOnly d cookie) when you cannot install a Slack app. Ships a runnable Python client."
     }
   ]
 }
