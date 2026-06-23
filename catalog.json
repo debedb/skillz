@@ -288,6 +288,12 @@
       "path": "skills/playwright-mcp-upload-hidden-file-input/SKILL.md",
       "hosts": ["claude", "codex"],
       "summary": "Upload a file via Playwright MCP when the input is hidden: unhide+tag via evaluate, upload by id, verify via CDN/S3 URL."
+    },
+    {
+      "name": "agent-team-orchestration",
+      "path": "skills/agent-team-orchestration/SKILL.md",
+      "hosts": ["claude", "codex"],
+      "summary": "Run a team of agents over a repo's open issues: architect plans the parallel set, per-issue squads (dev + adversarial reviewer + SDET + productivity engineer), each a watchable cmux tab."
     }
   ],
   "collections": [
@@ -350,7 +356,8 @@
         "macos-bash-3.2-compat",
         "emacs-batch-package-verify-pitfalls",
         "python-symtable-no-col-offset-pairing",
-        "playwright-mcp-upload-hidden-file-input"
+        "playwright-mcp-upload-hidden-file-input",
+        "agent-team-orchestration"
       ],
       "summary": "Full repo bundle: every skill in one plugin."
     },
@@ -757,6 +764,14 @@
         "continuous-learning"
       ],
       "summary": "Codex-only plugin bundle: continuous-learning skill plus UserPromptSubmit + Stop hooks that drive an end-of-task retrospective."
+    },
+    {
+      "name": "agent-team-orchestration",
+      "claude_manifest": "plugins/agent-team-orchestration/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/agent-team-orchestration/.codex-plugin/plugin.json",
+      "hosts": ["claude", "codex"],
+      "skills": ["agent-team-orchestration"],
+      "summary": "Single-skill plugin: agent-team-orchestration."
     }
   ],
   "defaults": {

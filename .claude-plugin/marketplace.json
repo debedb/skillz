@@ -195,6 +195,11 @@
       "name": "playwright-mcp-upload-hidden-file-input",
       "source": "./plugins/playwright-mcp-upload-hidden-file-input/",
       "description": "Playwright MCP: attach a file to a hidden <input type=file> (unhide+tag via evaluate, upload by id, verify via CDN/S3 URL)."
+    },
+    {
+      "name": "agent-team-orchestration",
+      "source": "./plugins/agent-team-orchestration/",
+      "description": "Run a team of agents over a repo's open issues: architect plans the parallel set, per-issue squads (dev + adversarial reviewer + SDET + productivity engineer), each a watchable cmux tab."
     }
   ]
 }

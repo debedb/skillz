@@ -1,0 +1,11 @@
+{
+  "name": "agent-team-orchestration",
+  "version": "1.0.0",
+  "description": "Run a team of agents over a repo's open issues: an architect plans the parallel set, then per-issue squads (dev + adversarial reviewer + SDET + productivity engineer), each a watchable cmux tab.",
+  "author": "voitta-ai",
+  "homepage": "https://github.com/voitta-ai/skillz",
+  "repository": "https://github.com/voitta-ai/skillz",
+  "license": "MIT",
+  "keywords": ["claude", "codex", "skills", "agent-teams", "orchestration", "cmux", "github-issues"],
+  "skills": "./skills/"
+}
