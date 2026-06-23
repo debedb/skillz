@@ -68,6 +68,7 @@ environments and older Codex versions.
 | [macos-bash-3.2-compat](./skills/macos-bash-3.2-compat/SKILL.md) | skill | Claude, Codex | Fix bash scripts that fail on macOS's stock bash 3.2 (`declare -A`, `mapfile`, other bash-4-only constructs) |
 | [emacs-batch-package-verify-pitfalls](./skills/emacs-batch-package-verify-pitfalls/SKILL.md) | skill | Claude, Codex | Avoid false negatives when verifying an Emacs package with `emacs --batch` (no ELPA auto-activation; `use-package` defers `:config`) |
 | [python-symtable-no-col-offset-pairing](./skills/python-symtable-no-col-offset-pairing/SKILL.md) | skill | Claude, Codex | Pair Python `symtable` scopes with AST nodes when symtable has no `col_offset`, via (lineno, name) grouping |
+| [playwright-mcp-upload-hidden-file-input](./skills/playwright-mcp-upload-hidden-file-input/SKILL.md) | skill | Claude, Codex | Upload to a hidden `<input type=file>` via Playwright MCP (unhide+tag, upload, verify via CDN URL) |
 | [`skillz` plugin](./plugins/skillz/) | plugin | Claude, Codex | Full repo bundle: every skill |
 | [`pr-loop` plugin](./plugins/pr-loop/) | plugin | Claude, Codex | Paired author + reviewer PR-loop skills |
 | [`work-on-pr` plugin](./plugins/work-on-pr/) | plugin | Claude, Codex | Single-skill plugin: work-on-pr |
@@ -106,6 +107,7 @@ environments and older Codex versions.
 | [`emacs-batch-package-verify-pitfalls` plugin](./plugins/emacs-batch-package-verify-pitfalls/) | plugin | Claude, Codex | Single-skill plugin: emacs-batch-package-verify-pitfalls |
 | [`python-symtable-no-col-offset-pairing` plugin](./plugins/python-symtable-no-col-offset-pairing/) | plugin | Claude, Codex | Single-skill plugin: python-symtable-no-col-offset-pairing |
 | [`continuous-learning` plugin](./plugins/continuous-learning/) | plugin | Codex | Single-skill plugin (no hooks) |
+| [`playwright-mcp-upload-hidden-file-input` plugin](./plugins/playwright-mcp-upload-hidden-file-input/) | plugin | Claude, Codex | Single-skill plugin: playwright-mcp-upload-hidden-file-input |
 | [`codex-continuous-learning` plugin](./plugins/codex-continuous-learning/) | plugin | Codex | continuous-learning skill plus UserPromptSubmit + Stop hooks |
 | [pr-loop](./collections/pr-loop.json) | collection (legacy) | Claude, Codex | `install.sh` selector. Prefer the `pr-loop` plugin entry. |
 
