@@ -15,8 +15,8 @@ description: |
   authorization-code flow, store the token, then publish. NOT for self-hosted
   WordPress using application-password REST - this targets public-api.wordpress.com.
 author: Claude Code
-version: 1.2.0
-date: 2026-06-17
+version: 1.3.0
+date: 2026-06-24
 source: https://github.com/voitta-ai/skillz
 source_file: skills/wordpress-com-publish/SKILL.md
 ---
@@ -81,8 +81,9 @@ stores verbatim. Author in Markdown, then convert with `md2wp.py` below.
 **Two non-obvious traps (each cost real time):**
 - pandoc's default `--wrap=auto` line-wraps the HTML output - that is what
   injects `\n` into long headings (it is NOT WordPress doing it). You MUST pass
-  `--wrap=none`. Also `--syntax-highlighting=none` so code is plain
-  `<pre><code>`, not highlight-span soup.
+  `--wrap=none`. Also `--no-highlight` so code is plain `<pre><code>`, not
+  highlight-span soup. (Do NOT use `--syntax-highlighting=none` - it is not a
+  real pandoc flag and makes pandoc exit non-zero, failing the whole convert.)
 - The POST/PUT response `content` is the **rendered** HTML (block comments
   stripped), so it never matches what you sent. To verify the stored block
   markup, GET the post with `?context=edit`.
@@ -97,7 +98,7 @@ from html.parser import HTMLParser
 
 def to_blocks(md_path, shift=1):
     html = subprocess.run(
-        ["pandoc", "-f", "gfm", "-t", "html", "--syntax-highlighting=none",
+        ["pandoc", "-f", "gfm", "-t", "html", "--no-highlight",
          "--wrap=none", f"--shift-heading-level-by={shift}", md_path],
         capture_output=True, text=True, check=True).stdout
 
@@ -182,6 +183,27 @@ POST response is rendered, not the stored blocks).
 Needs an app at https://developer.wordpress.com/apps/ (Settings tab:
 **Client ID**, **Client Secret**, **Redirect URL**).
 
+**What to tell the user to set** (once; then auth is hands-off except one paste):
+
+| Env var (either prefix) | Where it comes from |
+|---|---|
+| `WPCOM_CLIENT_ID` / `WORDPRESS_CLIENT_ID` | app Settings -> Client ID |
+| `WPCOM_CLIENT_SECRET` / `WORDPRESS_CLIENT_SECRET` | app Settings -> Client Secret |
+| `WPCOM_REDIRECT_URI` / `_URL` / `WORDPRESS_REDIRECT_URI` / `_URL` | app Settings -> **Redirect URL**, byte-for-byte |
+| `WPCOM_SITE` (or pass as the 4th `publish.sh` arg) | the target blog domain, e.g. `blog.example.com` |
+
+The script accepts the `WORDPRESS_*` names and both `_URI` and `_URL` spellings,
+because WordPress's own field is labelled "Redirect URL" - users naturally export
+`WORDPRESS_REDIRECT_URL`. Only the **token** comes from the flow below; the rest
+the user sets once in their shell profile.
+
+**Redirect-URL tip:** the simplest registered Redirect URL is the blog's own URL
+(e.g. `https://blog.example.com`). On approval the browser lands on
+`https://blog.example.com/?code=...` - the homepage loads fine and the `code` is
+right there in the address bar to copy. (Any registered URL works; it just has to
+byte-match. A non-listening URL also works - the page fails to load but the `code`
+is still in the bar.)
+
 1. Open the authorize URL, approve, copy the `code` from the
    `redirect_uri?code=...` landing (the page may fail to load if nothing
    listens on the redirect - the `code` is still in the URL bar):
@@ -216,7 +238,7 @@ keeps content intact. No placeholders to leave un-substituted.
 # publish.sh --auth                                       - just mint+store a token
 # Token: $WPCOM_TOKEN, else macOS Keychain item `wpcom_token`.
 # Site:  4th arg, else $WPCOM_SITE (blog_id or domain).
-# Auth (only if no token): $WPCOM_CLIENT_ID, $WPCOM_REDIRECT_URI (+ prompts).
+# Auth (only if no token): $WPCOM_CLIENT_ID, $WPCOM_REDIRECT_URI|_URL (+ prompts).
 set -euo pipefail
 API=https://public-api.wordpress.com
 
@@ -224,11 +246,12 @@ token() { [[ -n "${WPCOM_TOKEN:-}" ]] && { printf '%s' "$WPCOM_TOKEN"; return; }
           security find-generic-password -s wpcom_token -w 2>/dev/null || true; }
 
 authorize() {
-  # accept WORDPRESS_* as aliases for WPCOM_* (users name the app creds either way)
+  # accept WORDPRESS_* as aliases for WPCOM_* (users name the app creds either way).
+  # WordPress's app field is literally "Redirect URL", so accept _URL as well as _URI.
   : "${WPCOM_CLIENT_ID:=${WORDPRESS_CLIENT_ID:-}}"
-  : "${WPCOM_REDIRECT_URI:=${WORDPRESS_REDIRECT_URI:-}}"
+  : "${WPCOM_REDIRECT_URI:=${WPCOM_REDIRECT_URL:-${WORDPRESS_REDIRECT_URI:-${WORDPRESS_REDIRECT_URL:-}}}}"
   : "${WPCOM_CLIENT_ID:?set WPCOM_CLIENT_ID or WORDPRESS_CLIENT_ID (apps live at https://developer.wordpress.com/apps/ - NOT wp-admin)}"
-  : "${WPCOM_REDIRECT_URI:?set WPCOM_REDIRECT_URI or WORDPRESS_REDIRECT_URI (must byte-match a registered Redirect URL)}"
+  : "${WPCOM_REDIRECT_URI:?set WPCOM_REDIRECT_URI/_URL or WORDPRESS_REDIRECT_URI/_URL (must byte-match the app's registered Redirect URL)}"
   echo "Open, approve, copy the ?code= from the redirect:" >&2
   echo "  $API/oauth2/authorize?client_id=$WPCOM_CLIENT_ID&redirect_uri=$WPCOM_REDIRECT_URI&response_type=code&scope=global" >&2
   local code secret tok
