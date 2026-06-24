@@ -16,7 +16,7 @@ description: |
   not required; the same structure works over plain terminals or other
   multiplexers.
 author: Claude Code
-version: 1.0.0
+version: 1.1.0
 date: 2026-06-22
 source: https://github.com/voitta-ai/skillz
 source_file: skills/agent-team-orchestration/SKILL.md
@@ -100,6 +100,31 @@ The architect's core deliverable. Heuristics:
 
 Run a wave, integrate, then re-plan the next wave from what's left - dependencies
 look different once the first wave merges.
+
+## Cross-repo / cross-lane coordination
+When the backlog spans **multiple repos** (one feature whose lanes live in
+separate services), the issue graph is not enough - the friction moves to the
+*seams between lanes*. The architect maintains a lightweight **coordination
+contract**, kept current as waves land:
+
+- **Team-handoff doc** - one scannable page, the architect's + every lane's entry
+  point. Per repo: folder, branch/PR, issue(s), current state; plus the goal,
+  cost, and the gates below. Link each repo's own detailed handoff rather than
+  inlining it.
+- **Inter-lane dependency registry** - the concrete outputs one lane hands
+  another, named explicitly so a lane never blocks guessing. (e.g. infra lane ->
+  consumer lane: the exact cross-cluster DNS the consumer must call; the consumer
+  cannot deploy without it.)
+- **Gates / freeze-windows** - "do NOT apply X while Y is live", "do NOT merge A
+  until B verifies". The multi-repo analogue of the serialized chains above - make
+  the ordering explicit so no lane trips another's live state.
+- **Per-project handoff files** - each repo keeps its own detailed handoff
+  (`.claude/` / `.handoffs/`); the team doc links them. A lane resuming mid-run
+  reads its own file; the architect reads the team doc.
+
+Treat the contract as living: re-publish it each time a gate clears or a
+dependency is delivered. Most multi-repo stalls trace to a missing entry here -
+an unstated address, an unflagged freeze - not to the code.
 
 ## Make every agent a watchable cmux tab
 The rule that keeps a multi-agent run legible: **every agent is its own cmux
