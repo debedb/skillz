@@ -72,6 +72,32 @@ catalog (https://github.com/voitta-ai/skillz) and any internal playbook repo, so
 its plan reuses existing skills (e.g. `work-on-pr`, `review-pr-loop`) instead of
 reinventing the loop.
 
+## Step 0: runtime precondition (before any spawn)
+Detect the surface **before** the first agent is spawned, not at spawn time. The
+architect runs, as a precondition:
+```bash
+which tmux        # is a tmux/cmux shim on PATH?
+echo "$TMUX"      # are we inside a tmux/cmux session?
+which cmux        # is cmux installed at all?
+```
+This is a **once-per-run** check whose result drives an **opinionated default**:
+
+- **If under `cmux claude-teams`** (shim on PATH, `TMUX` set): proceed with
+  watchable per-agent tabs - the cmux path below.
+- **If not under cmux**: **proceed automatically via the Workflow /
+  background-agent surface** - state that you're doing so, don't ask. The role
+  structure and wave plan work fine without tabs; you only lose the live-watch
+  ergonomics.
+
+Only surface a choice if the user explicitly wants watchable tabs and isn't under
+cmux - then they restart the root session under `cmux claude-teams`. Do **not**
+add a spawn-time default that steers away from cmux: the precondition has already
+decided, opinionatedly, and it decided once.
+
+**Ask each surface/runtime decision at most once.** Once step 0 has resolved the
+surface, no later step re-asks it (gate 4 must not re-pose gate 2). Record the
+resolved surface and reuse it for the whole run.
+
 ## The roles
 Each issue in the active wave gets a squad. Roles are deliberately separated so
 no agent both writes and blesses the same code.
@@ -98,8 +124,36 @@ The architect's core deliverable. Heuristics:
 - **Cap the wave** to the number of squads you can actually watch and unblock.
   Parallelism you can't supervise just moves the bottleneck onto you.
 
+**Scope/wave default (don't ask when you don't have to).** The default scope is
+**all ready/independent issues, parallelized up to the supervision cap.** The
+architect picks the wave by that rule and proceeds; it only asks you to narrow
+scope when the ready set **exceeds** what the supervisor can watch (then it asks
+which subset, once). Don't ask "how many issues?" or "which ones?" when the
+independent set already fits under the cap - that's a decision the default
+already makes.
+
 Run a wave, integrate, then re-plan the next wave from what's left - dependencies
 look different once the first wave merges.
+
+## Idempotency pre-flight (before creating any issue or PR)
+**Mandatory.** Before the architect (or any squad) creates an issue or opens a
+PR, it first checks for work that already covers the same change:
+```bash
+gh issue list --state all        # is this already filed?
+gh pr list --state all           # is there already a PR for it?
+git branch -a                    # is there already a branch/worktree?
+```
+If existing work is found, **extend or reference it instead of duplicating** -
+comment on the existing issue, push to the existing branch, or note the overlap
+in the plan. Duplicate issues/PRs/branches are pure friction at integration time.
+(Concretely: running `gh issue list` before filing surfaced pre-existing overlap
+that would otherwise have become a duplicate.)
+
+**Merge-order default.** Independent PRs **merge on green review** - no human
+gate, because they were chosen as independent in the first place. Escalate to you
+**only** for genuine ordering or shared-file conflicts (two PRs touch the same
+file, or B's acceptance depends on A landing). Don't ask "which merges first?"
+when the PRs don't actually interact.
 
 ## Cross-repo / cross-lane coordination
 When the backlog spans **multiple repos** (one feature whose lanes live in
@@ -128,14 +182,16 @@ an unstated address, an unflagged freeze - not to the code.
 
 ## Make every agent a watchable cmux tab
 The rule that keeps a multi-agent run legible: **every agent is its own cmux
-surface you can watch and type into.** The runtimes differ - see the
+surface you can watch and type into.** This applies when step 0 resolved the
+surface to cmux; if it didn't, you're on the background-agent surface and skip
+this section. The runtimes differ - see the
 [`cmux-agent-tabs`](../cmux-agent-tabs/SKILL.md) skill for the full why - but the
 short version:
 
 - **Claude Code** teammates only tab if the root session was launched through the
   `cmux claude-teams` wrapper (it prepends a tmux shim to PATH).
-  `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` alone is a red herring. Diagnose with
-  `which tmux` + `echo $TMUX`.
+  `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` alone is a red herring. (This is what
+  the step-0 `which tmux` + `echo $TMUX` check detects.)
 - **Codex** subagents tab automatically under `cmux codex-teams` /
   `cmux hooks setup codex`.
 
@@ -165,19 +221,55 @@ entry, a sharper issue template, or a default the architect should set next
 time. Promote the reusable ones via `continuous-learning` / claudeception into
 this catalog; keep the project-specific ones in memory or the project's docs.
 
+## Defaults: don't ask for cheap process decisions
+A confirmation stall is only worth it for a real judgment call. **Cheap process
+decisions default to *yes*, with an opt-out** the supervisor can flip at any time:
+- **Auto-save reusable learnings.** When the productivity engineer spots a
+  durable learning, it's saved via claudeception by default - no "should I save
+  this?" prompt. Opt out if you don't want catalog churn this run.
+- **Auto-continue the SDET pass.** Once a deploy/preview is up, the SDET starts
+  its exploration automatically rather than asking permission to begin.
+
+These are reversible, low-cost, and not architectural - so they don't earn a gate.
+Reserve your attention for the decisions below.
+
+## Decisions that stay human gates - posed once
+Some decisions are genuine architectural judgment and should **not** be
+auto-resolved:
+- **Design reconciliation** (e.g. which navbar/header/component wins when two
+  issues disagree) stays a **human gate**. The architect does not pick for you.
+
+But a real gate must still be **de-duplicated**: once a decision is posed, the
+architect **records it and never re-poses the same decision.** The architect
+maintains an explicit list of open vs. decided decisions, so an integration-time
+question isn't re-asked just because it resurfaces in a later wave (the F10
+meta-bug: gate 13 duplicating gate 12). Posing a kept gate once is correct;
+posing it twice is friction.
+
 ## Workflow
-1. **Architect conversation.** Architect reads issues + repo, proposes the wave
-   plan and squads, you approve.
-2. **Launch the surface.** Start the root session via `cmux claude-teams` (or
-   `cmux codex-teams`) so agents tab. Verify with `which tmux` / `cmux tree`.
-3. **Spin up wave-1 squads.** One dev + reviewer + SDET per active issue, each on
+1. **Step-0 runtime precondition.** Architect runs `which tmux` + `echo $TMUX` +
+   `which cmux` and resolves the surface (cmux vs. background-agent) **once**,
+   opinionatedly - no spawn-time re-ask.
+2. **Architect conversation.** Architect reads issues + repo, proposes the wave
+   plan and squads. Default scope = all ready/independent issues up to the
+   supervision cap; only narrow if it exceeds what you can watch.
+3. **Idempotency pre-flight.** Before filing/creating anything, run
+   `gh issue list` / `gh pr list` / `git branch -a`; extend existing work rather
+   than duplicate.
+4. **Launch the surface.** If step 0 resolved to cmux, start the root session via
+   `cmux claude-teams` (or `cmux codex-teams`) so agents tab; otherwise proceed on
+   the background-agent surface. Verify cmux with `cmux tree`.
+5. **Spin up wave-1 squads.** One dev + reviewer + SDET per active issue, each on
    its own worktree (`multi-phase-feature-pr-worktrees`), each a named tab.
-4. **Run the loops.** Developers use `work-on-pr`; reviewers use `review-pr-loop`
-   / adversarial review; SDETs exercise the change and file findings.
-5. **Productivity engineer watches** and logs confirmation/info/rework stalls.
-6. **Integrate + re-plan.** Architect merges landed work, resolves conflicts,
-   re-derives the next wave from remaining issues.
-7. **Retrospective.** Turn telemetry into concrete process fixes; promote
+6. **Run the loops.** Developers use `work-on-pr`; reviewers use `review-pr-loop`
+   / adversarial review; SDETs exercise the change (auto-started once a deploy is
+   up) and file findings.
+7. **Productivity engineer watches** and logs confirmation/info/rework stalls;
+   auto-saves durable learnings by default.
+8. **Integrate + re-plan.** Architect merges independent PRs on green review,
+   escalating only genuine ordering/shared-file conflicts; tracks open vs.
+   decided design gates so none is re-posed; re-derives the next wave.
+9. **Retrospective.** Turn telemetry into concrete process fixes; promote
    reusable learnings as skills.
 
 ## Outcomes this is built to produce
@@ -193,14 +285,25 @@ this catalog; keep the project-specific ones in memory or the project's docs.
   adversarial review.
 - **cmux tabbing is asymmetric** across runtimes - if Claude teammates aren't
   tabbing, you almost certainly didn't launch via `cmux claude-teams`
-  (`cmux-agent-tabs`).
+  (`cmux-agent-tabs`). Resolve this at step 0, not at spawn time.
 - **Re-plan between waves.** A parallel set chosen up front goes stale once the
   first PRs merge; dependencies shift.
+- **Ask each decision at most once.** Surface/runtime, scope, and design gates are
+  all resolved once and recorded; re-posing a settled decision is friction, not
+  diligence.
+- **Keep real gates; drop cheap ones.** Design reconciliation stays a human gate;
+  reversible process decisions (save-learning, start-SDET) default to yes.
 
 ## Quick reference
 | Goal | Command / skill |
 |---|---|
+| Step-0 surface check (once) | `which tmux` + `echo $TMUX` + `which cmux` |
+| Idempotency pre-flight | `gh issue list` / `gh pr list` / `git branch -a` before creating |
 | Plan parallel set | architect reads `gh issue list` / `gh issue view`, groups independent vs serialized |
+| Default scope | all ready/independent issues up to the supervision cap |
+| Default merge order | independent PRs merge on green; escalate only ordering/shared-file conflicts |
+| Cheap process decisions | default yes with opt-out (auto-save learnings, auto-continue SDET) |
+| Design conflicts | human gate, posed once, recorded - never re-posed |
 | Claude agents -> tabs | launch via `cmux claude-teams ...` |
 | Codex agents -> tabs | `cmux codex-teams ...` / `cmux hooks setup codex` |
 | Is Claude bridge active? | `which tmux` (shim) + `TMUX` set |
