@@ -1,0 +1,11 @@
+{
+  "name": "codex-adversarial-pr-review",
+  "version": "1.0.0",
+  "description": "Post /codex:adversarial-review findings as a batched GitHub PR review (inline comments + summary body), with out-of-diff rollup and confidence filtering.",
+  "author": "voitta-ai",
+  "homepage": "https://github.com/voitta-ai/skillz",
+  "repository": "https://github.com/voitta-ai/skillz",
+  "license": "MIT",
+  "keywords": ["claude", "codex", "skills", "codex-cli", "pr-review", "github", "adversarial-review"],
+  "skills": "./skills/"
+}

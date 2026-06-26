@@ -22,6 +22,15 @@
       "summary": "Reviewer-side PR iteration loop."
     },
     {
+      "name": "codex-adversarial-pr-review",
+      "path": "skills/codex-adversarial-pr-review/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Post /codex:adversarial-review findings as a batched GitHub PR review (inline + out-of-diff rollup)."
+    },
+    {
       "name": "continuous-learning",
       "path": "skills/continuous-learning/SKILL.md",
       "hosts": [
@@ -297,6 +306,7 @@
       "skills": [
         "work-on-pr",
         "review-pr-loop",
+        "codex-adversarial-pr-review",
         "continuous-learning",
         "cmux-search",
         "cmux-agent-tabs",
@@ -675,6 +685,14 @@
         "gh-pr-merge-delete-branch-closes-dependent-pr"
       ],
       "summary": "Single-skill plugin: gh-pr-merge-delete-branch-closes-dependent-pr."
+    },
+    {
+      "name": "codex-adversarial-pr-review",
+      "claude_manifest": "plugins/codex-adversarial-pr-review/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/codex-adversarial-pr-review/.codex-plugin/plugin.json",
+      "hosts": ["claude", "codex"],
+      "skills": ["codex-adversarial-pr-review"],
+      "summary": "Single-skill plugin: codex-adversarial-pr-review."
     }
   ],
   "defaults": {
