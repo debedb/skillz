@@ -294,6 +294,12 @@
       "path": "skills/agent-team-orchestration/SKILL.md",
       "hosts": ["claude", "codex"],
       "summary": "Run a team of agents over a repo's open issues: architect plans the parallel set, per-issue squads (dev + adversarial reviewer + SDET + productivity engineer), each a watchable cmux tab."
+    },
+    {
+      "name": "slack-xoxc-session-client",
+      "path": "skills/slack-xoxc-session-client/SKILL.md",
+      "hosts": ["claude", "codex"],
+      "summary": "Drive the Slack web API as yourself via a live browser session (xoxc token + httpOnly d cookie) when you cannot install a Slack app; ships a runnable Python client."
     }
   ],
   "collections": [
@@ -357,7 +363,8 @@
         "emacs-batch-package-verify-pitfalls",
         "python-symtable-no-col-offset-pairing",
         "playwright-mcp-upload-hidden-file-input",
-        "agent-team-orchestration"
+        "agent-team-orchestration",
+        "slack-xoxc-session-client"
       ],
       "summary": "Full repo bundle: every skill in one plugin."
     },
@@ -742,6 +749,14 @@
       "hosts": ["claude", "codex"],
       "skills": ["playwright-mcp-upload-hidden-file-input"],
       "summary": "Single-skill plugin: playwright-mcp-upload-hidden-file-input."
+    },
+    {
+      "name": "slack-xoxc-session-client",
+      "claude_manifest": "plugins/slack-xoxc-session-client/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/slack-xoxc-session-client/.codex-plugin/plugin.json",
+      "hosts": ["claude", "codex"],
+      "skills": ["slack-xoxc-session-client"],
+      "summary": "Single-skill plugin: slack-xoxc-session-client (ships a runnable Python client)."
     },
     {
       "name": "continuous-learning",
