@@ -70,6 +70,7 @@ environments and older Codex versions.
 | [python-symtable-no-col-offset-pairing](./skills/python-symtable-no-col-offset-pairing/SKILL.md) | skill | Claude, Codex | Pair Python `symtable` scopes with AST nodes when symtable has no `col_offset`, via (lineno, name) grouping |
 | [playwright-mcp-upload-hidden-file-input](./skills/playwright-mcp-upload-hidden-file-input/SKILL.md) | skill | Claude, Codex | Upload to a hidden `<input type=file>` via Playwright MCP (unhide+tag, upload, verify via CDN URL) |
 | [agent-team-orchestration](./skills/agent-team-orchestration/SKILL.md) | skill | Claude, Codex | Run a team of agents over a repo's open issues: architect plans the parallel set, per-issue squads (dev + adversarial reviewer + SDET + productivity engineer), each a watchable cmux tab |
+| [istio-multicluster-endpointless-mesh-service](./skills/istio-multicluster-endpointless-mesh-service/SKILL.md) | skill | Claude, Codex | Istio multi-cluster endpoint-less away-Service: use a decoy selector (not an omitted one) so an EndpointSlice anchor exists for the mesh to merge remote endpoints into; for cross-region write-routing / home-away Service topologies |
 | [`skillz` plugin](./plugins/skillz/) | plugin | Claude, Codex | Full repo bundle: every skill |
 | [`pr-loop` plugin](./plugins/pr-loop/) | plugin | Claude, Codex | Paired author + reviewer PR-loop skills |
 | [`work-on-pr` plugin](./plugins/work-on-pr/) | plugin | Claude, Codex | Single-skill plugin: work-on-pr |
@@ -111,6 +112,7 @@ environments and older Codex versions.
 | [`playwright-mcp-upload-hidden-file-input` plugin](./plugins/playwright-mcp-upload-hidden-file-input/) | plugin | Claude, Codex | Single-skill plugin: playwright-mcp-upload-hidden-file-input |
 | [`codex-continuous-learning` plugin](./plugins/codex-continuous-learning/) | plugin | Codex | continuous-learning skill plus UserPromptSubmit + Stop hooks |
 | [`agent-team-orchestration` plugin](./plugins/agent-team-orchestration/) | plugin | Claude, Codex | Single-skill plugin: agent-team-orchestration |
+| [`istio-multicluster-endpointless-mesh-service` plugin](./plugins/istio-multicluster-endpointless-mesh-service/) | plugin | Claude, Codex | Single-skill plugin: istio-multicluster-endpointless-mesh-service |
 | [pr-loop](./collections/pr-loop.json) | collection (legacy) | Claude, Codex | `install.sh` selector. Prefer the `pr-loop` plugin entry. |
 
 Machine-readable index: [`catalog.json`](./catalog.json). The
