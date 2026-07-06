@@ -14,7 +14,14 @@ description: |
 author: Claude Code
 version: 1.0.0
 date: 2026-07-06
+source: https://github.com/voitta-ai/skillz
+source_file: skills/istio-multicluster-endpointless-mesh-service/SKILL.md
 ---
+
+> **Canonical source.** This skill lives in the repo at
+> https://github.com/voitta-ai/skillz (file:
+> `skills/istio-multicluster-endpointless-mesh-service/SKILL.md`). Updates go
+> through the repo's worktree + PR workflow — open an issue, branch, PR.
 
 # Istio multi-cluster endpoint-less mesh Service (decoy selector, not omitted)
 
