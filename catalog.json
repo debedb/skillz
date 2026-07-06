@@ -300,6 +300,12 @@
       "path": "skills/slack-xoxc-session-client/SKILL.md",
       "hosts": ["claude", "codex"],
       "summary": "Drive the Slack web API as yourself via a live browser session (xoxc token + httpOnly d cookie) when you cannot install a Slack app; ships a runnable Python client."
+    },
+    {
+      "name": "istio-multicluster-endpointless-mesh-service",
+      "path": "skills/istio-multicluster-endpointless-mesh-service/SKILL.md",
+      "hosts": ["claude", "codex"],
+      "summary": "Istio multi-cluster endpoint-less away-Service: use a decoy selector (not an omitted one) so an EndpointSlice anchor exists for the mesh to merge remote endpoints into; for cross-region write-routing / home-away Service topologies."
     }
   ],
   "collections": [
@@ -364,7 +370,8 @@
         "python-symtable-no-col-offset-pairing",
         "playwright-mcp-upload-hidden-file-input",
         "agent-team-orchestration",
-        "slack-xoxc-session-client"
+        "slack-xoxc-session-client",
+        "istio-multicluster-endpointless-mesh-service"
       ],
       "summary": "Full repo bundle: every skill in one plugin."
     },
@@ -787,6 +794,14 @@
       "hosts": ["claude", "codex"],
       "skills": ["agent-team-orchestration"],
       "summary": "Single-skill plugin: agent-team-orchestration."
+    },
+    {
+      "name": "istio-multicluster-endpointless-mesh-service",
+      "claude_manifest": "plugins/istio-multicluster-endpointless-mesh-service/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/istio-multicluster-endpointless-mesh-service/.codex-plugin/plugin.json",
+      "hosts": ["claude", "codex"],
+      "skills": ["istio-multicluster-endpointless-mesh-service"],
+      "summary": "Single-skill plugin: istio-multicluster-endpointless-mesh-service."
     }
   ],
   "defaults": {
