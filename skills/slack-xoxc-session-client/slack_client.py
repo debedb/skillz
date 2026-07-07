@@ -21,6 +21,21 @@ expiry -> the client re-extracts automatically when a call returns invalid_auth.
 SECURITY: tokens are held in memory only. This script never writes them to disk.
 Do not print, log, or commit the xoxc token or the d / d-s cookies.
 
+Agent self-labeling (good-faith convention):
+  Because this client posts AS the logged-in human, Slack cannot tell an
+  agent-authored message from one the human typed. The only thing that can mark
+  a post as agentic is a voluntary convention -- a "robots.txt for agents":
+  no enforcement, just good faith. So by default every outgoing post is
+  prefixed with a visible, greppable marker:
+
+      🤖 [agent]                -> no label given
+      🤖 [agent: openclaw]      -> agent_label="openclaw"
+
+  Readers (human or machine) detect agent posts by the leading "🤖 [agent"
+  (see AGENT_MARKER_RE). Pass agent_label to identify which agent; pass
+  label_posts=False / --no-label to opt out. We ship it on-by-default so the
+  honest behavior is the path of least resistance.
+
 Requires: pycookiecheat, requests  (install in a .venv).
 
 Cross-platform / cross-browser:
@@ -40,9 +55,14 @@ Usage (library):
     sc = SlackSessionClient("<workspace-subdomain>", browser="firefox")
 
 CLI:
-    python3 slack_client.py [--browser NAME] <subdomain> <method> [k=v ...]
+    python3 slack_client.py [--browser NAME] [--agent-label NAME] [--no-label] \
+        <subdomain> <method> [k=v ...]
     python3 slack_client.py <workspace-subdomain> auth.test
     python3 slack_client.py <workspace-subdomain> conversations.history channel=C0123 limit=20
+    # Posts are self-labeled by default:
+    python3 slack_client.py --agent-label openclaw <sub> chat.postMessage channel=C0123 text='hi'
+    # -> posts: "🤖 [agent: openclaw] hi"
+    python3 slack_client.py --no-label <sub> chat.postMessage channel=C0123 text='hi'
 """
 import re
 import sys
@@ -53,16 +73,55 @@ import pycookiecheat
 
 _UA = "Mozilla/5.0"
 
+# --- Agent self-labeling (good-faith "robots.txt for agents") ---------------
+# Web-API methods that create/edit a visible message and therefore get labeled.
+_LABELED_METHODS = frozenset(
+    {"chat.postMessage", "chat.update", "chat.scheduleMessage", "chat.meMessage"}
+)
+# A post is agent-authored iff its text begins with this pattern. Keep the regex
+# and the marker emitted by _agent_marker() in sync -- this is the whole protocol.
+AGENT_MARKER_RE = re.compile(r"^\U0001F916 \[agent\b")
+
+
+def _agent_marker(agent_label=None):
+    """Return the visible marker that prefixes an agent-authored post."""
+    if agent_label:
+        retval = f"\U0001F916 [agent: {agent_label}]"
+    else:
+        retval = "\U0001F916 [agent]"
+    return retval
+
+
+def apply_agent_label(method, params, agent_label=None):
+    """Return params with the agent marker prepended to `text`, when applicable.
+
+    Pure/idempotent: only touches labeled methods that carry a `text`, and never
+    double-marks an already-labeled message. Returns a new dict; input untouched.
+    """
+    text = params.get("text")
+    if method not in _LABELED_METHODS or not text:
+        retval = params
+    elif AGENT_MARKER_RE.match(text):
+        retval = params
+    else:
+        retval = {**params, "text": f"{_agent_marker(agent_label)} {text}"}
+    return retval
+
 
 class SlackSessionClient:
     """Slack web-API client authenticated by a live browser session."""
 
-    def __init__(self, subdomain, browser="chrome"):
+    def __init__(self, subdomain, browser="chrome", agent_label=None,
+                 label_posts=True):
         self.subdomain = subdomain
         # BASE must be the team subdomain host. A generic slack.com host
         # silently fails auth for these session-token calls.
         self.base = f"https://{subdomain}.slack.com/api"
         self._browser = browser
+        # Good-faith agent self-labeling: on by default so the honest behavior
+        # is the path of least resistance. See apply_agent_label / module docs.
+        self.agent_label = agent_label
+        self.label_posts = label_posts
         self._cookies = None
         self._token = None
 
@@ -112,7 +171,11 @@ class SlackSessionClient:
         """POST to a Slack web-API method, return parsed JSON dict.
 
         On invalid_auth (rotated/expired secrets), re-extract once and retry.
+        Outgoing posts are self-labeled per the good-faith agent convention
+        unless label_posts is False.
         """
+        if self.label_posts:
+            params = apply_agent_label(method, params, self.agent_label)
         self._ensure_auth()
         result = self._post(method, params)
         if result.get("error") == "invalid_auth":
@@ -134,13 +197,28 @@ class SlackSessionClient:
 def _main(argv):
     args = argv[1:]
     browser = "chrome"
-    if args and args[0] == "--browser":
-        if len(args) < 2:
+    agent_label = None
+    label_posts = True
+    # Leading option flags, in any order, before the positional args.
+    while args and args[0].startswith("--"):
+        flag = args[0]
+        if flag == "--no-label":
+            label_posts = False
+            args = args[1:]
+        elif flag in ("--browser", "--agent-label"):
+            if len(args) < 2:
+                print(__doc__)
+                retval = 2
+                return retval
+            if flag == "--browser":
+                browser = args[1]
+            else:
+                agent_label = args[1]
+            args = args[2:]
+        else:
             print(__doc__)
             retval = 2
             return retval
-        browser = args[1]
-        args = args[2:]
     if len(args) < 2:
         print(__doc__)
         retval = 2
@@ -151,7 +229,10 @@ def _main(argv):
     for kv in args[2:]:
         k, _, v = kv.partition("=")
         params[k] = v
-    client = SlackSessionClient(subdomain, browser=browser)
+    client = SlackSessionClient(
+        subdomain, browser=browser, agent_label=agent_label,
+        label_posts=label_posts,
+    )
     result = client.call(method, **params)
     print(json.dumps(result, indent=2))
     retval = 0 if result.get("ok") else 1
