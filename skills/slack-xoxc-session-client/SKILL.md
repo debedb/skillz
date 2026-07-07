@@ -11,10 +11,11 @@ description: |
   slack-automation-workaround skill hit). Headline insight: decrypt the httpOnly
   `d` cookie straight from the browser cookie store with pycookiecheat, and scrape
   the `xoxc-` web token from the authenticated workspace HTML (`"api_token"` key).
-  Ships a working, generalized Python client (slack_client.py).
+  Ships a working, generalized Python client (slack_client.py) that self-labels
+  outgoing posts with a good-faith agent marker by default.
 author: Claude Code
-version: 1.0.0
-date: 2026-06-22
+version: 1.1.0
+date: 2026-07-06
 source: https://github.com/voitta-ai/skillz/issues/67
 source_file: skills/slack-xoxc-session-client/slack_client.py
 ---
@@ -121,6 +122,43 @@ python3 slack_client.py --browser firefox <workspace-subdomain> auth.test
 - Do not hardcode a subdomain that identifies a real private workspace into any
   file committed to a public repo. Use a `<workspace-subdomain>` placeholder in
   examples (this skill does).
+
+## Agent self-labeling (good-faith convention)
+
+Because this client posts **as the logged-in human**, Slack cannot distinguish
+an agent-authored message from one the person typed by hand — the same session,
+the same identity. Nothing structural marks a post as agentic. So the only thing
+that *can* mark it is a **voluntary convention**: a "robots.txt for agents" —
+a norm anyone can honor or ignore, no enforcement, purely good faith.
+
+This client ships that convention **on by default**, so the honest behavior is
+the path of least resistance:
+
+- Every outgoing post (`chat.postMessage`, `chat.update`, `chat.scheduleMessage`,
+  `chat.meMessage`) is prefixed with a visible, greppable marker:
+
+  ```
+  🤖 [agent]                -> no label
+  🤖 [agent: openclaw]      -> agent_label="openclaw"
+  ```
+
+- The marker is **human-visible** (readers see who they're talking to) and
+  **machine-parseable** (`AGENT_MARKER_RE` — a post is agent-authored iff its
+  text begins with `🤖 [agent`). That single regex *is* the whole protocol.
+- Labeling is **idempotent** (already-marked text is left alone) and only
+  touches posting methods carrying `text` — reads and non-text posts pass
+  through untouched.
+
+```python
+sc = SlackSessionClient("<workspace-subdomain>", agent_label="openclaw")
+sc.call("chat.postMessage", channel="C0123", text="on it")
+# posts: "🤖 [agent: openclaw] on it"
+```
+
+Opt out per-client with `label_posts=False` (or `--no-label` on the CLI) — but
+the point is to leave it on. It earns legitimacy by adoption, not by a
+gatekeeper; other agents are free to adopt the same `🤖 [agent…]` marker so a
+channel of mixed humans and agents stays honestly readable.
 
 ## Relationship to the interactive fallback
 

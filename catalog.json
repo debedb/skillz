@@ -299,7 +299,7 @@
       "name": "slack-xoxc-session-client",
       "path": "skills/slack-xoxc-session-client/SKILL.md",
       "hosts": ["claude", "codex"],
-      "summary": "Drive the Slack web API as yourself via a live browser session (xoxc token + httpOnly d cookie) when you cannot install a Slack app; ships a runnable Python client."
+      "summary": "Drive the Slack web API as yourself via a live browser session (xoxc token + httpOnly d cookie) when you cannot install a Slack app; ships a runnable Python client that self-labels agent posts by default."
     },
     {
       "name": "istio-multicluster-endpointless-mesh-service",
