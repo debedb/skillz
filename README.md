@@ -35,6 +35,7 @@ environments and older Codex versions.
 | [review-pr-loop](./skills/review-pr-loop/SKILL.md) | skill | Claude, Codex | Reviewer-side PR iteration loop |
 | [continuous-learning](./skills/continuous-learning/SKILL.md) | skill | Codex | End-of-task retrospective: extract reusable, verified learnings as Codex skills |
 | [cmux-search](./skills/cmux-search/SKILL.md) | skill | Claude, Codex | Search all open cmux workspaces/tabs/panes - live scrollback + agent transcripts |
+| [macos-sparkle-update-quarantine-relaunch](./skills/macos-sparkle-update-quarantine-relaunch/SKILL.md) | skill | Claude, Codex | Sparkle updater error 4005 / 'Failed to create installation cache directory' persists after stripping quarantine; relaunch the un-quarantined bundle |
 | [cmux-agent-tabs](./skills/cmux-agent-tabs/SKILL.md) | skill | Claude, Codex | Make AI agents show as watchable cmux tabs; Claude needs the `claude-teams` wrapper, Codex via `codex-teams`/hooks |
 | [gh-git-heredoc-body-file](./skills/gh-git-heredoc-body-file/SKILL.md) | skill | Claude, Codex | Body-file pattern: stop gh/git mangling multi-line bodies (backticks, code fences, `$(...)`) |
 | [claude-code-static-allow-bypasses-hook](./skills/claude-code-static-allow-bypasses-hook/SKILL.md) | skill | Claude, Codex | Why a Claude Code PreToolUse hook never fires for some commands (static allow short-circuits it) |
