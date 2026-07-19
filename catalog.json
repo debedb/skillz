@@ -158,55 +158,82 @@
     {
       "name": "gh-api-f-vs-F-body-file",
       "path": "skills/gh-api-f-vs-F-body-file/SKILL.md",
-      "hosts": ["claude", "codex"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
       "summary": "gh api -F (uppercase) reads @file into the field; -f sends the value as a literal string."
     },
     {
       "name": "gh-api-jq-no-arg",
       "path": "skills/gh-api-jq-no-arg/SKILL.md",
-      "hosts": ["claude", "codex"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
       "summary": "gh api --jq needs its filter as the argument; a misplaced/empty --jq silently drops the filter."
     },
     {
       "name": "gh-fork-issues-disabled",
       "path": "skills/gh-fork-issues-disabled/SKILL.md",
-      "hosts": ["claude", "codex"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
       "summary": "gh issue create fails on a fork because GitHub disables the Issues tab on forks by default."
     },
     {
       "name": "gh-pr-graphql-401-rest-fallback",
       "path": "skills/gh-pr-graphql-401-rest-fallback/SKILL.md",
-      "hosts": ["claude", "codex"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
       "summary": "When gh PR GraphQL calls return 401, fall back to the REST PR endpoints."
     },
     {
       "name": "gh-pr-merge-delete-branch-closes-dependent-pr",
       "path": "skills/gh-pr-merge-delete-branch-closes-dependent-pr/SKILL.md",
-      "hosts": ["claude", "codex"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
       "summary": "Deleting the branch on gh pr merge can auto-close a dependent PR stacked on it."
     },
     {
       "name": "gh-workflow-run-matching",
       "path": "skills/gh-workflow-run-matching/SKILL.md",
-      "hosts": ["claude", "codex"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
       "summary": "Match a gh workflow run to its trigger when multiple runs share one workflow name."
     },
     {
       "name": "github-api-list-endpoint-staleness-fresh-pr",
       "path": "skills/github-api-list-endpoint-staleness-fresh-pr/SKILL.md",
-      "hosts": ["claude", "codex"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
       "summary": "GitHub list endpoints serve stale empty results on a fresh PR; use the timeline / single-resource fetch."
     },
     {
       "name": "github-closing-keywords-default-branch-only",
       "path": "skills/github-closing-keywords-default-branch-only/SKILL.md",
-      "hosts": ["claude", "codex"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
       "summary": "GitHub closing keywords (Closes #N) only auto-close when the PR merges into the default branch."
     },
     {
       "name": "github-private-repo-readme-image-rendering",
       "path": "skills/github-private-repo-readme-image-rendering/SKILL.md",
-      "hosts": ["claude", "codex"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
       "summary": "Images in a private-repo README need authenticated or relative paths to render."
     },
     {
@@ -220,92 +247,146 @@
     {
       "name": "claude-code-claudemd-symlink-write-refused",
       "path": "skills/claude-code-claudemd-symlink-write-refused/SKILL.md",
-      "hosts": ["claude", "codex"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
       "summary": "Fix Edit/Write 'Refusing to write through symlink' on ~/.claude/CLAUDE.md by resolving the symlink to its real target path."
     },
     {
       "name": "claude-code-codex-plugin-parity",
       "path": "skills/claude-code-codex-plugin-parity/SKILL.md",
-      "hosts": ["claude", "codex"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
       "summary": "Port a Claude Code plugin to the Codex CLI (or back); where the two plugin systems match vs diverge, and the shared hooks.json caveats."
     },
     {
       "name": "claude-code-piebald-lsp-binary-on-path",
       "path": "skills/claude-code-piebald-lsp-binary-on-path/SKILL.md",
-      "hosts": ["claude", "codex"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
       "summary": "Piebald LSP plugins surface the LSP tool but the language-server binary isn't on PATH; install and expose the server binary."
     },
     {
       "name": "claude-code-plugin-from-existing-repo",
       "path": "skills/claude-code-plugin-from-existing-repo/SKILL.md",
-      "hosts": ["claude", "codex"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
       "summary": "Convert a repo that ships Claude Code commands/hooks (manual copy-in) into an installable plugin without breaking manual install."
     },
     {
       "name": "claude-code-plugin-python-bootstrap",
       "path": "skills/claude-code-plugin-python-bootstrap/SKILL.md",
-      "hosts": ["claude", "codex"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
       "summary": "Bootstrap Python deps from a Claude Code plugin hook so /plugin install is one-click on systems lacking them (PEP 668-safe)."
     },
     {
       "name": "claude-code-plugin-update-flow",
       "path": "skills/claude-code-plugin-update-flow/SKILL.md",
-      "hosts": ["claude", "codex"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
       "summary": "Update an installed Claude Code plugin via /plugin marketplace update + /reload-plugins, not the discovery-picker /plugin update."
     },
     {
       "name": "claude-json-mcp-migration-slice",
       "path": "skills/claude-json-mcp-migration-slice/SKILL.md",
-      "hosts": ["claude", "codex"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
       "summary": "Identify the exact ~/.claude.json slice that carries MCP config for cross-machine migration vs session bookkeeping."
     },
     {
       "name": "macos-bash-3.2-compat",
       "path": "skills/macos-bash-3.2-compat/SKILL.md",
-      "hosts": ["claude", "codex"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
       "summary": "Fix bash scripts that fail on macOS's stock bash 3.2 (declare -A, mapfile, and other bash-4-only constructs)."
     },
     {
       "name": "emacs-batch-package-verify-pitfalls",
       "path": "skills/emacs-batch-package-verify-pitfalls/SKILL.md",
-      "hosts": ["claude", "codex"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
       "summary": "Avoid false-negative failures when verifying an Emacs package install with emacs --batch (no ELPA auto-activation on load-path; use-package deferred loading skips :config)."
     },
     {
       "name": "claude-code-el-macos-home-trust-exit1",
       "path": "skills/claude-code-el-macos-home-trust-exit1/SKILL.md",
-      "hosts": ["claude", "codex"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
       "summary": "Fix M-x claude-code (claude-code.el) dying with \"exited abnormally with code 1\" at the HOME trust prompt: pre-trust the dir via ~/.claude.json hasTrustDialogAccepted (or launch in a trusted project); plus desktop-save-mode to restore Emacs buffers after reboot."
     },
     {
       "name": "python-symtable-no-col-offset-pairing",
       "path": "skills/python-symtable-no-col-offset-pairing/SKILL.md",
-      "hosts": ["claude", "codex"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
       "summary": "Pair Python symtable scope entries with AST nodes when symtable exposes no col_offset, via (lineno, name) grouping."
     },
     {
       "name": "playwright-mcp-upload-hidden-file-input",
       "path": "skills/playwright-mcp-upload-hidden-file-input/SKILL.md",
-      "hosts": ["claude", "codex"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
       "summary": "Upload a file via Playwright MCP when the input is hidden: unhide+tag via evaluate, upload by id, verify via CDN/S3 URL."
     },
     {
       "name": "agent-team-orchestration",
       "path": "skills/agent-team-orchestration/SKILL.md",
-      "hosts": ["claude", "codex"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
       "summary": "Run a team of agents over a repo's open issues: architect plans the parallel set, per-issue squads (dev + adversarial reviewer + SDET + productivity engineer), each a watchable cmux tab."
     },
     {
       "name": "slack-xoxc-session-client",
       "path": "skills/slack-xoxc-session-client/SKILL.md",
-      "hosts": ["claude", "codex"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
       "summary": "Drive the Slack web API as yourself via a live browser session (xoxc token + httpOnly d cookie) when you cannot install a Slack app; ships a runnable Python client that self-labels agent posts by default."
     },
     {
       "name": "istio-multicluster-endpointless-mesh-service",
       "path": "skills/istio-multicluster-endpointless-mesh-service/SKILL.md",
-      "hosts": ["claude", "codex"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
       "summary": "Istio multi-cluster endpoint-less away-Service: use a decoy selector (not an omitted one) so an EndpointSlice anchor exists for the mesh to merge remote endpoints into; for cross-region write-routing / home-away Service topologies."
+    },
+    {
+      "name": "macos-sparkle-update-quarantine-relaunch",
+      "path": "skills/macos-sparkle-update-quarantine-relaunch/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Fix macOS Sparkle updater error 4005 / 'Failed to create installation cache directory' that persists after stripping quarantine: relaunch the un-quarantined bundle."
     }
   ],
   "collections": [
@@ -371,7 +452,8 @@
         "playwright-mcp-upload-hidden-file-input",
         "agent-team-orchestration",
         "slack-xoxc-session-client",
-        "istio-multicluster-endpointless-mesh-service"
+        "istio-multicluster-endpointless-mesh-service",
+        "macos-sparkle-update-quarantine-relaunch"
       ],
       "summary": "Full repo bundle: every skill in one plugin."
     },
@@ -601,168 +683,273 @@
       "name": "gh-api-f-vs-F-body-file",
       "claude_manifest": "plugins/gh-api-f-vs-F-body-file/.claude-plugin/plugin.json",
       "codex_manifest": "plugins/gh-api-f-vs-F-body-file/.codex-plugin/plugin.json",
-      "hosts": ["claude", "codex"],
-      "skills": ["gh-api-f-vs-F-body-file"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "gh-api-f-vs-F-body-file"
+      ],
       "summary": "Single-skill plugin: gh-api-f-vs-F-body-file."
     },
     {
       "name": "gh-api-jq-no-arg",
       "claude_manifest": "plugins/gh-api-jq-no-arg/.claude-plugin/plugin.json",
       "codex_manifest": "plugins/gh-api-jq-no-arg/.codex-plugin/plugin.json",
-      "hosts": ["claude", "codex"],
-      "skills": ["gh-api-jq-no-arg"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "gh-api-jq-no-arg"
+      ],
       "summary": "Single-skill plugin: gh-api-jq-no-arg."
     },
     {
       "name": "gh-fork-issues-disabled",
       "claude_manifest": "plugins/gh-fork-issues-disabled/.claude-plugin/plugin.json",
       "codex_manifest": "plugins/gh-fork-issues-disabled/.codex-plugin/plugin.json",
-      "hosts": ["claude", "codex"],
-      "skills": ["gh-fork-issues-disabled"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "gh-fork-issues-disabled"
+      ],
       "summary": "Single-skill plugin: gh-fork-issues-disabled."
     },
     {
       "name": "gh-pr-graphql-401-rest-fallback",
       "claude_manifest": "plugins/gh-pr-graphql-401-rest-fallback/.claude-plugin/plugin.json",
       "codex_manifest": "plugins/gh-pr-graphql-401-rest-fallback/.codex-plugin/plugin.json",
-      "hosts": ["claude", "codex"],
-      "skills": ["gh-pr-graphql-401-rest-fallback"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "gh-pr-graphql-401-rest-fallback"
+      ],
       "summary": "Single-skill plugin: gh-pr-graphql-401-rest-fallback."
     },
     {
       "name": "gh-pr-merge-delete-branch-closes-dependent-pr",
       "claude_manifest": "plugins/gh-pr-merge-delete-branch-closes-dependent-pr/.claude-plugin/plugin.json",
       "codex_manifest": "plugins/gh-pr-merge-delete-branch-closes-dependent-pr/.codex-plugin/plugin.json",
-      "hosts": ["claude", "codex"],
-      "skills": ["gh-pr-merge-delete-branch-closes-dependent-pr"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "gh-pr-merge-delete-branch-closes-dependent-pr"
+      ],
       "summary": "Single-skill plugin: gh-pr-merge-delete-branch-closes-dependent-pr."
     },
     {
       "name": "gh-workflow-run-matching",
       "claude_manifest": "plugins/gh-workflow-run-matching/.claude-plugin/plugin.json",
       "codex_manifest": "plugins/gh-workflow-run-matching/.codex-plugin/plugin.json",
-      "hosts": ["claude", "codex"],
-      "skills": ["gh-workflow-run-matching"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "gh-workflow-run-matching"
+      ],
       "summary": "Single-skill plugin: gh-workflow-run-matching."
     },
     {
       "name": "github-api-list-endpoint-staleness-fresh-pr",
       "claude_manifest": "plugins/github-api-list-endpoint-staleness-fresh-pr/.claude-plugin/plugin.json",
       "codex_manifest": "plugins/github-api-list-endpoint-staleness-fresh-pr/.codex-plugin/plugin.json",
-      "hosts": ["claude", "codex"],
-      "skills": ["github-api-list-endpoint-staleness-fresh-pr"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "github-api-list-endpoint-staleness-fresh-pr"
+      ],
       "summary": "Single-skill plugin: github-api-list-endpoint-staleness-fresh-pr."
     },
     {
       "name": "github-closing-keywords-default-branch-only",
       "claude_manifest": "plugins/github-closing-keywords-default-branch-only/.claude-plugin/plugin.json",
       "codex_manifest": "plugins/github-closing-keywords-default-branch-only/.codex-plugin/plugin.json",
-      "hosts": ["claude", "codex"],
-      "skills": ["github-closing-keywords-default-branch-only"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "github-closing-keywords-default-branch-only"
+      ],
       "summary": "Single-skill plugin: github-closing-keywords-default-branch-only."
     },
     {
       "name": "github-private-repo-readme-image-rendering",
       "claude_manifest": "plugins/github-private-repo-readme-image-rendering/.claude-plugin/plugin.json",
       "codex_manifest": "plugins/github-private-repo-readme-image-rendering/.codex-plugin/plugin.json",
-      "hosts": ["claude", "codex"],
-      "skills": ["github-private-repo-readme-image-rendering"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "github-private-repo-readme-image-rendering"
+      ],
       "summary": "Single-skill plugin: github-private-repo-readme-image-rendering."
     },
     {
       "name": "claude-code-claudemd-symlink-write-refused",
       "claude_manifest": "plugins/claude-code-claudemd-symlink-write-refused/.claude-plugin/plugin.json",
       "codex_manifest": "plugins/claude-code-claudemd-symlink-write-refused/.codex-plugin/plugin.json",
-      "hosts": ["claude", "codex"],
-      "skills": ["claude-code-claudemd-symlink-write-refused"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "claude-code-claudemd-symlink-write-refused"
+      ],
       "summary": "Single-skill plugin: claude-code-claudemd-symlink-write-refused."
     },
     {
       "name": "claude-code-codex-plugin-parity",
       "claude_manifest": "plugins/claude-code-codex-plugin-parity/.claude-plugin/plugin.json",
       "codex_manifest": "plugins/claude-code-codex-plugin-parity/.codex-plugin/plugin.json",
-      "hosts": ["claude", "codex"],
-      "skills": ["claude-code-codex-plugin-parity"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "claude-code-codex-plugin-parity"
+      ],
       "summary": "Single-skill plugin: claude-code-codex-plugin-parity."
     },
     {
       "name": "claude-code-piebald-lsp-binary-on-path",
       "claude_manifest": "plugins/claude-code-piebald-lsp-binary-on-path/.claude-plugin/plugin.json",
       "codex_manifest": "plugins/claude-code-piebald-lsp-binary-on-path/.codex-plugin/plugin.json",
-      "hosts": ["claude", "codex"],
-      "skills": ["claude-code-piebald-lsp-binary-on-path"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "claude-code-piebald-lsp-binary-on-path"
+      ],
       "summary": "Single-skill plugin: claude-code-piebald-lsp-binary-on-path."
     },
     {
       "name": "claude-code-plugin-from-existing-repo",
       "claude_manifest": "plugins/claude-code-plugin-from-existing-repo/.claude-plugin/plugin.json",
       "codex_manifest": "plugins/claude-code-plugin-from-existing-repo/.codex-plugin/plugin.json",
-      "hosts": ["claude", "codex"],
-      "skills": ["claude-code-plugin-from-existing-repo"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "claude-code-plugin-from-existing-repo"
+      ],
       "summary": "Single-skill plugin: claude-code-plugin-from-existing-repo."
     },
     {
       "name": "claude-code-plugin-python-bootstrap",
       "claude_manifest": "plugins/claude-code-plugin-python-bootstrap/.claude-plugin/plugin.json",
       "codex_manifest": "plugins/claude-code-plugin-python-bootstrap/.codex-plugin/plugin.json",
-      "hosts": ["claude", "codex"],
-      "skills": ["claude-code-plugin-python-bootstrap"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "claude-code-plugin-python-bootstrap"
+      ],
       "summary": "Single-skill plugin: claude-code-plugin-python-bootstrap."
     },
     {
       "name": "claude-code-plugin-update-flow",
       "claude_manifest": "plugins/claude-code-plugin-update-flow/.claude-plugin/plugin.json",
       "codex_manifest": "plugins/claude-code-plugin-update-flow/.codex-plugin/plugin.json",
-      "hosts": ["claude", "codex"],
-      "skills": ["claude-code-plugin-update-flow"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "claude-code-plugin-update-flow"
+      ],
       "summary": "Single-skill plugin: claude-code-plugin-update-flow."
     },
     {
       "name": "claude-json-mcp-migration-slice",
       "claude_manifest": "plugins/claude-json-mcp-migration-slice/.claude-plugin/plugin.json",
       "codex_manifest": "plugins/claude-json-mcp-migration-slice/.codex-plugin/plugin.json",
-      "hosts": ["claude", "codex"],
-      "skills": ["claude-json-mcp-migration-slice"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "claude-json-mcp-migration-slice"
+      ],
       "summary": "Single-skill plugin: claude-json-mcp-migration-slice."
     },
     {
       "name": "macos-bash-3.2-compat",
       "claude_manifest": "plugins/macos-bash-3.2-compat/.claude-plugin/plugin.json",
       "codex_manifest": "plugins/macos-bash-3.2-compat/.codex-plugin/plugin.json",
-      "hosts": ["claude", "codex"],
-      "skills": ["macos-bash-3.2-compat"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "macos-bash-3.2-compat"
+      ],
       "summary": "Single-skill plugin: macos-bash-3.2-compat."
     },
     {
       "name": "emacs-batch-package-verify-pitfalls",
       "claude_manifest": "plugins/emacs-batch-package-verify-pitfalls/.claude-plugin/plugin.json",
       "codex_manifest": "plugins/emacs-batch-package-verify-pitfalls/.codex-plugin/plugin.json",
-      "hosts": ["claude", "codex"],
-      "skills": ["emacs-batch-package-verify-pitfalls"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "emacs-batch-package-verify-pitfalls"
+      ],
       "summary": "Single-skill plugin: emacs-batch-package-verify-pitfalls."
     },
     {
       "name": "python-symtable-no-col-offset-pairing",
       "claude_manifest": "plugins/python-symtable-no-col-offset-pairing/.claude-plugin/plugin.json",
       "codex_manifest": "plugins/python-symtable-no-col-offset-pairing/.codex-plugin/plugin.json",
-      "hosts": ["claude", "codex"],
-      "skills": ["python-symtable-no-col-offset-pairing"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "python-symtable-no-col-offset-pairing"
+      ],
       "summary": "Single-skill plugin: python-symtable-no-col-offset-pairing."
     },
     {
       "name": "playwright-mcp-upload-hidden-file-input",
       "claude_manifest": "plugins/playwright-mcp-upload-hidden-file-input/.claude-plugin/plugin.json",
       "codex_manifest": "plugins/playwright-mcp-upload-hidden-file-input/.codex-plugin/plugin.json",
-      "hosts": ["claude", "codex"],
-      "skills": ["playwright-mcp-upload-hidden-file-input"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "playwright-mcp-upload-hidden-file-input"
+      ],
       "summary": "Single-skill plugin: playwright-mcp-upload-hidden-file-input."
     },
     {
       "name": "slack-xoxc-session-client",
       "claude_manifest": "plugins/slack-xoxc-session-client/.claude-plugin/plugin.json",
       "codex_manifest": "plugins/slack-xoxc-session-client/.codex-plugin/plugin.json",
-      "hosts": ["claude", "codex"],
-      "skills": ["slack-xoxc-session-client"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "slack-xoxc-session-client"
+      ],
       "summary": "Single-skill plugin: slack-xoxc-session-client (ships a runnable Python client)."
     },
     {
@@ -791,16 +978,26 @@
       "name": "agent-team-orchestration",
       "claude_manifest": "plugins/agent-team-orchestration/.claude-plugin/plugin.json",
       "codex_manifest": "plugins/agent-team-orchestration/.codex-plugin/plugin.json",
-      "hosts": ["claude", "codex"],
-      "skills": ["agent-team-orchestration"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "agent-team-orchestration"
+      ],
       "summary": "Single-skill plugin: agent-team-orchestration."
     },
     {
       "name": "istio-multicluster-endpointless-mesh-service",
       "claude_manifest": "plugins/istio-multicluster-endpointless-mesh-service/.claude-plugin/plugin.json",
       "codex_manifest": "plugins/istio-multicluster-endpointless-mesh-service/.codex-plugin/plugin.json",
-      "hosts": ["claude", "codex"],
-      "skills": ["istio-multicluster-endpointless-mesh-service"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "istio-multicluster-endpointless-mesh-service"
+      ],
       "summary": "Single-skill plugin: istio-multicluster-endpointless-mesh-service."
     }
   ],
