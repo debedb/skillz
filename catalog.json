@@ -387,6 +387,15 @@
         "codex"
       ],
       "summary": "Fix macOS Sparkle updater error 4005 / 'Failed to create installation cache directory' that persists after stripping quarantine: relaunch the un-quarantined bundle."
+    },
+    {
+      "name": "pre-open-source-credential-audit",
+      "path": "skills/pre-open-source-credential-audit/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Audit a git repo for leaked secrets before making it public: scan tracked files AND full history, avoid the git grep -E word-boundary false-negative, catch tracked editor-backup files, and decide rewrite+rotate vs. accept an inert identifier."
     }
   ],
   "collections": [
@@ -453,7 +462,8 @@
         "agent-team-orchestration",
         "slack-xoxc-session-client",
         "istio-multicluster-endpointless-mesh-service",
-        "macos-sparkle-update-quarantine-relaunch"
+        "macos-sparkle-update-quarantine-relaunch",
+        "pre-open-source-credential-audit"
       ],
       "summary": "Full repo bundle: every skill in one plugin."
     },
@@ -999,6 +1009,19 @@
         "istio-multicluster-endpointless-mesh-service"
       ],
       "summary": "Single-skill plugin: istio-multicluster-endpointless-mesh-service."
+    },
+    {
+      "name": "pre-open-source-credential-audit",
+      "claude_manifest": "plugins/pre-open-source-credential-audit/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/pre-open-source-credential-audit/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "pre-open-source-credential-audit"
+      ],
+      "summary": "Single-skill plugin: pre-open-source-credential-audit."
     }
   ],
   "defaults": {
