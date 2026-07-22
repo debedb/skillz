@@ -37,38 +37,18 @@ environments and older Codex versions.
 | [cmux-search](./skills/cmux-search/SKILL.md) | skill | Claude, Codex | Search all open cmux workspaces/tabs/panes - live scrollback + agent transcripts |
 | [macos-sparkle-update-quarantine-relaunch](./skills/macos-sparkle-update-quarantine-relaunch/SKILL.md) | skill | Claude, Codex | Sparkle updater error 4005 / 'Failed to create installation cache directory' persists after stripping quarantine; relaunch the un-quarantined bundle |
 | [cmux-agent-tabs](./skills/cmux-agent-tabs/SKILL.md) | skill | Claude, Codex | Make AI agents show as watchable cmux tabs; Claude needs the `claude-teams` wrapper, Codex via `codex-teams`/hooks |
-| [gh-git-heredoc-body-file](./skills/gh-git-heredoc-body-file/SKILL.md) | skill | Claude, Codex | Body-file pattern: stop gh/git mangling multi-line bodies (backticks, code fences, `$(...)`) |
-| [claude-code-static-allow-bypasses-hook](./skills/claude-code-static-allow-bypasses-hook/SKILL.md) | skill | Claude, Codex | Why a Claude Code PreToolUse hook never fires for some commands (static allow short-circuits it) |
 | [python-ast-static-analyzer-scoping](./skills/python-ast-static-analyzer-scoping/SKILL.md) | skill | Claude, Codex | Build a Python `ast` analyzer: import-alias resolution + load-time vs deferred scoping |
 | [wordpress-com-publish](./skills/wordpress-com-publish/SKILL.md) | skill | Claude, Codex | Acquire a WordPress.com OAuth2 token (authorization-code flow) and publish/update posts |
-| [git-add-u-rename-pitfall](./skills/git-add-u-rename-pitfall/SKILL.md) | skill | Claude, Codex | `git add -u` can miss a rename (old path staged as deleted); stage the new path |
-| [git-branch-cleanup-script-races](./skills/git-branch-cleanup-script-races/SKILL.md) | skill | Claude, Codex | Branch-cleanup scripts race concurrent ref updates; snapshot refs first |
 | [git-graft-worktree-onto-remote](./skills/git-graft-worktree-onto-remote/SKILL.md) | skill | Claude, Codex | Graft a local worktree's commits onto a remote branch without re-cloning |
 | [multi-phase-feature-pr-worktrees](./skills/multi-phase-feature-pr-worktrees/SKILL.md) | skill | Claude, Codex | Run a multi-phase feature as stacked worktree PRs, each reviewed independently |
 | [gist-to-repo-migration](./skills/gist-to-repo-migration/SKILL.md) | skill | Claude, Codex | Migrate a gist's full revision history into a real git repo |
-| [vercel-token-deploy-branch-domains](./skills/vercel-token-deploy-branch-domains/SKILL.md) | skill | Claude, Codex | Token-only per-branch Vercel deploys to fixed custom domains; gitBranch domain pin; preview SSO 401 |
-| [s3-presigned-upload-fails-nonexistent-bucket](./skills/s3-presigned-upload-fails-nonexistent-bucket/SKILL.md) | skill | Claude, Codex | Presigned S3 upload fails on wrong/missing bucket; HeadBucket 404-vs-403; CloudFront origin reveals real bucket |
 | [neon-vercel-db-identify-and-migrate](./skills/neon-vercel-db-identify-and-migrate/SKILL.md) | skill | Claude, Codex | Identify which Neon project backs a Vercel app and migrate/split it; safe non-destructive cutover |
-| [gh-api-f-vs-F-body-file](./skills/gh-api-f-vs-F-body-file/SKILL.md) | skill | Claude, Codex | `gh api -F` reads `@file`; `-f` sends it as a literal string |
-| [gh-api-jq-no-arg](./skills/gh-api-jq-no-arg/SKILL.md) | skill | Claude, Codex | `gh api --jq` needs its filter as the arg; a misplaced/empty `--jq` drops it |
-| [gh-fork-issues-disabled](./skills/gh-fork-issues-disabled/SKILL.md) | skill | Claude, Codex | `gh issue create` fails on a fork (Issues tab disabled by default) |
-| [gh-pr-graphql-401-rest-fallback](./skills/gh-pr-graphql-401-rest-fallback/SKILL.md) | skill | Claude, Codex | gh PR GraphQL 401 -> fall back to the REST PR endpoints |
-| [gh-pr-merge-delete-branch-closes-dependent-pr](./skills/gh-pr-merge-delete-branch-closes-dependent-pr/SKILL.md) | skill | Claude, Codex | Deleting the branch on `gh pr merge` can auto-close a dependent stacked PR |
-| [gh-workflow-run-matching](./skills/gh-workflow-run-matching/SKILL.md) | skill | Claude, Codex | Match a `gh` workflow run to its trigger when runs share a name |
-| [github-api-list-endpoint-staleness-fresh-pr](./skills/github-api-list-endpoint-staleness-fresh-pr/SKILL.md) | skill | Claude, Codex | GitHub list endpoints serve stale `[]` on a fresh PR; use the timeline endpoint |
-| [github-closing-keywords-default-branch-only](./skills/github-closing-keywords-default-branch-only/SKILL.md) | skill | Claude, Codex | `Closes #N` only auto-closes when the PR merges into the default branch |
-| [github-private-repo-readme-image-rendering](./skills/github-private-repo-readme-image-rendering/SKILL.md) | skill | Claude, Codex | Private-repo README images need authenticated/relative paths to render |
 | [claudeception](./skills/claudeception/SKILL.md) | skill | Claude | Continuous-learning meta-skill: procedures become catalog skills via PR; specifics go to memory (local or shared vault) |
-| [claude-code-claudemd-symlink-write-refused](./skills/claude-code-claudemd-symlink-write-refused/SKILL.md) | skill | Claude, Codex | Fix Edit/Write "Refusing to write through symlink" on `~/.claude/CLAUDE.md` by resolving to the real target |
 | [claude-code-codex-plugin-parity](./skills/claude-code-codex-plugin-parity/SKILL.md) | skill | Claude, Codex | Port a Claude Code plugin to the Codex CLI (or back); where the two systems match vs diverge |
-| [claude-code-piebald-lsp-binary-on-path](./skills/claude-code-piebald-lsp-binary-on-path/SKILL.md) | skill | Claude, Codex | Piebald LSP plugins surface the LSP tool but the language-server binary isn't on PATH |
 | [claude-code-plugin-from-existing-repo](./skills/claude-code-plugin-from-existing-repo/SKILL.md) | skill | Claude, Codex | Convert a repo that ships CC commands/hooks (manual copy-in) into an installable plugin |
 | [claude-code-plugin-python-bootstrap](./skills/claude-code-plugin-python-bootstrap/SKILL.md) | skill | Claude, Codex | Bootstrap Python deps from a CC plugin hook so `/plugin install` is one-click (PEP 668-safe) |
 | [claude-code-plugin-update-flow](./skills/claude-code-plugin-update-flow/SKILL.md) | skill | Claude, Codex | Update a CC plugin via `/plugin marketplace update` + `/reload-plugins`, not the picker `/plugin update` |
 | [claude-json-mcp-migration-slice](./skills/claude-json-mcp-migration-slice/SKILL.md) | skill | Claude, Codex | The exact `~/.claude.json` slice that carries MCP config for migration vs session bookkeeping |
-| [macos-bash-3.2-compat](./skills/macos-bash-3.2-compat/SKILL.md) | skill | Claude, Codex | Fix bash scripts that fail on macOS's stock bash 3.2 (`declare -A`, `mapfile`, other bash-4-only constructs) |
-| [emacs-batch-package-verify-pitfalls](./skills/emacs-batch-package-verify-pitfalls/SKILL.md) | skill | Claude, Codex | Avoid false negatives when verifying an Emacs package with `emacs --batch` (no ELPA auto-activation; `use-package` defers `:config`) |
-| [python-symtable-no-col-offset-pairing](./skills/python-symtable-no-col-offset-pairing/SKILL.md) | skill | Claude, Codex | Pair Python `symtable` scopes with AST nodes when symtable has no `col_offset`, via (lineno, name) grouping |
 | [playwright-mcp-upload-hidden-file-input](./skills/playwright-mcp-upload-hidden-file-input/SKILL.md) | skill | Claude, Codex | Upload to a hidden `<input type=file>` via Playwright MCP (unhide+tag, upload, verify via CDN URL) |
 | [agent-team-orchestration](./skills/agent-team-orchestration/SKILL.md) | skill | Claude, Codex | Run a team of agents over a repo's open issues: architect plans the parallel set, per-issue squads (dev + adversarial reviewer + SDET + productivity engineer), each a watchable cmux tab |
 | [istio-multicluster-endpointless-mesh-service](./skills/istio-multicluster-endpointless-mesh-service/SKILL.md) | skill | Claude, Codex | Istio multi-cluster endpoint-less away-Service: use a decoy selector (not an omitted one) so an EndpointSlice anchor exists for the mesh to merge remote endpoints into; for cross-region write-routing / home-away Service topologies |
@@ -79,37 +59,17 @@ environments and older Codex versions.
 | [`review-pr-loop` plugin](./plugins/review-pr-loop/) | plugin | Claude, Codex | Single-skill plugin: review-pr-loop |
 | [`cmux-search` plugin](./plugins/cmux-search/) | plugin | Claude, Codex | Single-skill plugin: search all open cmux panes |
 | [`cmux-agent-tabs` plugin](./plugins/cmux-agent-tabs/) | plugin | Claude, Codex | Single-skill plugin: cmux-agent-tabs |
-| [`gh-git-heredoc-body-file` plugin](./plugins/gh-git-heredoc-body-file/) | plugin | Claude, Codex | Single-skill plugin: gh-git-heredoc-body-file |
-| [`claude-code-static-allow-bypasses-hook` plugin](./plugins/claude-code-static-allow-bypasses-hook/) | plugin | Claude, Codex | Single-skill plugin: claude-code-static-allow-bypasses-hook |
 | [`python-ast-static-analyzer-scoping` plugin](./plugins/python-ast-static-analyzer-scoping/) | plugin | Claude, Codex | Single-skill plugin: python-ast-static-analyzer-scoping |
 | [`wordpress-com-publish` plugin](./plugins/wordpress-com-publish/) | plugin | Claude, Codex | Single-skill plugin: WordPress.com token + publish |
-| [`git-add-u-rename-pitfall` plugin](./plugins/git-add-u-rename-pitfall/) | plugin | Claude, Codex | Single-skill plugin: git-add-u-rename-pitfall |
-| [`git-branch-cleanup-script-races` plugin](./plugins/git-branch-cleanup-script-races/) | plugin | Claude, Codex | Single-skill plugin: git-branch-cleanup-script-races |
 | [`git-graft-worktree-onto-remote` plugin](./plugins/git-graft-worktree-onto-remote/) | plugin | Claude, Codex | Single-skill plugin: git-graft-worktree-onto-remote |
 | [`multi-phase-feature-pr-worktrees` plugin](./plugins/multi-phase-feature-pr-worktrees/) | plugin | Claude, Codex | Single-skill plugin: multi-phase-feature-pr-worktrees |
 | [`gist-to-repo-migration` plugin](./plugins/gist-to-repo-migration/) | plugin | Claude, Codex | Single-skill plugin: gist-to-repo-migration |
-| [`vercel-token-deploy-branch-domains` plugin](./plugins/vercel-token-deploy-branch-domains/) | plugin | Claude, Codex | Single-skill plugin: vercel-token-deploy-branch-domains |
-| [`s3-presigned-upload-fails-nonexistent-bucket` plugin](./plugins/s3-presigned-upload-fails-nonexistent-bucket/) | plugin | Claude, Codex | Single-skill plugin: s3-presigned-upload-fails-nonexistent-bucket |
 | [`neon-vercel-db-identify-and-migrate` plugin](./plugins/neon-vercel-db-identify-and-migrate/) | plugin | Claude, Codex | Single-skill plugin: neon-vercel-db-identify-and-migrate |
-| [`gh-api-f-vs-F-body-file` plugin](./plugins/gh-api-f-vs-F-body-file/) | plugin | Claude, Codex | Single-skill plugin: gh-api-f-vs-F-body-file |
-| [`gh-api-jq-no-arg` plugin](./plugins/gh-api-jq-no-arg/) | plugin | Claude, Codex | Single-skill plugin: gh-api-jq-no-arg |
-| [`gh-fork-issues-disabled` plugin](./plugins/gh-fork-issues-disabled/) | plugin | Claude, Codex | Single-skill plugin: gh-fork-issues-disabled |
-| [`gh-pr-graphql-401-rest-fallback` plugin](./plugins/gh-pr-graphql-401-rest-fallback/) | plugin | Claude, Codex | Single-skill plugin: gh-pr-graphql-401-rest-fallback |
-| [`gh-pr-merge-delete-branch-closes-dependent-pr` plugin](./plugins/gh-pr-merge-delete-branch-closes-dependent-pr/) | plugin | Claude, Codex | Single-skill plugin: gh-pr-merge-delete-branch-closes-dependent-pr |
-| [`gh-workflow-run-matching` plugin](./plugins/gh-workflow-run-matching/) | plugin | Claude, Codex | Single-skill plugin: gh-workflow-run-matching |
-| [`github-api-list-endpoint-staleness-fresh-pr` plugin](./plugins/github-api-list-endpoint-staleness-fresh-pr/) | plugin | Claude, Codex | Single-skill plugin: github-api-list-endpoint-staleness-fresh-pr |
-| [`github-closing-keywords-default-branch-only` plugin](./plugins/github-closing-keywords-default-branch-only/) | plugin | Claude, Codex | Single-skill plugin: github-closing-keywords-default-branch-only |
-| [`github-private-repo-readme-image-rendering` plugin](./plugins/github-private-repo-readme-image-rendering/) | plugin | Claude, Codex | Single-skill plugin: github-private-repo-readme-image-rendering |
-| [`claude-code-claudemd-symlink-write-refused` plugin](./plugins/claude-code-claudemd-symlink-write-refused/) | plugin | Claude, Codex | Single-skill plugin: claude-code-claudemd-symlink-write-refused |
 | [`claude-code-codex-plugin-parity` plugin](./plugins/claude-code-codex-plugin-parity/) | plugin | Claude, Codex | Single-skill plugin: claude-code-codex-plugin-parity |
-| [`claude-code-piebald-lsp-binary-on-path` plugin](./plugins/claude-code-piebald-lsp-binary-on-path/) | plugin | Claude, Codex | Single-skill plugin: claude-code-piebald-lsp-binary-on-path |
 | [`claude-code-plugin-from-existing-repo` plugin](./plugins/claude-code-plugin-from-existing-repo/) | plugin | Claude, Codex | Single-skill plugin: claude-code-plugin-from-existing-repo |
 | [`claude-code-plugin-python-bootstrap` plugin](./plugins/claude-code-plugin-python-bootstrap/) | plugin | Claude, Codex | Single-skill plugin: claude-code-plugin-python-bootstrap |
 | [`claude-code-plugin-update-flow` plugin](./plugins/claude-code-plugin-update-flow/) | plugin | Claude, Codex | Single-skill plugin: claude-code-plugin-update-flow |
 | [`claude-json-mcp-migration-slice` plugin](./plugins/claude-json-mcp-migration-slice/) | plugin | Claude, Codex | Single-skill plugin: claude-json-mcp-migration-slice |
-| [`macos-bash-3.2-compat` plugin](./plugins/macos-bash-3.2-compat/) | plugin | Claude, Codex | Single-skill plugin: macos-bash-3.2-compat |
-| [`emacs-batch-package-verify-pitfalls` plugin](./plugins/emacs-batch-package-verify-pitfalls/) | plugin | Claude, Codex | Single-skill plugin: emacs-batch-package-verify-pitfalls |
-| [`python-symtable-no-col-offset-pairing` plugin](./plugins/python-symtable-no-col-offset-pairing/) | plugin | Claude, Codex | Single-skill plugin: python-symtable-no-col-offset-pairing |
 | [`continuous-learning` plugin](./plugins/continuous-learning/) | plugin | Codex | Single-skill plugin (no hooks) |
 | [`playwright-mcp-upload-hidden-file-input` plugin](./plugins/playwright-mcp-upload-hidden-file-input/) | plugin | Claude, Codex | Single-skill plugin: playwright-mcp-upload-hidden-file-input |
 | [`codex-continuous-learning` plugin](./plugins/codex-continuous-learning/) | plugin | Codex | continuous-learning skill plus UserPromptSubmit + Stop hooks |
