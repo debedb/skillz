@@ -396,6 +396,15 @@
         "codex"
       ],
       "summary": "Audit a git repo for leaked secrets before making it public: scan tracked files AND full history, avoid the git grep -E word-boundary false-negative, catch tracked editor-backup files, and decide rewrite+rotate vs. accept an inert identifier."
+    },
+    {
+      "name": "keda-scale-to-zero-fanout-worker",
+      "path": "skills/keda-scale-to-zero-fanout-worker/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Enable KEDA scale-to-zero on a two-stage fan-out SQS worker via activation-only upstream triggers (large queueLength sentinel), so minReplicaCount:0 doesn't strand the first-stage queue."
     }
   ],
   "collections": [
@@ -463,7 +472,8 @@
         "slack-xoxc-session-client",
         "istio-multicluster-endpointless-mesh-service",
         "macos-sparkle-update-quarantine-relaunch",
-        "pre-open-source-credential-audit"
+        "pre-open-source-credential-audit",
+        "keda-scale-to-zero-fanout-worker"
       ],
       "summary": "Full repo bundle: every skill in one plugin."
     },
@@ -1022,6 +1032,19 @@
         "pre-open-source-credential-audit"
       ],
       "summary": "Single-skill plugin: pre-open-source-credential-audit."
+    },
+    {
+      "name": "keda-scale-to-zero-fanout-worker",
+      "claude_manifest": "plugins/keda-scale-to-zero-fanout-worker/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/keda-scale-to-zero-fanout-worker/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "keda-scale-to-zero-fanout-worker"
+      ],
+      "summary": "Single-skill plugin: keda-scale-to-zero-fanout-worker."
     }
   ],
   "defaults": {

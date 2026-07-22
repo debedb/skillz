@@ -1,0 +1,12 @@
+{
+  "name": "keda-scale-to-zero-fanout-worker",
+  "description": "Enable KEDA scale-to-zero on a two-stage fan-out SQS worker via activation-only upstream triggers (large queueLength sentinel), so minReplicaCount:0 doesn't strand the first-stage queue.",
+  "version": "1.0.0",
+  "author": {
+    "name": "voitta-ai"
+  },
+  "homepage": "https://github.com/voitta-ai/skillz",
+  "repository": "https://github.com/voitta-ai/skillz",
+  "license": "MIT",
+  "skills": "./skills/"
+}

@@ -73,6 +73,7 @@ environments and older Codex versions.
 | [agent-team-orchestration](./skills/agent-team-orchestration/SKILL.md) | skill | Claude, Codex | Run a team of agents over a repo's open issues: architect plans the parallel set, per-issue squads (dev + adversarial reviewer + SDET + productivity engineer), each a watchable cmux tab |
 | [istio-multicluster-endpointless-mesh-service](./skills/istio-multicluster-endpointless-mesh-service/SKILL.md) | skill | Claude, Codex | Istio multi-cluster endpoint-less away-Service: use a decoy selector (not an omitted one) so an EndpointSlice anchor exists for the mesh to merge remote endpoints into; for cross-region write-routing / home-away Service topologies |
 | [pre-open-source-credential-audit](./skills/pre-open-source-credential-audit/SKILL.md) | skill | Claude, Codex | Audit a git repo for leaked secrets before making it public: scan tracked files AND full history, avoid the git grep -E word-boundary false-negative, catch tracked editor-backup files, decide rewrite+rotate vs. accept an inert identifier |
+| [keda-scale-to-zero-fanout-worker](./skills/keda-scale-to-zero-fanout-worker/SKILL.md) | skill | Claude, Codex | KEDA scale-to-zero on a two-stage fan-out SQS worker: activation-only upstream triggers so minReplicaCount:0 doesn't strand the first-stage queue |
 | [`skillz` plugin](./plugins/skillz/) | plugin | Claude, Codex | Full repo bundle: every skill |
 | [`pr-loop` plugin](./plugins/pr-loop/) | plugin | Claude, Codex | Paired author + reviewer PR-loop skills |
 | [`work-on-pr` plugin](./plugins/work-on-pr/) | plugin | Claude, Codex | Single-skill plugin: work-on-pr |
@@ -116,6 +117,7 @@ environments and older Codex versions.
 | [`agent-team-orchestration` plugin](./plugins/agent-team-orchestration/) | plugin | Claude, Codex | Single-skill plugin: agent-team-orchestration |
 | [`istio-multicluster-endpointless-mesh-service` plugin](./plugins/istio-multicluster-endpointless-mesh-service/) | plugin | Claude, Codex | Single-skill plugin: istio-multicluster-endpointless-mesh-service |
 | [`pre-open-source-credential-audit` plugin](./plugins/pre-open-source-credential-audit/) | plugin | Claude, Codex | Single-skill plugin: pre-open-source-credential-audit |
+| [`keda-scale-to-zero-fanout-worker` plugin](./plugins/keda-scale-to-zero-fanout-worker/) | plugin | Claude, Codex | Single-skill plugin: keda-scale-to-zero-fanout-worker |
 | [pr-loop](./collections/pr-loop.json) | collection (legacy) | Claude, Codex | `install.sh` selector. Prefer the `pr-loop` plugin entry. |
 
 Machine-readable index: [`catalog.json`](./catalog.json). The
@@ -164,6 +166,7 @@ skills/                            # canonical skill content
   macos-bash-3.2-compat/SKILL.md
   emacs-batch-package-verify-pitfalls/SKILL.md
   python-symtable-no-col-offset-pairing/SKILL.md
+  keda-scale-to-zero-fanout-worker/SKILL.md
 .claude-plugin/
   marketplace.json                 # Claude Code marketplace (lists all plugin entries)
 .codex-plugin/
@@ -322,6 +325,10 @@ plugins/                           # per-plugin manifests + skill symlinks
     .claude-plugin/plugin.json
     .codex-plugin/plugin.json
     skills/python-symtable-no-col-offset-pairing -> ../../../skills/python-symtable-no-col-offset-pairing
+  keda-scale-to-zero-fanout-worker/ # single-skill plugin
+    .claude-plugin/plugin.json
+    .codex-plugin/plugin.json
+    skills/keda-scale-to-zero-fanout-worker -> ../../../skills/keda-scale-to-zero-fanout-worker
   continuous-learning/             # Codex-only single-skill plugin (no hooks)
     .codex-plugin/plugin.json
     skills/continuous-learning -> ../../../skills/continuous-learning
