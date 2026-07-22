@@ -396,6 +396,12 @@
         "codex"
       ],
       "summary": "Audit a git repo for leaked secrets before making it public: scan tracked files AND full history, avoid the git grep -E word-boundary false-negative, catch tracked editor-backup files, and decide rewrite+rotate vs. accept an inert identifier."
+    },
+    {
+      "name": "git-worktree-add-relative-path-nests-inside-repo",
+      "path": "skills/git-worktree-add-relative-path-nests-inside-repo/SKILL.md",
+      "hosts": ["claude", "codex"],
+      "summary": "git worktree add resolves a relative path against CWD, so running it from inside the repo nests the worktree under the repo instead of the sibling worktrees dir; use an absolute path or git worktree move to fix."
     }
   ],
   "collections": [
@@ -463,7 +469,8 @@
         "slack-xoxc-session-client",
         "istio-multicluster-endpointless-mesh-service",
         "macos-sparkle-update-quarantine-relaunch",
-        "pre-open-source-credential-audit"
+        "pre-open-source-credential-audit",
+        "git-worktree-add-relative-path-nests-inside-repo"
       ],
       "summary": "Full repo bundle: every skill in one plugin."
     },
