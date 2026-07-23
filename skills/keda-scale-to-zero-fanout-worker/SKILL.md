@@ -159,6 +159,35 @@ Two things that scale-to-zero exposes:
   delayed-count alarms are unaffected — a cold-start wait never reaches the
   DLQ, and DelaySeconds is applied regardless of consumer count).
 
+### 4. Apply-time gotcha: Server-Side-Apply field-manager conflict
+
+If min/max on the ScaledObject was ever `kubectl patch`ed out-of-band — common
+on a dev/test cluster, since the usual scale-out test does exactly
+`kubectl patch minReplicaCount=0` — a stale `kubectl-patch` field manager
+co-owns those fields. A terraform `kubernetes_manifest` apply that then changes
+them (e.g. min `1 -> 0`) fails with:
+
+    Error: There was a field manager conflict when trying to apply the manifest
+
+Diagnose with `kubectl get scaledobject <name> --show-managed-fields -o json`
+and look for a non-`Terraform` entry in `.metadata.managedFields[*]` owning
+`f:spec.f:minReplicaCount` / `f:maxReplicaCount`.
+
+Fix is per-resource, on the terraform side — it is NOT something the KEDA
+install / operator owns, so it cannot live in your cluster/eks module:
+
+    resource "kubernetes_manifest" "scaled_object" {
+      field_manager { force_conflicts = true }   # terraform reconciles over manual patches
+      manifest = { ... }
+    }
+
+`force_conflicts` makes terraform's apply steal ownership of the conflicting
+fields back. Tradeoff: an emergency `kubectl patch` to the ScaledObject is then
+reverted on the next apply — the correct policy for a terraform-managed
+resource. The conflict only exists on clusters someone actually patched (often
+just dev), so check `managedFields` per cluster: prod may already have
+`Terraform` as sole owner and not strictly need the flag.
+
 ## Verification
 
 Scale the worker to 0 (let it idle past `cooldownPeriod`), enqueue a **single**
