@@ -15,10 +15,11 @@ description: |
   Encodes the role set, the parallelization decision, the watchability
   convention, and the bottleneck-telemetry pass. cmux is the default interaction
   surface but not required; the same structure works over plain terminals or
-  other multiplexers.
+  other multiplexers. Also use when (5) a spawned wave produces no commits, no
+  dirty files and no replies - agents that are visible but wedged.
 author: Claude Code
-version: 1.2.0
-date: 2026-07-25
+version: 1.3.0
+date: 2026-07-26
 source: https://github.com/voitta-ai/skillz
 source_file: skills/agent-team-orchestration/SKILL.md
 ---
@@ -105,6 +106,34 @@ decided, opinionatedly, and it decided once.
 **Ask each surface/runtime decision at most once.** Once step 0 has resolved the
 surface, no later step re-asks it (gate 4 must not re-pose gate 2). Record the
 resolved surface and reuse it for the whole run.
+
+## Step 0b: executability precondition (a single probe agent, before the wave)
+Step 0 answers "will agents be **visible**." It does not answer "can agents
+**act**." Those are independent preconditions, and passing the first is not
+licence to fan out. A wave can be perfectly visible - names in the agent list,
+elapsed time ticking up - while every agent is wedged on its first tool call.
+
+Do not try to introspect the permission mode. **Probe it.** Spawn exactly
+**one** agent on the smallest issue in the wave, briefed to prove liveness
+before anything else:
+
+> As your very first tool call, run `<trivial command> && echo PROBE_OK`, then
+> immediately `SendMessage` to `main` reporting `PROBE_OK` or
+> `PROBE_BLOCKED - <what happened>`. Do not batch this with other work.
+
+Fan out to the remaining squads **only after the probe confirms**. The probe
+costs ~90 seconds and catches every cause of a wedge - permission mode, quota,
+a dead runtime - not just the one you thought to check.
+
+**If the probe stays silent past ~2 minutes, that is a hard stop.** Do not spawn
+the rest of the wave. Surface it to the operator, because in the common case
+(the session is in a permission mode that gates each tool call, and a background
+subagent has no operator to prompt) **only they can change it.** Recover with
+`TaskStop` per agent by name: it leaves worktrees, branches, and any prepared
+baseline intact, so a restart after the mode is fixed is cheap.
+
+Every squad brief carries the same liveness first call, not just the probe's -
+it turns a 45-minute silent stall into a sub-minute signal.
 
 ## The roles
 Each issue in the active wave gets a squad. Roles are deliberately separated so
@@ -285,19 +314,23 @@ posing it twice is friction.
    session via `cmux claude-teams` (or `cmux codex-teams`) so agents tab, and
    verify with `cmux tree`. If the CLI is absent, or you're on the
    background-agent surface, proceed without tabs - don't re-ask.
-5. **Spin up wave-1 squads.** One dev + reviewer + SDET per active issue, each on
+5. **Step-0b executability probe.** One agent on the smallest issue, liveness
+   first call, `SendMessage` back. Silent past ~2 min = hard stop, `TaskStop`,
+   escalate to the operator. No fan-out until it confirms.
+6. **Spin up wave-1 squads.** One dev + reviewer + SDET per active issue, each on
    its own worktree (`multi-phase-feature-pr-worktrees`), each individually
    watchable (a named tab, or an entry in the native agent list).
-6. **Run the loops.** Developers use `work-on-pr`; reviewers use `review-pr-loop`
+7. **Run the loops.** Developers use `work-on-pr`; reviewers use `review-pr-loop`
    / adversarial review; SDETs exercise the change (auto-started once a deploy is
    up) and file findings.
-7. **Productivity engineer watches** and logs confirmation/info/rework stalls;
-   auto-saves durable learnings by default.
-8. **Integrate + re-plan.** Architect merges independent PRs on green review,
+8. **Productivity engineer watches** and logs confirmation/info/rework stalls;
+   auto-saves durable learnings by default. Liveness is checked against the
+   filesystem, not the agent list.
+9. **Integrate + re-plan.** Architect merges independent PRs on green review,
    escalating only genuine ordering/shared-file conflicts; tracks open vs.
    decided design gates so none is re-posed; re-derives the next wave.
-9. **Retrospective.** Turn telemetry into concrete process fixes; promote
-   reusable learnings as skills.
+10. **Retrospective.** Turn telemetry into concrete process fixes; promote
+    reusable learnings as skills.
 
 ## Outcomes this is built to produce
 - The backlog gets worked with build/attack/verify separation per issue.
@@ -317,6 +350,23 @@ posing it twice is friction.
   installed, so surfaces can't be enumerated or named. Resolve this at step 0,
   not at spawn time - and don't chase the launch-wrapper theory when the run was
   in fact launched that way.
+- **Visible is not the same as working, and there is no progress signal.**
+  Elapsed-time counters keep incrementing for a wedged agent, so a stalled wave
+  is indistinguishable from "agents are thinking hard" - especially under a brief
+  that (correctly) says diagnose before you change code. `SendMessage` does not
+  rescue you: a wedged agent never reaches its inbox, so the one channel you'd
+  reach for to diagnose it is dead for exactly the same reason it's stuck. The
+  reliable liveness oracle is **filesystem state**, which an idling agent cannot
+  fake:
+  ```bash
+  git -C <worktree> status --porcelain      # any dirty files?
+  git -C <worktree> rev-list --count HEAD ^origin/master   # any commits?
+  ls <worktree>/**/__pycache__ 2>/dev/null  # did anything even run?
+  stat -f %m <worktree>                     # mtime still at creation time?
+  ```
+  Zero across all of them, with the agent list ticking, means wedged - not busy.
+  Check whose activity you're reading before drawing conclusions: an architect's
+  own earlier validation run in one worktree can look like a live agent.
 - **Re-plan between waves.** A parallel set chosen up front goes stale once the
   first PRs merge; dependencies shift.
 - **Ask each decision at most once.** Surface/runtime, scope, and design gates are
@@ -329,6 +379,9 @@ posing it twice is friction.
 | Goal | Command / skill |
 |---|---|
 | Step-0 surface check (once) | `which tmux` + `echo $TMUX` + `which cmux` - all three results count |
+| Step-0b executability check | one probe agent, liveness first call, `SendMessage` back; fan out only on `PROBE_OK` |
+| Liveness oracle (wedged vs busy) | `git status --porcelain` / commit count / `__pycache__` / worktree mtime - never the elapsed-time counter |
+| Wedged wave, recovery | `TaskStop` per agent by name; worktrees + branches + baseline survive |
 | Idempotency pre-flight | `gh issue list` / `gh pr list` / `git branch -a` before creating |
 | Plan parallel set | architect reads `gh issue list` / `gh issue view`, groups independent vs serialized |
 | Default scope | all ready/independent issues up to the supervision cap |
