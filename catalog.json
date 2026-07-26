@@ -216,6 +216,15 @@
         "codex"
       ],
       "summary": "git worktree add resolves a relative path against CWD, so running it from inside the repo nests the worktree under the repo instead of the sibling worktrees dir; use an absolute path or git worktree move to fix."
+    },
+    {
+      "name": "openclaw-model-cascade-debugging",
+      "path": "skills/openclaw-model-cascade-debugging/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Diagnose OpenClaw model-cascade failures (gateway process up but every run FailoverErrors because all providers are down), build a free OpenRouter fallback basket to survive codex cooldowns, and verify with one-shot `openclaw agent`."
     }
   ],
   "collections": [
@@ -264,7 +273,8 @@
         "istio-multicluster-endpointless-mesh-service",
         "macos-sparkle-update-quarantine-relaunch",
         "pre-open-source-credential-audit",
-        "git-worktree-add-relative-path-nests-inside-repo"
+        "git-worktree-add-relative-path-nests-inside-repo",
+        "openclaw-model-cascade-debugging"
       ],
       "summary": "Full repo bundle: every skill in one plugin."
     },
@@ -563,6 +573,19 @@
         "pre-open-source-credential-audit"
       ],
       "summary": "Single-skill plugin: pre-open-source-credential-audit."
+    },
+    {
+      "name": "openclaw-model-cascade-debugging",
+      "claude_manifest": "plugins/openclaw-model-cascade-debugging/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/openclaw-model-cascade-debugging/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "openclaw-model-cascade-debugging"
+      ],
+      "summary": "Single-skill plugin: openclaw-model-cascade-debugging."
     }
   ],
   "defaults": {
