@@ -4,20 +4,21 @@ description: |
   Run a team of AI agents against the outstanding issues of a GitHub repo:
   an architect plans what can be parallelized, then each issue gets a small
   squad - a developer, an adversarial reviewer, an SDET/QA, and a productivity
-  engineer that watches for process bottlenecks - with every agent a watchable
-  cmux tab. Use when: (1) you want to work a whole backlog (not one issue) with
-  agents and need a division of labor that an architect derives from the issue
-  graph; (2) you want per-issue dev + review + QA roles rather than a single
-  do-everything agent; (3) you want each agent visible/steerable as its own
-  cmux surface; (4) you want to capture where the run stalled (what needed your
+  engineer that watches for process bottlenecks - with every agent individually
+  watchable and steerable. Use when: (1) you want to work a whole backlog (not
+  one issue) with agents and need a division of labor that an architect derives
+  from the issue graph; (2) you want per-issue dev + review + QA roles rather
+  than a single do-everything agent; (3) you want each agent visible/steerable
+  on its own surface - a cmux tab, or Claude Code's native agent list plus
+  SendMessage; (4) you want to capture where the run stalled (what needed your
   confirmation, what info was missing) as telemetry for improving the loop.
-  Encodes the role set, the parallelization decision, the cmux tab convention,
-  and the bottleneck-telemetry pass. cmux is the default interaction surface but
-  not required; the same structure works over plain terminals or other
-  multiplexers.
+  Encodes the role set, the parallelization decision, the watchability
+  convention, and the bottleneck-telemetry pass. cmux is the default interaction
+  surface but not required; the same structure works over plain terminals or
+  other multiplexers.
 author: Claude Code
-version: 1.1.0
-date: 2026-06-22
+version: 1.2.0
+date: 2026-07-25
 source: https://github.com/voitta-ai/skillz
 source_file: skills/agent-team-orchestration/SKILL.md
 ---
@@ -80,11 +81,18 @@ which tmux        # is a tmux/cmux shim on PATH?
 echo "$TMUX"      # are we inside a tmux/cmux session?
 which cmux        # is cmux installed at all?
 ```
-This is a **once-per-run** check whose result drives an **opinionated default**:
+All three results matter - `which cmux` is not decoration. Shim + `TMUX` is
+**necessary but not sufficient**: without the `cmux` CLI you are inside a
+claude-teams session yet cannot enumerate or name surfaces. This is a
+**once-per-run** check whose result drives an **opinionated default**:
 
-- **If under `cmux claude-teams`** (shim on PATH, `TMUX` set): proceed with
-  watchable per-agent tabs - the cmux path below.
-- **If not under cmux**: **proceed automatically via the Workflow /
+- **Shim on PATH, `TMUX` set, `cmux` CLI present**: proceed with watchable
+  per-agent tabs - the cmux path below.
+- **Shim on PATH, `TMUX` set, but `cmux: command not found`**: proceed anyway
+  and **skip the tab-naming section entirely** - `cmux tree --all` and
+  `cmux tab-action` are unavailable, so there is nothing to name. State that
+  you're doing so; don't ask, and don't re-check later.
+- **Not under cmux at all**: **proceed automatically via the Workflow /
   background-agent surface** - state that you're doing so, don't ask. The role
   structure and wave plan work fine without tabs; you only lose the live-watch
   ergonomics.
@@ -180,27 +188,43 @@ Treat the contract as living: re-publish it each time a gate clears or a
 dependency is delivered. Most multi-repo stalls trace to a missing entry here -
 an unstated address, an unflagged freeze - not to the code.
 
-## Make every agent a watchable cmux tab
-The rule that keeps a multi-agent run legible: **every agent is its own cmux
-surface you can watch and type into.** This applies when step 0 resolved the
-surface to cmux; if it didn't, you're on the background-agent surface and skip
-this section. The runtimes differ - see the
-[`cmux-agent-tabs`](../cmux-agent-tabs/SKILL.md) skill for the full why - but the
-short version:
+## Make every agent watchable and addressable
+The rule that keeps a multi-agent run legible: **every agent must be
+individually watchable and addressable mid-run.** cmux tabs are one mechanism;
+they are not the only one. Two that satisfy the rule:
 
-- **Claude Code** teammates only tab if the root session was launched through the
+- **cmux surfaces** - one tab per agent you can watch and type into. Requires
+  step 0 to have resolved to the full cmux path (shim + `TMUX` + `cmux` CLI).
+- **Claude Code's native agent list** - Agent-tool subagents render in-TUI under
+  the `main` node with live elapsed time, and are steerable by name via
+  `SendMessage`. No cmux tabs are involved and the run is still legible.
+
+Which one you get depends on the **spawn path**, not just the launch wrapper -
+see the [`cmux-agent-tabs`](../cmux-agent-tabs/SKILL.md) skill for the full why,
+but the short version:
+
+- **Claude Code teammates** only tab if the root session was launched through the
   `cmux claude-teams` wrapper (it prepends a tmux shim to PATH).
   `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` alone is a red herring. (This is what
   the step-0 `which tmux` + `echo $TMUX` check detects.)
+- **Claude Code Agent-tool subagents** do **not** tab even under
+  `cmux claude-teams` - they run in Claude Code's own subagent runtime and
+  surface in the native agent list instead. Launching correctly does not change
+  this; the spawn path does.
 - **Codex** subagents tab automatically under `cmux codex-teams` /
   `cmux hooks setup codex`.
 
-Name tabs `<project>-<issue>-<role>` so the wall of panes is readable:
+When you are on the cmux path, name tabs `<project>-<issue>-<role>` so the wall
+of panes is readable:
 ```bash
 cmux tab-action --action rename --tab surface:N --title "<project>-<issue>-dev"
 # ...-rev, ...-qa, ...-arch
 cmux tree --all      # list every surface + ref
 ```
+Both commands need the `cmux` CLI. If step 0 found the shim without the CLI, or
+the agents came from the Agent tool, skip this block - the agents are watchable
+in the native list and there is nothing to rename.
+
 cmux is the default surface because you can watch and steer mid-run, but it is
 **not required** - the role structure and wave plan work over plain terminals,
 tmux, or any multiplexer. If you skip cmux, just lose the live-watch ergonomics.
@@ -248,19 +272,22 @@ posing it twice is friction.
 
 ## Workflow
 1. **Step-0 runtime precondition.** Architect runs `which tmux` + `echo $TMUX` +
-   `which cmux` and resolves the surface (cmux vs. background-agent) **once**,
-   opinionatedly - no spawn-time re-ask.
+   `which cmux` and resolves the surface **once**, opinionatedly - full cmux,
+   shim-without-CLI (proceed, skip tab naming), or background-agent. No
+   spawn-time re-ask.
 2. **Architect conversation.** Architect reads issues + repo, proposes the wave
    plan and squads. Default scope = all ready/independent issues up to the
    supervision cap; only narrow if it exceeds what you can watch.
 3. **Idempotency pre-flight.** Before filing/creating anything, run
    `gh issue list` / `gh pr list` / `git branch -a`; extend existing work rather
    than duplicate.
-4. **Launch the surface.** If step 0 resolved to cmux, start the root session via
-   `cmux claude-teams` (or `cmux codex-teams`) so agents tab; otherwise proceed on
-   the background-agent surface. Verify cmux with `cmux tree`.
+4. **Launch the surface.** If step 0 resolved to full cmux, start the root
+   session via `cmux claude-teams` (or `cmux codex-teams`) so agents tab, and
+   verify with `cmux tree`. If the CLI is absent, or you're on the
+   background-agent surface, proceed without tabs - don't re-ask.
 5. **Spin up wave-1 squads.** One dev + reviewer + SDET per active issue, each on
-   its own worktree (`multi-phase-feature-pr-worktrees`), each a named tab.
+   its own worktree (`multi-phase-feature-pr-worktrees`), each individually
+   watchable (a named tab, or an entry in the native agent list).
 6. **Run the loops.** Developers use `work-on-pr`; reviewers use `review-pr-loop`
    / adversarial review; SDETs exercise the change (auto-started once a deploy is
    up) and file findings.
@@ -283,9 +310,13 @@ posing it twice is friction.
   just relocates the bottleneck to you - size the wave to your attention.
 - **Don't merge the dev and review roles** to save agents; that defeats the
   adversarial review.
-- **cmux tabbing is asymmetric** across runtimes - if Claude teammates aren't
-  tabbing, you almost certainly didn't launch via `cmux claude-teams`
-  (`cmux-agent-tabs`). Resolve this at step 0, not at spawn time.
+- **cmux tabbing is asymmetric** across runtimes, and "no tabs" has more than one
+  cause (`cmux-agent-tabs`): the session wasn't launched via `cmux claude-teams`;
+  the agents came from the **Agent tool** rather than teammate spawning (correct
+  launch, still no tabs); or the tmux shim is present but the `cmux` CLI isn't
+  installed, so surfaces can't be enumerated or named. Resolve this at step 0,
+  not at spawn time - and don't chase the launch-wrapper theory when the run was
+  in fact launched that way.
 - **Re-plan between waves.** A parallel set chosen up front goes stale once the
   first PRs merge; dependencies shift.
 - **Ask each decision at most once.** Surface/runtime, scope, and design gates are
@@ -297,17 +328,18 @@ posing it twice is friction.
 ## Quick reference
 | Goal | Command / skill |
 |---|---|
-| Step-0 surface check (once) | `which tmux` + `echo $TMUX` + `which cmux` |
+| Step-0 surface check (once) | `which tmux` + `echo $TMUX` + `which cmux` - all three results count |
 | Idempotency pre-flight | `gh issue list` / `gh pr list` / `git branch -a` before creating |
 | Plan parallel set | architect reads `gh issue list` / `gh issue view`, groups independent vs serialized |
 | Default scope | all ready/independent issues up to the supervision cap |
 | Default merge order | independent PRs merge on green; escalate only ordering/shared-file conflicts |
 | Cheap process decisions | default yes with opt-out (auto-save learnings, auto-continue SDET) |
 | Design conflicts | human gate, posed once, recorded - never re-posed |
-| Claude agents -> tabs | launch via `cmux claude-teams ...` |
+| Claude teammates -> tabs | launch via `cmux claude-teams ...` |
+| Claude Agent-tool subagents | never tab; watch in the native agent list, steer via `SendMessage` |
 | Codex agents -> tabs | `cmux codex-teams ...` / `cmux hooks setup codex` |
-| Is Claude bridge active? | `which tmux` (shim) + `TMUX` set |
-| Name a squad tab | `cmux tab-action --action rename --tab surface:N --title "<proj>-<issue>-<role>"` |
+| Is Claude bridge active? | `which tmux` (shim) + `TMUX` set + `which cmux` (CLI) |
+| Name a squad tab | `cmux tab-action --action rename --tab surface:N --title "<proj>-<issue>-<role>"` (needs the `cmux` CLI) |
 | Per-issue isolation | `multi-phase-feature-pr-worktrees` |
 | Dev loop | `work-on-pr` |
 | Review loop | `review-pr-loop` / `/codex:adversarial-review` |

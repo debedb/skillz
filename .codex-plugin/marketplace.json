@@ -214,7 +214,7 @@
     {
       "name": "agent-team-orchestration",
       "source": "./plugins/agent-team-orchestration/",
-      "description": "Run a team of agents over a repo's open issues: architect plans the parallel set, per-issue squads (dev + adversarial reviewer + SDET + productivity engineer), each a watchable cmux tab."
+      "description": "Run a team of agents over a repo's open issues: architect plans the parallel set, per-issue squads (dev + adversarial reviewer + SDET + productivity engineer), each individually watchable."
     },
     {
       "name": "istio-multicluster-endpointless-mesh-service",

@@ -170,7 +170,7 @@
         "claude",
         "codex"
       ],
-      "summary": "Run a team of agents over a repo's open issues: architect plans the parallel set, per-issue squads (dev + adversarial reviewer + SDET + productivity engineer), each a watchable cmux tab."
+      "summary": "Run a team of agents over a repo's open issues: architect plans the parallel set, per-issue squads (dev + adversarial reviewer + SDET + productivity engineer), each individually watchable."
     },
     {
       "name": "slack-xoxc-session-client",
