@@ -243,6 +243,33 @@
         "codex"
       ],
       "summary": "Diagnose why cmux does not resume agent sessions after a macOS reboot even though terminal.autoResumeAgentSessions is enabled."
+    },
+    {
+      "name": "terraform-state-version-apply-forensics",
+      "path": "skills/terraform-state-version-apply-forensics/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Prove a terraform change really was applied to an env: census versioned S3 tfstate objects (serial + resource-type counts) + cross-check CloudTrail; separates a real apply from a reverted one, identifies which variant of a stacked change ran, and tells untracked orphans from failed destroys"
+    },
+    {
+      "name": "terraform-ecs-capacity-provider-staged-teardown",
+      "path": "skills/terraform-ecs-capacity-provider-staged-teardown/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Tear down an ECS-on-EC2 capacity-provider stack when one apply deadlocks with ResourceInUseException: destroy order is reverse-dependency, so compute tears down before the workload; split into two sequential untargeted applies, workload first"
+    },
+    {
+      "name": "gh-pr-merge-delete-branch-closes-dependent-pr",
+      "path": "skills/gh-pr-merge-delete-branch-closes-dependent-pr/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Stacked PRs: merging the upstream PR with branch deletion AUTO-CLOSES the dependent PR instead of retargeting it, and gh pr reopen then fails because the base ref is gone; recover by recreating the ref, or prevent by retargeting downstream PRs first"
     }
   ],
   "collections": [
@@ -294,7 +321,10 @@
         "git-worktree-add-relative-path-nests-inside-repo",
         "openclaw-model-cascade-debugging",
         "claude-code-plugin-publish-anthropic-marketplace",
-        "cmux-autoresume-after-reboot"
+        "cmux-autoresume-after-reboot",
+        "terraform-state-version-apply-forensics",
+        "terraform-ecs-capacity-provider-staged-teardown",
+        "gh-pr-merge-delete-branch-closes-dependent-pr"
       ],
       "summary": "Full repo bundle: every skill in one plugin."
     },
@@ -606,6 +636,45 @@
         "openclaw-model-cascade-debugging"
       ],
       "summary": "Single-skill plugin: openclaw-model-cascade-debugging."
+    },
+    {
+      "name": "terraform-state-version-apply-forensics",
+      "claude_manifest": "plugins/terraform-state-version-apply-forensics/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/terraform-state-version-apply-forensics/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "terraform-state-version-apply-forensics"
+      ],
+      "summary": "Single-skill plugin: terraform-state-version-apply-forensics."
+    },
+    {
+      "name": "terraform-ecs-capacity-provider-staged-teardown",
+      "claude_manifest": "plugins/terraform-ecs-capacity-provider-staged-teardown/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/terraform-ecs-capacity-provider-staged-teardown/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "terraform-ecs-capacity-provider-staged-teardown"
+      ],
+      "summary": "Single-skill plugin: terraform-ecs-capacity-provider-staged-teardown."
+    },
+    {
+      "name": "gh-pr-merge-delete-branch-closes-dependent-pr",
+      "claude_manifest": "plugins/gh-pr-merge-delete-branch-closes-dependent-pr/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/gh-pr-merge-delete-branch-closes-dependent-pr/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "gh-pr-merge-delete-branch-closes-dependent-pr"
+      ],
+      "summary": "Single-skill plugin: gh-pr-merge-delete-branch-closes-dependent-pr."
     }
   ],
   "defaults": {
