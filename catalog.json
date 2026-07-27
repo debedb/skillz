@@ -225,6 +225,24 @@
         "codex"
       ],
       "summary": "Diagnose OpenClaw model-cascade failures (gateway process up but every run FailoverErrors because all providers are down), build a free OpenRouter fallback basket to survive codex cooldowns, and verify with one-shot `openclaw agent`."
+    },
+    {
+      "name": "claude-code-plugin-publish-anthropic-marketplace",
+      "path": "skills/claude-code-plugin-publish-anthropic-marketplace/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Publish a Claude Code plugin to Anthropic's plugin marketplace, including the pre-submission validation pass."
+    },
+    {
+      "name": "cmux-autoresume-after-reboot",
+      "path": "skills/cmux-autoresume-after-reboot/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Diagnose why cmux does not resume agent sessions after a macOS reboot even though terminal.autoResumeAgentSessions is enabled."
     }
   ],
   "collections": [
@@ -274,7 +292,9 @@
         "macos-sparkle-update-quarantine-relaunch",
         "pre-open-source-credential-audit",
         "git-worktree-add-relative-path-nests-inside-repo",
-        "openclaw-model-cascade-debugging"
+        "openclaw-model-cascade-debugging",
+        "claude-code-plugin-publish-anthropic-marketplace",
+        "cmux-autoresume-after-reboot"
       ],
       "summary": "Full repo bundle: every skill in one plugin."
     },

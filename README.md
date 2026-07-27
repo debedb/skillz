@@ -37,6 +37,7 @@ environments and older Codex versions.
 | [cmux-search](./skills/cmux-search/SKILL.md) | skill | Claude, Codex | Search all open cmux workspaces/tabs/panes - live scrollback + agent transcripts |
 | [macos-sparkle-update-quarantine-relaunch](./skills/macos-sparkle-update-quarantine-relaunch/SKILL.md) | skill | Claude, Codex | Sparkle updater error 4005 / 'Failed to create installation cache directory' persists after stripping quarantine; relaunch the un-quarantined bundle |
 | [cmux-agent-tabs](./skills/cmux-agent-tabs/SKILL.md) | skill | Claude, Codex | Make AI agents show as watchable cmux tabs; Claude needs the `claude-teams` wrapper, Codex via `codex-teams`/hooks |
+| [cmux-autoresume-after-reboot](./skills/cmux-autoresume-after-reboot/SKILL.md) | skill | Claude, Codex | Why cmux does not resume agent sessions after a macOS reboot despite `autoResumeAgentSessions` |
 | [python-ast-static-analyzer-scoping](./skills/python-ast-static-analyzer-scoping/SKILL.md) | skill | Claude, Codex | Build a Python `ast` analyzer: import-alias resolution + load-time vs deferred scoping |
 | [wordpress-com-publish](./skills/wordpress-com-publish/SKILL.md) | skill | Claude, Codex | Acquire a WordPress.com OAuth2 token (authorization-code flow) and publish/update posts |
 | [git-graft-worktree-onto-remote](./skills/git-graft-worktree-onto-remote/SKILL.md) | skill | Claude, Codex | Graft a local worktree's commits onto a remote branch without re-cloning |
@@ -48,6 +49,7 @@ environments and older Codex versions.
 | [claude-code-plugin-from-existing-repo](./skills/claude-code-plugin-from-existing-repo/SKILL.md) | skill | Claude, Codex | Convert a repo that ships CC commands/hooks (manual copy-in) into an installable plugin |
 | [claude-code-plugin-python-bootstrap](./skills/claude-code-plugin-python-bootstrap/SKILL.md) | skill | Claude, Codex | Bootstrap Python deps from a CC plugin hook so `/plugin install` is one-click (PEP 668-safe) |
 | [claude-code-plugin-update-flow](./skills/claude-code-plugin-update-flow/SKILL.md) | skill | Claude, Codex | Update a CC plugin via `/plugin marketplace update` + `/reload-plugins`, not the picker `/plugin update` |
+| [claude-code-plugin-publish-anthropic-marketplace](./skills/claude-code-plugin-publish-anthropic-marketplace/SKILL.md) | skill | Claude, Codex | Publish a CC plugin to Anthropic's marketplace, plus the pre-submission validation pass |
 | [claude-json-mcp-migration-slice](./skills/claude-json-mcp-migration-slice/SKILL.md) | skill | Claude, Codex | The exact `~/.claude.json` slice that carries MCP config for migration vs session bookkeeping |
 | [playwright-mcp-upload-hidden-file-input](./skills/playwright-mcp-upload-hidden-file-input/SKILL.md) | skill | Claude, Codex | Upload to a hidden `<input type=file>` via Playwright MCP (unhide+tag, upload, verify via CDN URL) |
 | [agent-team-orchestration](./skills/agent-team-orchestration/SKILL.md) | skill | Claude, Codex | Run a team of agents over a repo's open issues: architect plans the parallel set, per-issue squads (dev + adversarial reviewer + SDET + productivity engineer), each individually watchable |
