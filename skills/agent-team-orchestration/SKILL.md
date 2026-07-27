@@ -18,8 +18,8 @@ description: |
   other multiplexers. Also use when (5) a spawned wave produces no commits, no
   dirty files and no replies - agents that are visible but wedged.
 author: Claude Code
-version: 1.3.0
-date: 2026-07-26
+version: 1.4.0
+date: 2026-07-27
 source: https://github.com/voitta-ai/skillz
 source_file: skills/agent-team-orchestration/SKILL.md
 ---
@@ -143,13 +143,50 @@ no agent both writes and blesses the same code.
 |---|---|---|
 | **Architect / integrator** | Plans the parallel set, assigns squads, integrates merged work, resolves cross-issue conflicts. One per run. | `gh`, the issue graph; `multi-phase-feature-pr-worktrees` for isolation |
 | **Developer** | Implements the issue on its own branch/worktree, opens the PR, addresses review. | `work-on-pr` (author-side PR loop) |
-| **Adversarial reviewer** | Tries to *break* the developer's PR, not rubber-stamp it. Separate agent from the developer. | `review-pr-loop`; Codex `/codex:adversarial-review` |
+| **Adversarial reviewer** | Tries to *break* the developer's PR, not rubber-stamp it. A **different model provider** than the author; sees the **diff + contract only**; posts a **PR-visible verdict**. | `review-pr-loop`; Codex `/codex:adversarial-review` |
 | **SDET / QA** | Exercises the change like a user - crawls routes/forms, watches console+network, files real findings. | `sdet-explore`, `sdet-email-flow` |
 | **Productivity engineer** | Meta-role. Watches the whole run for *process* bottlenecks: what needed your confirmation, what info was missing, where agents stalled. Feeds improvements back. | telemetry pass below; `continuous-learning` / claudeception |
 
 Keep the developer and reviewer as **distinct agents**. The value of the
 adversarial review collapses if the same context that wrote the code also
 reviews it.
+
+## Adversarial review: independence, artifact, aggregation
+Separate-agent is the floor, not the ceiling. Four rules make the review
+actually load-bearing:
+
+- **Independence is by model *provider*, not just a separate agent or harness.**
+  A reviewer from the author's own model family shares its blind spots. Prefer a
+  reviewer on a **different provider** (author = Claude -> reviewer = Codex/GPT,
+  and vice-versa). A different *harness* on the **same** provider (e.g. two tools
+  both driving GPT) is **not** an independent review - say so, and treat it as
+  weaker. (External convergence: Databricks' Omnigent routes every diff to a
+  reviewer of a different vendor than the one that wrote it.)
+- **The reviewer sees the diff + acceptance contract only - never the
+  implementer's worktree.** Point it at the worktree and its stray edits can
+  reach the deliverable; only the implementer opens/updates the PR. The reviewer
+  **reports, it does not fix.**
+- **Leave a PR-visible verdict (auditability).** The review lands as an artifact
+  on the PR - `gh pr review` (approve / request-changes) or a comment with
+  per-finding `Real/Valid/Reject` + rationale, tagged with the reviewer's
+  identity (`[claude]` / `[codex]`). A verdict that lives only in an agent's
+  transcript is unverifiable; "both approved first pass, zero rework" with **no
+  artifact on the PR** is a claim, not evidence. A squash-merge collapses review
+  comments out of mainline history, so the **PR thread is the durable record** -
+  keep it there, don't rely on the merge body.
+- **Aggregating multiple reviewers (the council) - aggregate by output type.**
+  On a high-blast-radius PR you may run more than one reviewer. Do **not**
+  majority-vote everything:
+  - **Bug findings -> union, then verify.** Take the union of what *any* reviewer
+    flags (a real high-severity bug is often caught by only one), then run one
+    cheap confirmer per finding to drop false positives. Majority-vote on
+    findings *suppresses the minority-but-real bug* - the wrong aggregator for
+    recall.
+  - **The APPROVE / REQUEST_CHANGES verdict -> majority.** The verdict is a
+    judgment call; an outlier approving what the others would block should be
+    outvoted.
+  - **N=3 is the cost/recall knee** for a small diff - a 4th/5th reviewer rarely
+    adds a finding. Scale N with diff size and blast radius, not a fixed count.
 
 ## Choosing the parallel set
 The architect's core deliverable. Heuristics:
@@ -342,7 +379,13 @@ posing it twice is friction.
 - **Supervision is the real cap.** More squads than you can watch and unblock
   just relocates the bottleneck to you - size the wave to your attention.
 - **Don't merge the dev and review roles** to save agents; that defeats the
-  adversarial review.
+  adversarial review. And separate-agent alone is weak: independence is by model
+  **provider**, the reviewer sees **diff + contract only**, and its verdict must
+  land as a **PR artifact** - a narrated "approved" with nothing on the PR is
+  unverifiable.
+- **Majority-vote is the wrong aggregator for bug recall.** A real high-severity
+  bug is often caught by only one reviewer; union-then-verify keeps it, majority
+  drops it. Reserve majority for the approve/request-changes verdict.
 - **cmux tabbing is asymmetric** across runtimes, and "no tabs" has more than one
   cause (`cmux-agent-tabs`): the session wasn't launched via `cmux claude-teams`;
   the agents came from the **Agent tool** rather than teammate spawning (correct
@@ -396,5 +439,9 @@ posing it twice is friction.
 | Per-issue isolation | `multi-phase-feature-pr-worktrees` |
 | Dev loop | `work-on-pr` |
 | Review loop | `review-pr-loop` / `/codex:adversarial-review` |
+| Reviewer independence | different model **provider**, not just a separate agent/harness |
+| Reviewer inputs | diff + acceptance contract only - never the implementer's worktree |
+| Review verdict | PR artifact (`gh pr review` / comment, per-finding + identity tag) - not the merge body |
+| Council aggregation | bug findings -> union-then-verify; approve/RC verdict -> majority; N=3 knee |
 | QA pass | `sdet-explore`, `sdet-email-flow` |
 | Promote learnings | `continuous-learning` / claudeception |
