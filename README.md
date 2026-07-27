@@ -715,12 +715,29 @@ token shapes, `PRIVATE KEY` blocks, RFC-1918 IPs, `.internal`/`.corp` domains)
 and exits non-zero on any hit.
 
 Client/account **names** can't live in a denylist in this public repo, so the
-script reads them from a private, out-of-repo wordlist (one term per line):
+script reads them from a private, out-of-repo wordlist — one term per line,
+blank lines and `#` comments ignored, each term matched case-insensitively
+(names get written `Foo`, `foo`, and `FOO`). It defaults to
+`~/.config/skillz/sensitive-terms.txt`, so once that file exists the name
+check runs with no flags:
 
 ```bash
-SKILLZ_SENSITIVE_TERMS_FILE=~/.config/skillz/sensitive-terms.txt \
-  ./scripts/check-sensitive-terms.sh skills/<new-skill>/
+mkdir -p ~/.config/skillz
+cat >> ~/.config/skillz/sensitive-terms.txt <<'EOF'
+# employer / client names, internal repo + service prefixes
+EOF
+
+./scripts/check-sensitive-terms.sh skills/<new-skill>/
 ```
+
+Point `SKILLZ_SENSITIVE_TERMS_FILE` elsewhere to override the default. If it
+is set to a path that doesn't exist the script exits `2` rather than quietly
+downgrading to structural-only — a typo'd path should fail loudly, not look
+clean.
+
+Without a wordlist you get structural checks only, and the script says so.
+That is the expected state for anyone outside the org: the names that matter
+are exactly the ones this repo must not carry.
 
 Clean exit = safe to promote. This is the automated form of the hard rule
 "the public repo must never contain account IDs, client names, domains, or
