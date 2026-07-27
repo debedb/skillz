@@ -216,6 +216,24 @@
         "codex"
       ],
       "summary": "git worktree add resolves a relative path against CWD, so running it from inside the repo nests the worktree under the repo instead of the sibling worktrees dir; use an absolute path or git worktree move to fix."
+    },
+    {
+      "name": "claude-code-plugin-publish-anthropic-marketplace",
+      "path": "skills/claude-code-plugin-publish-anthropic-marketplace/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Publish a Claude Code plugin to Anthropic's plugin marketplace, including the pre-submission validation pass."
+    },
+    {
+      "name": "cmux-autoresume-after-reboot",
+      "path": "skills/cmux-autoresume-after-reboot/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Diagnose why cmux does not resume agent sessions after a macOS reboot even though terminal.autoResumeAgentSessions is enabled."
     }
   ],
   "collections": [
@@ -264,7 +282,9 @@
         "istio-multicluster-endpointless-mesh-service",
         "macos-sparkle-update-quarantine-relaunch",
         "pre-open-source-credential-audit",
-        "git-worktree-add-relative-path-nests-inside-repo"
+        "git-worktree-add-relative-path-nests-inside-repo",
+        "claude-code-plugin-publish-anthropic-marketplace",
+        "cmux-autoresume-after-reboot"
       ],
       "summary": "Full repo bundle: every skill in one plugin."
     },
