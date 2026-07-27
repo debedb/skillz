@@ -696,6 +696,36 @@ The script:
 
 Run it before opening a PR that touches the catalog or installer.
 
+## Pre-publish sensitive-term gate
+
+When a skill is authored on a client / day-job machine and promoted here, its
+`SKILL.md` (and any shipped code) can leak content the public repo must never
+carry — account IDs, keys/tokens, client names, internal domains, infra
+topology. Run the gate before opening the PR:
+
+```bash
+./scripts/check-sensitive-terms.sh skills/<new-skill>/
+```
+
+It greps for **structural** leaks that are safe to enumerate publicly (AWS
+account-id / access-key shapes, Slack `xox*`/`xapp-` and GitHub/OpenAI/Google
+token shapes, `PRIVATE KEY` blocks, RFC-1918 IPs, `.internal`/`.corp` domains)
+and exits non-zero on any hit.
+
+Client/account **names** can't live in a denylist in this public repo, so the
+script reads them from a private, out-of-repo wordlist (one term per line):
+
+```bash
+SKILLZ_SENSITIVE_TERMS_FILE=~/.config/skillz/sensitive-terms.txt \
+  ./scripts/check-sensitive-terms.sh skills/<new-skill>/
+```
+
+Clean exit = safe to promote. This is the automated form of the hard rule
+"the public repo must never contain account IDs, client names, domains, or
+infra topology" — make it a step in the claudeception / skill-promotion flow.
+(Optionally wire it into CI over changed skill paths; it currently reports
+clean across all of `skills/`.)
+
 ## Related code-review approaches
 
 The pr-loop collection operates at the **workflow** layer — when to
