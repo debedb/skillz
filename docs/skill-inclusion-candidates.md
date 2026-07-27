@@ -25,14 +25,15 @@ A skill **qualifies** for this catalog when all of the following hold:
    not about one employer's systems.
 2. **Reusable outside one org.** A stranger with the same tool hits the
    same problem. No dependence on private infrastructure to be useful.
-3. **No internal references.** It names no ZoomInfo / Clickagy / Voitta
-   internal account, repo, service, cluster, dashboard, or process.
+3. **No internal references.** It names no employer-internal or
+   client-internal account, repo, service, cluster, dashboard, or
+   process — and no internal naming that would identify one.
 
 A skill is **disqualified** when any of the following hold:
 
-- It references internal accounts, repos, services, or data
-  (`zoominfo-*`, `clickagy-*`, `kpv2-*`, internal AWS account IDs,
-  named internal clusters/dashboards, internal Jira projects).
+- It references internal accounts, repos, services, or data: internal
+  repo/service name prefixes, cloud account IDs, named internal
+  clusters or dashboards, internal Jira projects.
 - Its value is a runbook for a specific internal system, even if the
   underlying tool is public.
 - It is operational/process glue for one team (deploy announcements,
@@ -213,41 +214,31 @@ pass; out of scope now. Approximate set (~45):
 
 The remaining ~145 skills are runbooks for internal systems or name
 internal accounts/repos/services/dashboards. They fail bar rule 3 and
-must not be published. By prefix family:
+must not be published.
 
-- ZoomInfo: `zoominfo-*`, `zi-*`, `zichat-interaction`,
-  `intent-audience-count-discrepancy`, `dsp-mos-data-debugging`,
-  `persona-service-*`, `bidder-*`, `zimos-jira-fix-version`
-- Clickagy: `clickagy-*`, `kpv2-*`,
-  `crowdstrike-falcon-eks-clickagy-onboarding`
-- Internal AWS / infra (account-, cluster-, or pipeline-specific):
-  most `aws-*`, `cloudwatch-*`, `eks-*`, `alb-*`, `athena-*`,
-  `kinesis-*`, `kcl-*`, `kpl-*`, `nat-metrics-*`, `vpc-flow-logs-*`,
-  `flow-logs-*`, `app-signals-*`, `cost-explorer-*`, `ecs-*`,
-  `istio-*`, `mwaa-*`, `airflow-*`, `grafana-*`, `amg-token-rotation`,
-  `pagerduty-*`, internal-state `terraform-*`
-  (`terraform-shared-infra-identity-lookup`,
-  `terraform-cross-state-tag-ownership`,
-  `terraform-sibling-repo-convention-survey`,
-  `terraform-aws-provider-profile-vs-env-vars`, ...),
-  `identify-aws-service-from-flow-log-ip`,
-  `manual-apply-overwritten-by-main-ci`,
-  `manual-dev-apply-stale-service-version-downgrades-image`,
-  `ci-dual-region-ecr-push-gap`, `ci-spotless-autopush-detached-head`,
-  `s3-write-backend-ab-parallel-glue-table`,
-  `log-sink-insert-echo-amplification`
-- Internal Jira / Atlassian workflows:
-  `jira-mcp-issue-and-link-gotchas`, `jira-changelog-mcp-gotchas`,
-  `mcp-atlassian-search-result-schema`
-- Internal ops / process: `daily-activity-log`,
-  `clickagy-prod-deploy-announce`, `zi-operating-system`,
-  `zi-nft-gatling-add-service`, `zi-gcs-retention-compliance`
+**This list is deliberately not enumerated here.** An inventory of
+internal skill names is itself an internal reference — it exposes the
+shape of private systems even when no individual runbook is published.
+The excluded set is tracked privately; it belongs in the internal
+skills repo, not in this public catalog. By category, without names:
 
-Boundary note: a few `terraform-*` and `micronaut-*` entries are
-framework-generic rather than internal and are listed under Deferred,
-not here. The split between Deferred and Excluded for borderline infra
-skills should be confirmed by reading each `SKILL.md` when #58 is
-executed — names alone occasionally understate internal coupling.
+- Employer- or client-specific product and service runbooks.
+- Account-, cluster-, or pipeline-specific cloud/infra procedures,
+  including the subset of `terraform-*` entries bound to shared
+  internal state.
+- Internal Jira / Atlassian workflow gotchas tied to a private
+  instance.
+- Team operational glue: deploy announcements, daily logs, on-call.
+
+Boundary note: some infra and framework entries are generic rather
+than internal and are listed under Deferred, not excluded. Confirm the
+split by reading each `SKILL.md` — names alone occasionally understate
+internal coupling, in both directions.
+
+**Sanitizing is not a promotion path.** A skill that names internal
+systems is held for the internal repo, not rewritten to hide them.
+Genericizing an internal runbook produces a worse skill and still
+leaks the underlying problem shape.
 
 ## Recommendation
 
