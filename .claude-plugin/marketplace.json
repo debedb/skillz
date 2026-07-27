@@ -9,7 +9,7 @@
     {
       "name": "skillz",
       "source": "./plugins/skillz/",
-      "description": "Full bundle: every skill in the catalog (work-on-pr, review-pr-loop, continuous-learning, cmux-search, cmux-agent-tabs, gh-git-heredoc-body-file, claude-code-static-allow-bypasses-hook, python-ast-static-analyzer-scoping, wordpress-com-publish, git-add-u-rename-pitfall, git-branch-cleanup-script-races, git-graft-worktree-onto-remote, multi-phase-feature-pr-worktrees, gist-to-repo-migration, vercel-token-deploy-branch-domains, s3-presigned-upload-fails-nonexistent-bucket, neon-vercel-db-identify-and-migrate, gh-api-f-vs-F-body-file, gh-api-jq-no-arg, gh-fork-issues-disabled, gh-pr-graphql-401-rest-fallback, gh-pr-merge-delete-branch-closes-dependent-pr, gh-workflow-run-matching, github-api-list-endpoint-staleness-fresh-pr, github-closing-keywords-default-branch-only, github-private-repo-readme-image-rendering, claude-code-claudemd-symlink-write-refused, claude-code-codex-plugin-parity, claude-code-piebald-lsp-binary-on-path, claude-code-plugin-from-existing-repo, claude-code-plugin-python-bootstrap, claude-code-plugin-update-flow, claude-json-mcp-migration-slice, macos-bash-3.2-compat, emacs-batch-package-verify-pitfalls, python-symtable-no-col-offset-pairing, playwright-mcp-upload-hidden-file-input, istio-multicluster-endpointless-mesh-service, pre-open-source-credential-audit)."
+      "description": "Full bundle: every skill in the catalog (work-on-pr, review-pr-loop, continuous-learning, cmux-search, cmux-agent-tabs, gh-git-heredoc-body-file, claude-code-static-allow-bypasses-hook, python-ast-static-analyzer-scoping, wordpress-com-publish, git-add-u-rename-pitfall, git-branch-cleanup-script-races, git-graft-worktree-onto-remote, multi-phase-feature-pr-worktrees, gist-to-repo-migration, vercel-token-deploy-branch-domains, s3-presigned-upload-fails-nonexistent-bucket, neon-vercel-db-identify-and-migrate, gh-api-f-vs-F-body-file, gh-api-jq-no-arg, gh-fork-issues-disabled, gh-pr-graphql-401-rest-fallback, gh-pr-merge-delete-branch-closes-dependent-pr, gh-workflow-run-matching, github-api-list-endpoint-staleness-fresh-pr, github-closing-keywords-default-branch-only, github-private-repo-readme-image-rendering, claude-code-claudemd-symlink-write-refused, claude-code-codex-plugin-parity, claude-code-piebald-lsp-binary-on-path, claude-code-plugin-from-existing-repo, claude-code-plugin-python-bootstrap, claude-code-plugin-update-flow, claude-json-mcp-migration-slice, macos-bash-3.2-compat, emacs-batch-package-verify-pitfalls, python-symtable-no-col-offset-pairing, playwright-mcp-upload-hidden-file-input, istio-multicluster-endpointless-mesh-service, pre-open-source-credential-audit, terraform-state-version-apply-forensics, terraform-ecs-capacity-provider-staged-teardown)."
     },
     {
       "name": "pr-loop",
@@ -215,6 +215,16 @@
       "name": "pre-open-source-credential-audit",
       "source": "./plugins/pre-open-source-credential-audit/",
       "description": "Audit a git repo for leaked secrets before making it public: scan tracked files AND full history, avoid the git grep -E word-boundary false-negative, catch tracked editor-backup files, and decide rewrite+rotate vs. accept an inert identifier."
+    },
+    {
+      "name": "terraform-state-version-apply-forensics",
+      "source": "./plugins/terraform-state-version-apply-forensics/",
+      "description": "Single-skill plugin: terraform-state-version-apply-forensics."
+    },
+    {
+      "name": "terraform-ecs-capacity-provider-staged-teardown",
+      "source": "./plugins/terraform-ecs-capacity-provider-staged-teardown/",
+      "description": "Single-skill plugin: terraform-ecs-capacity-provider-staged-teardown."
     }
   ]
 }
