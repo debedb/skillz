@@ -19,7 +19,7 @@ description: |
   dirty files and no replies - agents that are visible but wedged.
 author: Claude Code
 version: 1.4.0
-date: 2026-07-27
+date: 2026-07-28
 source: https://github.com/voitta-ai/skillz
 source_file: skills/agent-team-orchestration/SKILL.md
 ---
@@ -121,6 +121,15 @@ before anything else:
 > immediately `SendMessage` to `main` reporting `PROBE_OK` or
 > `PROBE_BLOCKED - <what happened>`. Do not batch this with other work.
 
+**The probe's report channel must itself be un-gated**, or the probe wedges on
+its own liveness report and produces exactly the silence it was built to
+detect. Whatever the report rides on - a marker file, an echo - must be
+something the *resolved mode* already permits: write markers **inside the
+worktree**, never to `/tmp` or another path outside the project, because
+`acceptEdits` does not cover paths outside the working directory. Check the
+first call against the mode before you spawn. (Learned the hard way: a probe
+briefed to report via `Write` to a scratchpad path hung on that very call.)
+
 Fan out to the remaining squads **only after the probe confirms**. The probe
 costs ~90 seconds and catches every cause of a wedge - permission mode, quota,
 a dead runtime - not just the one you thought to check.
@@ -131,6 +140,20 @@ the rest of the wave. Surface it to the operator, because in the common case
 subagent has no operator to prompt) **only they can change it.** Recover with
 `TaskStop` per agent by name: it leaves worktrees, branches, and any prepared
 baseline intact, so a restart after the mode is fixed is cheap.
+
+**Any** tool call that needs permission wedges this way - not just `Bash`. A
+measured case: a background subagent's first call was a `Write`, under
+`acceptEdits`, to a path outside the project. Transcript, in full:
+
+```
+21:02:21  assistant   text: "I'll follow these steps exactly in order."
+21:02:22  assistant   tool_use: Write -> /private/tmp/.../probe.log
+<no tool_result, ever>
+```
+
+Two and a half hours later: no result, no error, no timeout, no prompt shown to
+the operator. Treat any per-tool mitigation (a hook that denies gated `Bash` in
+subagents, say) as covering one tool, not the class.
 
 Every squad brief carries the same liveness first call, not just the probe's -
 it turns a 45-minute silent stall into a sub-minute signal.
@@ -410,6 +433,11 @@ posing it twice is friction.
   Zero across all of them, with the agent list ticking, means wedged - not busy.
   Check whose activity you're reading before drawing conclusions: an architect's
   own earlier validation run in one worktree can look like a live agent.
+  To *confirm* - and to name the exact call that wedged - read the agent's
+  transcript for a **`tool_use` with no matching `tool_result`**. That signature
+  is unambiguous where mtimes are circumstantial, and it survives both the
+  agent's death and the session's. Filesystem state stays the cheap first check;
+  the transcript is the one that ends the argument.
 - **Re-plan between waves.** A parallel set chosen up front goes stale once the
   first PRs merge; dependencies shift.
 - **Ask each decision at most once.** Surface/runtime, scope, and design gates are
@@ -423,7 +451,9 @@ posing it twice is friction.
 |---|---|
 | Step-0 surface check (once) | `which tmux` + `echo $TMUX` + `which cmux` - all three results count |
 | Step-0b executability check | one probe agent, liveness first call, `SendMessage` back; fan out only on `PROBE_OK` |
+| Probe report channel | must be un-gated in the resolved mode - marker inside the worktree, never `/tmp` |
 | Liveness oracle (wedged vs busy) | `git status --porcelain` / commit count / `__pycache__` / worktree mtime - never the elapsed-time counter |
+| Confirm the wedge, name the call | agent transcript: a `tool_use` with no matching `tool_result` |
 | Wedged wave, recovery | `TaskStop` per agent by name; worktrees + branches + baseline survive |
 | Idempotency pre-flight | `gh issue list` / `gh pr list` / `git branch -a` before creating |
 | Plan parallel set | architect reads `gh issue list` / `gh issue view`, groups independent vs serialized |
