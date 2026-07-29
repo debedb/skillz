@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+#
+# pre-push - run the full pre-publish gate before anything leaves this machine.
+#
+# Enable per-clone (git does NOT pick this up automatically):
+#
+#   git config core.hooksPath hooks
+#
+# Why a hook and not just CI: the sensitive-term gate has two halves. The
+# structural half (key/token/account-id shapes, private IPs, internal-domain
+# hostnames) runs fine in CI. The NAME half reads a private wordlist that must
+# stay out of this public repo, so CI cannot run it - and an Actions secret
+# would not reach fork PRs, meaning the job would report green without having
+# checked anything. Names are therefore enforced here, where the wordlist
+# already lives (~/.config/skillz/sensitive-terms.txt by default).
+#
+# Skip once, deliberately: git push --no-verify
+#
+# bash 3.2 compatible (macOS default).
+
+set -u
+
+repo_root=$(git rev-parse --show-toplevel)
+cd "$repo_root" || exit 1
+
+fail=0
+
+echo "pre-push: validating catalog..."
+if ! bash scripts/validate-catalog.sh; then
+  fail=1
+fi
+
+echo "pre-push: sensitive-term gate..."
+# Same paths as CI, plus the wordlist half via the default
+# ~/.config/skillz/sensitive-terms.txt (or $SKILLZ_SENSITIVE_TERMS_FILE).
+if ! bash scripts/check-sensitive-terms.sh \
+       skills/ docs/ plugins/ README.md catalog.json; then
+  fail=1
+fi
+
+if [ "$fail" -ne 0 ]; then
+  echo "" >&2
+  echo "pre-push: BLOCKED - fix the above before pushing." >&2
+  echo "pre-push: to override deliberately: git push --no-verify" >&2
+  exit 1
+fi
+
+echo "pre-push: clean"
+exit 0
