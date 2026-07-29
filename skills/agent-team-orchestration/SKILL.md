@@ -141,6 +141,14 @@ subagent has no operator to prompt) **only they can change it.** Recover with
 `TaskStop` per agent by name: it leaves worktrees, branches, and any prepared
 baseline intact, so a restart after the mode is fixed is cheap.
 
+**When the probe goes silent, one question is the operator's alone.** Silence
+has two readings and the agent cannot tell them apart: the harness never
+surfaced a permission request (a wedge - escalate), or it surfaced one nobody
+answered (approve it, or pre-authorize and re-run). Ask the operator to look at
+their screen **while the probe is still hung**, before you `TaskStop` it - once
+it's stopped, that evidence is gone and the run is unfalsifiable. Tell them what
+to look for before you spawn, not after it stalls.
+
 **Any** tool call that needs permission wedges this way - not just `Bash`. A
 measured case: a background subagent's first call was a `Write`, under
 `acceptEdits`, to a path outside the project. Transcript, in full:
