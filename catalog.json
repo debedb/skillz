@@ -143,7 +143,7 @@
         "claude",
         "codex"
       ],
-      "summary": "Update an installed Claude Code plugin via /plugin marketplace update + /reload-plugins, not the discovery-picker /plugin update."
+      "summary": "Why `claude plugin update` reports \"up to date\" while the plugin still runs stale code: the install cache is keyed by plugin.json#version. Authors bump on every shipping merge; verify against the cache dir, never the marketplace clone."
     },
     {
       "name": "claude-json-mcp-migration-slice",

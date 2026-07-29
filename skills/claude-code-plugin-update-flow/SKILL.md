@@ -1,121 +1,195 @@
 ---
 name: claude-code-plugin-update-flow
 description: |
-  Correctly update an installed Claude Code plugin from its remote
-  marketplace. Use when: (1) `/plugin update <plugin>@<marketplace>`
-  opens the plugin-discovery picker instead of updating the plugin,
-  (2) you ran `/plugin marketplace update <name>` but the running
-  session is still on the old plugin code, (3) you're not sure
-  whether `/plugin update`, `/reload-plugins`, or a session restart
-  is needed. Root cause: in many Claude Code versions there is no
-  `/plugin update <plugin>@<marketplace>` subcommand — it falls
-  through to the discovery picker. The actual upgrade flow is
-  `/plugin marketplace update <name>` + `/reload-plugins` (or session
-  restart).
+  Get an installed Claude Code plugin to actually run new code, and — as
+  a plugin author — make sure your merges reach installs at all. Use when:
+  (1) `claude plugin update <plugin>@<marketplace>` reports "up to date"
+  but the plugin still behaves like an old build, (2) `claude plugin
+  marketplace update <name>` succeeds yet the running session's hooks /
+  commands / skills are unchanged, (3) you merged commits to the plugin
+  repo and no user, including you, ever sees them, (4) `/plugin update
+  <plugin>@<marketplace>` opens the plugin-discovery picker instead of
+  updating (older builds), (5) you're unsure whether `plugin update`,
+  `/reload-plugins`, or a restart is what's needed. Root cause for the
+  "up to date" case: the installed copy lives at
+  `~/.claude/plugins/cache/<marketplace>/<plugin>/<version>/`, keyed on
+  `.claude-plugin/plugin.json#version`, so an unchanged version means
+  nothing re-extracts. Also covers why checking the marketplace clone is
+  NOT valid verification, and the release-tagging order for squash-merge
+  repos.
 author: Claude Code
-version: 1.0.0
-date: 2026-05-11
+version: 1.1.0
+date: 2026-07-27
 ---
 
 # Claude Code: Updating an Installed Plugin
 
 ## Problem
 
-You installed a plugin via
-`/plugin marketplace add OWNER/REPO` + `/plugin install NAME@MARKETPLACE`.
-Now the upstream repo has new commits and you want them in your running
-Claude Code session. You type `/plugin update NAME@MARKETPLACE` and
-Claude Code opens the plugin-discovery picker — a list of public
-plugins — instead of updating anything.
+Two failures wear the same face — "the new code isn't running" — and
+they have different causes.
 
-Or you ran `/plugin marketplace update NAME` and got
-"✔ Updated 1 marketplace", but your session's hooks / commands /
-skills still behave like the old version.
+**As a user:** you pulled the marketplace, the CLI said it worked, and
+the plugin still behaves like the old build.
+
+**As an author:** you merged commits, maybe many, and nobody is running
+them. `claude plugin update` cheerfully reports "up to date" to every
+user, forever. This is the more dangerous one, because nothing anywhere
+reports an error — you only notice when a bug you fixed months ago is
+still biting you.
 
 ## Context / Trigger Conditions
 
-- You installed a CC plugin from a GitHub marketplace.
-- You ran `/plugin update <plugin>@<marketplace>` expecting an upgrade.
-- Instead: the discovery picker showed up
-  (`Discover plugins (1/N) / Search...`).
-- Or: you ran `/plugin marketplace update <name>`, the marketplace
-  refresh succeeded, but your running session didn't pick up the new
-  code (old hook still firing, old slash commands still listed).
+- `claude plugin update <plugin>@<marketplace>` prints "up to date" but
+  a feature you know is on master is missing.
+- `claude plugin marketplace update <name>` prints success and the
+  running session is unchanged.
+- A hook keeps making a decision you already fixed upstream.
+- You are the plugin author and cannot tell whether users have your
+  change.
+- Older builds only: `/plugin update <plugin>@<marketplace>` opens the
+  discovery picker (`Discover plugins (1/N) / Search...`).
+
+## The layout that explains everything
+
+Three locations, and conflating them is the whole trap:
+
+| path | what it is |
+|---|---|
+| `~/.claude/plugins/marketplaces/<marketplace>/` | git clone of the marketplace repo — the **fetched source** |
+| `~/.claude/plugins/cache/<marketplace>/<plugin>/<version>/` | extracted install — **what actually executes** |
+| `~/.claude/plugins/cache/.../<version>/.in_use/` | stamped by live sessions; identifies which copy is loaded |
+
+`claude plugin marketplace update` refreshes the **clone**.
+`claude plugin update` re-extracts from clone into **cache** — but only
+if the version differs, because the cache path is keyed by version.
+
+So the decision is a string comparison: installed `0.1.0` vs available
+`0.1.0` → "up to date", no work done. The clone can be a hundred commits
+ahead and it changes nothing.
 
 ## Solution
 
-```
-/plugin marketplace update <marketplace-name>
-/reload-plugins
-```
+### If you are the plugin author
 
-The two-step is the reliable upgrade path. The first command pulls
-the latest code into your local marketplace clone (typically under
-`~/.claude/plugins/marketplaces/<name>/`). The second reloads all
-installed plugins from the local marketplace clones into the running
-session.
+**Bump `.claude-plugin/plugin.json#version` on every merge that changes
+a file users receive.** There is no other mechanism. A merge without a
+bump is invisible.
 
-If `/reload-plugins` isn't available or doesn't fully pick up the
-change (some plugin updates require an environment reset), restart
-the Claude Code session.
+Suggested split for a pre-1.0 plugin, where the contract is "what does
+it do, and how do I configure it" rather than a code API:
 
-### Why `/plugin update` doesn't work
+- **patch** — nothing a user could observe at runtime: refactors, docs,
+  log fields, message wording. Still required; shipped is shipped.
+- **minor** — user-visible behavior: changed decisions or defaults, new
+  commands, new config keys or environment variables.
+- **major** — reserved for declaring a config-file format stable at
+  1.0, and for breaking it afterwards.
 
-Some Claude Code versions don't have a `/plugin update` subcommand at
-all. Typing `/plugin update <anything>` falls through the slash-command
-matcher and lands on the default behavior, which is the discovery
-picker. The picker is for *installing* plugins from a list; it's not
-the update flow.
+Files users never execute — `tests/`, `.github/`, maintainer notes —
+don't need their own bump; fold them into the next real one.
 
-### How to verify the upgrade landed
+**Tagging under squash merges.** A release script that rewrites the
+version, commits, *and* tags in one step does not fit a squash-merge
+repo: the tag lands on a feature-branch commit that the squash never
+puts on master. Correct order:
+
+1. Edit the version as part of the PR's own changes.
+2. Squash-merge.
+3. Tag master's squash commit and push the tag:
+   ```bash
+   git tag -a v0.2.0 -m "Release v0.2.0" <squash-sha>
+   git push origin v0.2.0
+   ```
+
+Tagging creates no commit, so this stays compatible with a
+no-direct-commits-to-master policy.
+
+### If you are the user
 
 ```bash
-# Check that the marketplace clone is at the expected commit:
-git -C ~/.claude/plugins/marketplaces/<marketplace>/ --no-pager log --oneline -1
-
-# Check that a file from the new version is present:
-ls ~/.claude/plugins/marketplaces/<marketplace>/<expected-new-file>
+claude plugin marketplace update <marketplace-name>
+claude plugin update <plugin>@<marketplace>
 ```
 
-If `git log` shows the new tip but your session still acts old, you
-ran `marketplace update` but skipped `/reload-plugins` / didn't
-restart.
+then restart the session (the CLI says so explicitly:
+`Restart to apply changes.`). In-session, `/reload-plugins` may be
+enough on builds that have it.
+
+Run the two commands **separately**. Pasting both at once lets the first
+`claude` process consume the second line off stdin, so it silently never
+executes — you get the marketplace output, no update output, and an
+unchanged cache.
+
+If `plugin update` says "up to date" and you know master has moved, the
+author didn't bump the version. Nothing on your side will fix that; the
+only local workaround is deleting the stale cache directory to force a
+re-extract, and that is a hack — the fix belongs upstream.
 
 ## Verification
 
-After running the two-step:
+**Check the cache, not the clone.** The marketplace clone being current
+is *not* evidence the install updated; that check reports success in
+exactly the case that's broken.
 
-1. `git -C ~/.claude/plugins/marketplaces/<marketplace>/ rev-parse HEAD`
-   matches the upstream `origin/<default-branch>` tip.
-2. New hooks fire / new slash commands appear in `/help`.
-3. Any session-cached old behavior is gone.
+```bash
+# A directory named for the new version should exist:
+ls ~/.claude/plugins/cache/<marketplace>/<plugin>/
+# 0.1.0   0.2.0
 
-## Notes
+# And it should contain a symbol only the new code has:
+grep -c "<new-symbol>" \
+  ~/.claude/plugins/cache/<marketplace>/<plugin>/<version>/hooks/<file>
+```
 
-- `/plugin marketplace update <name>` is a `git pull` on the
-  marketplace clone. If you've edited files in
-  `~/.claude/plugins/marketplaces/<name>/` locally (you shouldn't!),
-  the pull may fail or merge unexpectedly.
-- For plugins distributed across multiple marketplaces (rare), each
-  marketplace clone has its own `git` history and needs its own
-  `marketplace update`.
-- The "discovery picker" surfacing is a UX symptom; nothing actually
-  broke. Just hit Escape and run the right command.
-- If the plugin you wrote has a `pre-tool-use.sh` or similar wrapper
-  that caches state (e.g., a bootstrap-deps marker), the new code
-  may need to invalidate that cache — content-hash the cache key on
-  the relevant file (e.g., `requirements.txt`) so a dep bump
-  re-bootstraps automatically.
+A successful `claude plugin update` also states the transition outright
+— `Plugin "<name>" updated from 0.1.0 to 0.2.0 for scope user.` Absence
+of that line means nothing happened.
+
+To confirm *which* copy a running session loaded, look for the
+`.in_use/` directory under each cached version and compare mtimes.
 
 ## Example
 
-A plugin hit this during dogfood: `/plugin update <plugin>@<marketplace>`
-opened the picker. Once the developer realized the subcommand didn't exist,
-the correct flow was documented in the README's "Updating" section:
+A plugin's version had not moved off `0.1.0` since the commit that first
+shipped it; no tags existed. Over the following ~40 commits, five merged
+behavior changes accumulated. Every install, including the author's own
+dogfooding session, kept running the original build — while
+`claude plugin update` reported "up to date" each time it was tried.
 
-> `/plugin marketplace update <marketplace>` pulls the latest code into
-> your local marketplace clone. Then either `/reload-plugins` or
-> restart Claude Code so the running session picks up the new code.
+Diagnosis took three commands:
+
+```bash
+grep -rl "<new-symbol>" ~/.claude/plugins/marketplaces/<marketplace>/  # found
+grep -c  "<new-symbol>" ~/.claude/plugins/cache/<mkt>/<plugin>/0.1.0/hooks/<file>  # 0
+ls -la ~/.claude/plugins/cache/<mkt>/<plugin>/0.1.0/   # .in_use/ stamped today
+```
+
+Clone current, cache stale, stale copy live. Bumping to `0.2.0` and
+re-running `claude plugin update` produced a `0.2.0/` directory beside
+the old one, containing the merged code.
+
+## Notes
+
+- **Legacy builds:** some older Claude Code versions had no
+  `plugin update` subcommand at all; `/plugin update <anything>` fell
+  through the slash-command matcher to the discovery picker, which is
+  for *installing*. If you see the picker, the flow is
+  `/plugin marketplace update <name>` + `/reload-plugins` or a restart.
+  Current builds have working `claude plugin marketplace update` and
+  `claude plugin update` CLI subcommands.
+- `marketplace update` is a `git pull` on the clone. Editing files
+  under `~/.claude/plugins/marketplaces/<name>/` by hand (don't) can
+  make it fail or merge oddly.
+- Plugins distributed through more than one marketplace have one clone
+  per marketplace, each needing its own update.
+- If your plugin's wrapper script caches state (a bootstrap-deps
+  marker, for instance), new code may need to invalidate it — key the
+  cache on a content hash of the relevant file, e.g.
+  `requirements.txt`, so a dependency bump re-bootstraps by itself.
+- Anthropic's community marketplace pins a commit SHA and re-syncs on
+  push, but users installing from it are still served a versioned
+  plugin — the bump discipline applies the same way.
 
 ## References
 
