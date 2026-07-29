@@ -1,0 +1,36 @@
+name: checks
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Validates catalog.json against the tree: every skill path exists, every
+      # plugin manifest is declared, and each plugin's skills dir matches its
+      # declared skill list. Also runs install.sh --dry-run smoke tests, which
+      # read the LOCAL catalog.json (install.sh:138) - so this checks the PR's
+      # catalog, not master's, and needs no network.
+      - name: Validate catalog
+        run: bash scripts/validate-catalog.sh
+
+      # Structural half of the pre-publish gate: key/token/account-id shapes,
+      # private IPs, internal-domain hostnames.
+      #
+      # The name-wordlist half deliberately does NOT run here. The wordlist
+      # must stay out of this public repo, and an Actions secret would not
+      # reach fork PRs - the job would report green without having run the
+      # check, which is worse than not running it. That half runs pre-push on
+      # the author's machine; see hooks/pre-push.
+      - name: Sensitive-term gate (structural)
+        run: |
+          bash scripts/check-sensitive-terms.sh \
+            skills/ docs/ plugins/ README.md catalog.json

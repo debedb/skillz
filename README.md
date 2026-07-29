@@ -748,8 +748,43 @@ are exactly the ones this repo must not carry.
 Clean exit = safe to promote. This is the automated form of the hard rule
 "the public repo must never contain account IDs, client names, domains, or
 infra topology" — make it a step in the claudeception / skill-promotion flow.
-(Optionally wire it into CI over changed skill paths; it currently reports
-clean across all of `skills/`.)
+
+## Automated checks
+
+Both gates run automatically, split across two places because one of them
+cannot run in public CI.
+
+**CI** (`.github/workflows/checks.yml`) — on every pull request and every push
+to `master`:
+
+```bash
+bash scripts/validate-catalog.sh
+bash scripts/check-sensitive-terms.sh skills/ docs/ plugins/ README.md catalog.json
+```
+
+Advisory: it reports pass/fail on the PR but nothing is a required check yet.
+Neither script needs network — `install.sh` reads the local `catalog.json`
+when run from a checkout, so the dry-run smoke test validates *that* PR's
+catalog rather than master's.
+
+**Pre-push hook** (`hooks/pre-push`) — enable it per clone with git's own
+hooks path:
+
+```bash
+git config core.hooksPath hooks
+```
+
+One command, no installer, and the hook updates itself when you pull. Skip a
+run deliberately with `git push --no-verify`.
+
+The hook exists because the sensitive-term gate has two halves and CI can
+only do one. The **structural** half (key/token/account-id shapes, private
+IPs, internal-domain hostnames) runs fine in Actions. The **name** half reads
+a wordlist that must stay out of this public repo — and an Actions secret
+would not reach fork PRs, so the job would report green without having
+checked anything. A check that silently no-ops is worse than no check. Names
+are therefore enforced pre-push, on the machine where the wordlist already
+lives.
 
 ## Related code-review approaches
 
