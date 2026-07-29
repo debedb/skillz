@@ -5,9 +5,12 @@ set -euo pipefail
 # 1. Every skill referenced in catalog.json has a SKILL.md at its declared path.
 # 2. Every SKILL.md begins with a YAML frontmatter block containing `name:`
 #    and `description:`.
-# 3. Every collection (inline in catalog.json AND in collections/*.json)
+# 3. Every skill directory on disk is declared in catalog.json (the reverse of
+#    check 1 - an undeclared dir is invisible to install.sh, the bundle
+#    plugin, and the README, so it ships as a silent no-op).
+# 4. Every collection (inline in catalog.json AND in collections/*.json)
 #    references known skills.
-# 4. install.sh --dry-run works for: default no-arg, --collection pr-loop,
+# 5. install.sh --dry-run works for: default no-arg, --collection pr-loop,
 #    --skill work-on-pr, --all.
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -58,6 +61,38 @@ for s in skills:
         errors.append(f"skill '{name}' frontmatter missing `description:`")
 
 skill_hosts = {s.get("name"): s.get("hosts", []) for s in skills}
+
+# Reverse of the check above: every skill dir on disk must be declared.
+# An undeclared dir is invisible to install.sh (including --all), to the
+# skillz bundle plugin, and to the README table - it ships as a silent no-op,
+# so the author thinks it landed and review sees a green check.
+#
+# Declared paths are matched rather than directory names, since a catalog
+# entry's `name` and its directory need not agree.
+declared_dirs = {
+    os.path.normpath(os.path.dirname(s["path"]))
+    for s in skills
+    if s.get("path")
+}
+skills_root = os.path.join(root, "skills")
+if os.path.isdir(skills_root):
+    for entry in sorted(os.listdir(skills_root)):
+        entry_path = os.path.join(skills_root, entry)
+        # Plain files at the top level are left alone, so a future
+        # skills/README.md describing the layout would not trip this.
+        if not os.path.isdir(entry_path):
+            continue
+        rel = os.path.normpath(os.path.join("skills", entry))
+        if not os.path.isfile(os.path.join(entry_path, "SKILL.md")):
+            errors.append(
+                f"'{rel}' has no SKILL.md - not a skill; remove it or add one"
+            )
+            continue
+        if rel not in declared_dirs:
+            errors.append(
+                f"'{rel}' has a SKILL.md but no catalog.json entry - it will "
+                f"not install; add it to catalog.json or delete the directory"
+            )
 
 # Inline collections in catalog.json
 for c in catalog.get("collections", []):
