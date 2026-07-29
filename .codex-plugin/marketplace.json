@@ -295,6 +295,11 @@
       "name": "verbatim-social-post-retrieval",
       "source": "./plugins/verbatim-social-post-retrieval/",
       "description": "Single-skill plugin: retrieve verbatim truth social and x posts, including deleted ones, for fact-checking."
+    },
+    {
+      "name": "chrome-localhost-mic-autoblock",
+      "source": "./plugins/chrome-localhost-mic-autoblock/",
+      "description": "Fix a web app's mic failing in Chrome with a not-allowed error on localhost even though the OS granted Chrome mic access: Chrome auto-blocks the mic per-site and the OS Privacy toggle / Chrome restart never clears it; set the site to Allow."
     }
   ]
 }
