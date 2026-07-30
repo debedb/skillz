@@ -33,6 +33,7 @@ environments and older Codex versions.
 |---|---|---|---|
 | [work-on-pr](./skills/work-on-pr/SKILL.md) | skill | Claude, Codex | Author-side PR iteration loop |
 | [review-pr-loop](./skills/review-pr-loop/SKILL.md) | skill | Claude, Codex | Reviewer-side PR iteration loop |
+| [codex-adversarial-pr-review](./skills/codex-adversarial-pr-review/SKILL.md) | skill | Claude, Codex | Post /codex:adversarial-review findings as a batched GitHub PR review (inline + out-of-diff rollup) |
 | [continuous-learning](./skills/continuous-learning/SKILL.md) | skill | Codex | End-of-task retrospective: extract reusable, verified learnings as Codex skills |
 | [cmux-search](./skills/cmux-search/SKILL.md) | skill | Claude, Codex | Search all open cmux workspaces/tabs/panes - live scrollback + agent transcripts |
 | [macos-sparkle-update-quarantine-relaunch](./skills/macos-sparkle-update-quarantine-relaunch/SKILL.md) | skill | Claude, Codex | Sparkle updater error 4005 / 'Failed to create installation cache directory' persists after stripping quarantine; relaunch the un-quarantined bundle |
@@ -84,6 +85,7 @@ environments and older Codex versions.
 | [`terraform-state-version-apply-forensics` plugin](./plugins/terraform-state-version-apply-forensics/) | plugin | Claude, Codex | Single-skill plugin: terraform-state-version-apply-forensics |
 | [`terraform-ecs-capacity-provider-staged-teardown` plugin](./plugins/terraform-ecs-capacity-provider-staged-teardown/) | plugin | Claude, Codex | Single-skill plugin: terraform-ecs-capacity-provider-staged-teardown |
 | [`gh-pr-merge-delete-branch-closes-dependent-pr` plugin](./plugins/gh-pr-merge-delete-branch-closes-dependent-pr/) | plugin | Claude, Codex | Single-skill plugin: gh-pr-merge-delete-branch-closes-dependent-pr |
+| [`codex-adversarial-pr-review` plugin](./plugins/codex-adversarial-pr-review/) | plugin | Claude, Codex | Single-skill plugin: codex-adversarial-pr-review |
 | [pr-loop](./collections/pr-loop.json) | collection (legacy) | Claude, Codex | `install.sh` selector. Prefer the `pr-loop` plugin entry. |
 
 Machine-readable index: [`catalog.json`](./catalog.json). The
