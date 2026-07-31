@@ -96,6 +96,8 @@ environments and older Codex versions.
 | [`gh-pr-merge-delete-branch-closes-dependent-pr` plugin](./plugins/gh-pr-merge-delete-branch-closes-dependent-pr/) | plugin | Claude, Codex | Single-skill plugin: gh-pr-merge-delete-branch-closes-dependent-pr |
 | [`codex-adversarial-pr-review` plugin](./plugins/codex-adversarial-pr-review/) | plugin | Claude, Codex | Single-skill plugin: codex-adversarial-pr-review |
 | [pr-loop](./collections/pr-loop.json) | collection (legacy) | Claude, Codex | `install.sh` selector. Prefer the `pr-loop` plugin entry. |
+| [cmux-session-restore-forensics](./skills/cmux-session-restore-forensics/SKILL.md) | skill | Claude, Codex | Diagnose what cmux actually restored after a relaunch and recover panes it silently dropped: the Core Data epoch in `closedAt`, why `workspaceId` diffing is useless, and replaying a pane's stored `resumeBinding` via `cmux new-workspace` |
+| [`cmux-session-restore-forensics` plugin](./plugins/cmux-session-restore-forensics/) | plugin | Claude, Codex | Single-skill plugin: cmux-session-restore-forensics |
 
 Machine-readable index: [`catalog.json`](./catalog.json). The
 installer and validation script both read from it, so new entries
