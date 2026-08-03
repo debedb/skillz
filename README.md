@@ -108,6 +108,8 @@ environments and older Codex versions.
 | [`verbatim-social-post-retrieval` plugin](./plugins/verbatim-social-post-retrieval/) | plugin | Claude, Codex | Single-skill plugin: verbatim-social-post-retrieval |
 | [chrome-localhost-mic-autoblock](./skills/chrome-localhost-mic-autoblock/SKILL.md) | skill | Claude, Codex | Chrome mic fails with `not-allowed` on localhost even though the OS granted Chrome mic access: Chrome auto-blocks the mic per-site and the OS Privacy toggle / restart never clears it; set the site to Allow at `chrome://settings/content/microphone` |
 | [`chrome-localhost-mic-autoblock` plugin](./plugins/chrome-localhost-mic-autoblock/) | plugin | Claude, Codex | Single-skill plugin: chrome-localhost-mic-autoblock |
+| [metrics-zero-provenance-audit](./skills/metrics-zero-provenance-audit/SKILL.md) | skill | Claude, Codex | A `0` in a multi-source metrics schema usually means the source never populates the field, not that you did not do it |
+| [`metrics-zero-provenance-audit` plugin](./plugins/metrics-zero-provenance-audit/) | plugin | Claude, Codex | Single-skill plugin: metrics-zero-provenance-audit |
 
 Machine-readable index: [`catalog.json`](./catalog.json). The
 installer and validation script both read from it, so new entries

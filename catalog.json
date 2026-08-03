@@ -386,7 +386,7 @@
         "claude",
         "codex"
       ],
-      "summary": "Capture the exact outbound request body a single-page app sends and block it before it leaves the browser: patch window.fetch AND XMLHttpRequest together (the XHR half is the one usually missed, so a fetch-only wrapper lets the request through), read the parsed payload off window, and disarm with a reload — including why a hash-route change does not remove the patch. For actions whose side effect costs credits or creates an irreversible record."
+      "summary": "Capture the exact outbound request body a single-page app sends and block it before it leaves the browser: patch window.fetch AND XMLHttpRequest together (the XHR half is the one usually missed, so a fetch-only wrapper lets the request through), read the parsed payload off window, and disarm with a reload \u2014 including why a hash-route change does not remove the patch. For actions whose side effect costs credits or creates an irreversible record."
     },
     {
       "name": "us-federal-open-data-claim-verification",
@@ -414,6 +414,15 @@
         "codex"
       ],
       "summary": "Fix a web app's mic failing in Chrome with a not-allowed error on localhost even though the OS granted Chrome mic access: Chrome auto-blocks the mic per-site and the OS Privacy toggle / Chrome restart never clears it; set the site to Allow."
+    },
+    {
+      "name": "metrics-zero-provenance-audit",
+      "path": "skills/metrics-zero-provenance-audit/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Audit a multi-source metrics client before believing its zeros."
     }
   ],
   "collections": [
@@ -482,7 +491,8 @@
         "spa-request-capture-and-block",
         "us-federal-open-data-claim-verification",
         "verbatim-social-post-retrieval",
-        "chrome-localhost-mic-autoblock"
+        "chrome-localhost-mic-autoblock",
+        "metrics-zero-provenance-audit"
       ],
       "summary": "Full repo bundle: every skill in one plugin."
     },
@@ -977,7 +987,7 @@
       "skills": [
         "spa-request-capture-and-block"
       ],
-      "summary": "Capture the exact outbound request body a single-page app sends and block it before it leaves the browser: patch window.fetch AND XMLHttpRequest together (the XHR half is the one usually missed, so a fetch-only wrapper lets the request through), read the parsed payload off window, and disarm with a reload — including why a hash-route change does not remove the patch. For actions whose side effect costs credits or creates an irreversible record."
+      "summary": "Capture the exact outbound request body a single-page app sends and block it before it leaves the browser: patch window.fetch AND XMLHttpRequest together (the XHR half is the one usually missed, so a fetch-only wrapper lets the request through), read the parsed payload off window, and disarm with a reload \u2014 including why a hash-route change does not remove the patch. For actions whose side effect costs credits or creates an irreversible record."
     },
     {
       "name": "us-federal-open-data-claim-verification",
@@ -1021,6 +1031,19 @@
         "chrome-localhost-mic-autoblock"
       ],
       "summary": "Single-skill plugin: chrome-localhost-mic-autoblock."
+    },
+    {
+      "name": "metrics-zero-provenance-audit",
+      "claude_manifest": "plugins/metrics-zero-provenance-audit/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/metrics-zero-provenance-audit/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "metrics-zero-provenance-audit"
+      ],
+      "summary": "Single-skill plugin: metrics-zero-provenance-audit."
     }
   ],
   "defaults": {
