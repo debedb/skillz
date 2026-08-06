@@ -4,6 +4,15 @@
   "description": "Catalog of skills, collections, and plugin bundles distributable from this repo.",
   "skills": [
     {
+      "name": "aws-http-server-on-lambda-web-adapter",
+      "path": "skills/aws-http-server-on-lambda-web-adapter/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Host an unmodified HTTP server (incl. LLM-proxy demos) as a scale-to-zero Lambda via the Web Adapter; Function-URL-403 fallback to API Gateway and its 30s-cap latency tradeoff; cost guardrails."
+    },
+    {
       "name": "work-on-pr",
       "path": "skills/work-on-pr/SKILL.md",
       "hosts": [
@@ -334,7 +343,8 @@
         "cmux-autoresume-after-reboot",
         "terraform-state-version-apply-forensics",
         "terraform-ecs-capacity-provider-staged-teardown",
-        "gh-pr-merge-delete-branch-closes-dependent-pr"
+        "gh-pr-merge-delete-branch-closes-dependent-pr",
+        "aws-http-server-on-lambda-web-adapter"
       ],
       "summary": "Full repo bundle: every skill in one plugin."
     },
