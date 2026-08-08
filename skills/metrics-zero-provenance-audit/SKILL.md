@@ -15,10 +15,12 @@ description: |
   more often means "this source never populates this field" than "the
   user didn't do it" — and the two are indistinguishable on the wire.
   Covers the grep-the-incrementer check, the three meanings of zero,
-  the proxy-vs-outcome distinction, and the PR-vs-issue split.
+  the proxy-vs-outcome distinction, the PR-vs-issue split, and how to
+  neutralize a pre-existing broken test that taxes every PR you send
+  (skip at method granularity, never class or setUpClass).
 author: Claude Code
-version: 1.0.0
-date: 2026-08-02
+version: 1.1.0
+date: 2026-08-08
 source: https://github.com/aiqrank/plugin
 source_file: skills/metrics-zero-provenance-audit/SKILL.md
 ---
@@ -145,7 +147,58 @@ an **unrelated control field** that must not move:
 The control is what makes the number credible to someone who can't run your
 data.
 
-### Step 6 — state your own PR's kill condition
+### Step 6 — when a broken test blocks you, skip at the smallest scope
+
+A pre-existing test error in the repo you're contributing to is a tax on every
+PR you send: each one has to carry a paragraph explaining the failure isn't
+yours. Fixing it is usually welcome. Fix it at **method** granularity.
+
+The trap has two wrong answers that both look right:
+
+```python
+# WRONG 1 - collapses the class into a single skip. Reported count drops
+# (131 -> 114) and reads as tests having gone missing.
+@classmethod
+def setUpClass(cls):
+    if not fixture.is_file():
+        raise unittest.SkipTest("...")
+
+# WRONG 2 - count stays honest, but every test in the class stops running.
+# If only 1 of 17 needs the fixture, 16 silently lose coverage.
+@unittest.skipUnless(_HAVE_FIXTURES, _REASON)
+class SomeTests(unittest.TestCase): ...
+
+# RIGHT - only the tests that need the resource skip.
+class SomeTests(unittest.TestCase):
+    @unittest.skipUnless(_HAVE_FIXTURES, _REASON)
+    def test_needs_the_fixture(self): ...
+```
+
+Before decorating anything, count which tests actually touch the resource:
+
+```bash
+# per class: total tests vs tests referencing the fixture helper
+python3 - <<'PY'
+import re
+src = open("test_module.py").read()
+for cls, body in re.findall(r"\nclass (\w+)\(.*?\):(.*?)(?=\nclass |\Z)", src, re.S):
+    tests = re.findall(r"    def (test_\w+)\(self\):(.*?)(?=\n    def |\Z)", body, re.S)
+    need = [t for t, b in tests if "FIXTURE_HELPER" in b]
+    print(cls, "total", len(tests), "need", len(need))
+PY
+```
+
+Trading a **visible error** for **invisible loss of coverage** is a downgrade,
+not a fix. The test count alone won't catch it — a class-level skip keeps the
+count and hides the loss in the skip tally. Report before/after as
+`N tests, E errors` -> `N tests, OK (skipped=S)` and check that `S` equals the
+number of tests that genuinely need the missing resource.
+
+Run the **whole** suite, not the one module you were working in. The first pass
+here fixed one file; `unittest discover` showed a sibling test module had the
+identical bug and owned 8 of the 9 errors.
+
+### Step 7 — state your own PR's kill condition
 
 If a change moves an existing test case from the "should not count" list to
 "should count," say so in the PR body, in your own words, along with the
@@ -163,6 +216,8 @@ read that you're score-farming, and it costs nothing when it's true.
 - Each PR has a before/after table with a control field that didn't move
 - Test suite delta is stated against the pre-existing baseline, including any
   failure that was already broken on `main` and is not yours
+- If you neutralized a broken test, the skip count equals the number of tests
+  that genuinely need the missing resource — no more
 - The issue argues only from things the PRs demonstrated, not from grievance
 
 ## Example
@@ -188,6 +243,21 @@ that scans local transcripts and uploads metrics to a closed scorer:
 6. One issue for the residue: publish the rubric and its version, stop
    conflating not-observed with zero, score outcomes where the evidence is
    already collected, and state what the score is for.
+
+Outcome: two PRs merged the same day. The maintainer confirmed up front that
+none of them would move any score — the data becomes correct, which is a
+separate change from making it count — and that's the right trade to accept.
+On the third he asked a sharp review question: one field counted subagent
+activity with a stated reason, another excluded it with a stated reason, and a
+third counted it with no reason given. *Intended, but unstated is
+indistinguishable from accidental.* The fix was to state the rule (**work
+produced** counts subagent activity; a **user-chosen setting** does not) in a
+comment and pin it with a test.
+
+Two follow-ups he explicitly asked for: renaming a helper whose
+source-specific name had become misleading, and neutralizing the pre-existing
+broken test — see Step 6, which is where the class-vs-method skip trap showed
+up.
 
 Two claims made confidently earlier in that session were wrong and had to be
 retracted: MCP tool calls *were* already counted, and `sessions_with_*` are
