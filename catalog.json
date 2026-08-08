@@ -227,13 +227,13 @@
       "summary": "Audit a git repo for leaked secrets before making it public: scan tracked files AND full history, avoid the git grep -E word-boundary false-negative, catch tracked editor-backup files, and decide rewrite+rotate vs. accept an inert identifier."
     },
     {
-      "name": "git-worktree-add-relative-path-nests-inside-repo",
-      "path": "skills/git-worktree-add-relative-path-nests-inside-repo/SKILL.md",
+      "name": "git-worktree-convention",
+      "path": "skills/git-worktree-convention/SKILL.md",
       "hosts": [
         "claude",
         "codex"
       ],
-      "summary": "git worktree add resolves a relative path against CWD, so running it from inside the repo nests the worktree under the repo instead of the sibling worktrees dir; use an absolute path or git worktree move to fix."
+      "summary": "Keep every repo on its default branch with branch work in a sibling <repo>.worktrees/ dir; detect drift, ask before reorganizing, and recover from a repo on a branch, an ad-hoc worktree path, or a worktree nested inside the repo."
     },
     {
       "name": "openclaw-model-cascade-debugging",
@@ -337,7 +337,7 @@
         "istio-multicluster-endpointless-mesh-service",
         "macos-sparkle-update-quarantine-relaunch",
         "pre-open-source-credential-audit",
-        "git-worktree-add-relative-path-nests-inside-repo",
+        "git-worktree-convention",
         "openclaw-model-cascade-debugging",
         "claude-code-plugin-publish-anthropic-marketplace",
         "cmux-autoresume-after-reboot",
@@ -439,6 +439,19 @@
         "wordpress-com-publish"
       ],
       "summary": "Single-skill plugin: wordpress-com-publish."
+    },
+    {
+      "name": "git-worktree-convention",
+      "claude_manifest": "plugins/git-worktree-convention/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/git-worktree-convention/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "git-worktree-convention"
+      ],
+      "summary": "Single-skill plugin: git-worktree-convention."
     },
     {
       "name": "git-graft-worktree-onto-remote",
@@ -700,8 +713,13 @@
       "name": "codex-adversarial-pr-review",
       "claude_manifest": "plugins/codex-adversarial-pr-review/.claude-plugin/plugin.json",
       "codex_manifest": "plugins/codex-adversarial-pr-review/.codex-plugin/plugin.json",
-      "hosts": ["claude", "codex"],
-      "skills": ["codex-adversarial-pr-review"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "codex-adversarial-pr-review"
+      ],
       "summary": "Single-skill plugin: codex-adversarial-pr-review."
     }
   ],
