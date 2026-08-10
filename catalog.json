@@ -423,6 +423,15 @@
         "codex"
       ],
       "summary": "Audit a multi-source metrics client before believing its zeros."
+    },
+    {
+      "name": "archive-today-fetcher-hierarchy",
+      "path": "skills/archive-today-fetcher-hierarchy/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Reach archive.today when automation is refused, and cite it reproducibly."
     }
   ],
   "collections": [
@@ -492,7 +501,8 @@
         "us-federal-open-data-claim-verification",
         "verbatim-social-post-retrieval",
         "chrome-localhost-mic-autoblock",
-        "metrics-zero-provenance-audit"
+        "metrics-zero-provenance-audit",
+        "archive-today-fetcher-hierarchy"
       ],
       "summary": "Full repo bundle: every skill in one plugin."
     },
