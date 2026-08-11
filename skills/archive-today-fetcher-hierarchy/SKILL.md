@@ -14,14 +14,40 @@ description: |
   that work, why the operator's own browser is a legitimate route rather
   than a bypass, and the three constraints that keep it legitimate.
 author: Claude Code
-version: 1.0.0
-date: 2026-08-10
+version: 2.0.0
+date: 2026-08-11
 source: https://github.com/voitta-ai/skillz
 source_file: skills/archive-today-fetcher-hierarchy/SKILL.md
 ---
 
 **Canonical source:** this file lives at `skills/archive-today-fetcher-hierarchy/SKILL.md`
 in `voitta-ai/skillz`. Edit it there.
+
+## Send a truthful user agent
+
+**Do not spoof.** A user agent states who is asking, and hosts use it to decide
+what to serve; a browser string sent from a script is a false statement about the
+requester, however conventional. Send something that identifies you:
+
+    curl -A 'yourproject/1.0 (+https://your.url/; purpose; contact)'
+
+**This is not merely a scruple, and the empirical part is the surprise.** Measured
+2026-08-11 across nine hosts a research task actually depends on —
+federalregister.gov, uscode.house.gov, justice.gov, supremecourt.gov,
+clerk.house.gov, a State Department embassy site, dhs.gov, theguardian.com and a
+public JSON API — an honest identifying agent and a spoofed Chrome string returned
+**identical status codes on all nine.** Every one 200. The spoofing bought
+nothing at all.
+
+The mistake that produced the original advice was diagnostic. The failures that
+prompted it were an agent framework's *own* fetch tool being blocked at the
+framework level — something plain curl never shared. That is a fetcher
+difference, not a user-agent difference, and conflating the two yielded a
+technique both ineffective and dishonest.
+
+**Diagnosis order when a fetch fails:** change fetcher before you touch identity.
+If an honest agent genuinely fails where a spoofed one succeeds, that is a finding
+about the host's access policy, to be recorded — not a lock to be picked.
 
 ## The finding
 
@@ -91,6 +117,12 @@ Three constraints:
    A quotation transcribed from behind a paywall is strictly worse, because the
    reader cannot check it.
 3. **Human rate.** A page at a time, because a person is reading it.
+
+**What the browser route is not.** It is not spoofing. The operator's own browser
+sends its own true agent and a human is genuinely present, which is exactly why it
+is defensible where a scripted request in a browser costume is not: one makes a
+true statement about who is asking, the other a false one. The unresolved question
+there is rate limits and challenges, not identity.
 
 **The residue, stated:** you are the party deciding that your own use satisfies
 the spirit of someone else's access control. That is self-serving however
