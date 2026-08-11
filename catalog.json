@@ -396,6 +396,15 @@
         "codex"
       ],
       "summary": "Check quantitative claims about US federal grants/awards/revenue against NIH RePORTER, USAspending and Treasury FiscalData; count-vs-dollars trap and testing 'every area' universals at subunit granularity."
+    },
+    {
+      "name": "verbatim-social-post-retrieval",
+      "path": "skills/verbatim-social-post-retrieval/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Retrieve exact original text of Truth Social / X posts (incl. deleted ones) for fact-checking: api.fxtwitter.com JSON, trumpstruth.org archive with its query= param and deletion flags, date-bounded negatives, HTTP 451 syndication fallback."
     }
   ],
   "collections": [
@@ -462,7 +471,8 @@
         "cmux-session-restore-forensics",
         "spring-profile-config-overlay-dedupe",
         "spa-request-capture-and-block",
-        "us-federal-open-data-claim-verification"
+        "us-federal-open-data-claim-verification",
+        "verbatim-social-post-retrieval"
       ],
       "summary": "Full repo bundle: every skill in one plugin."
     },
@@ -973,6 +983,21 @@
         "us-federal-open-data-claim-verification"
       ],
       "summary": "Single-skill plugin: us-federal-open-data-claim-verification."
+    },
+    {
+      "name": "verbatim-social-post-retrieval",
+      "claude_manifest": "plugins/verbatim-social-post-retrieval/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/verbatim-social-post-retrieval/.codex-plugin/plugin.json",
+      "claude_marketplace": ".claude-plugin/marketplace.json",
+      "codex_marketplace": ".codex-plugin/marketplace.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "verbatim-social-post-retrieval"
+      ],
+      "summary": "Single-skill plugin: verbatim-social-post-retrieval."
     }
   ],
   "defaults": {

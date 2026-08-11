@@ -290,6 +290,11 @@
       "name": "us-federal-open-data-claim-verification",
       "source": "./plugins/us-federal-open-data-claim-verification/",
       "description": "Single-skill plugin: verify quantitative claims about US federal grants and revenue against government open-data APIs."
+    },
+    {
+      "name": "verbatim-social-post-retrieval",
+      "source": "./plugins/verbatim-social-post-retrieval/",
+      "description": "Single-skill plugin: retrieve verbatim truth social and x posts, including deleted ones, for fact-checking."
     }
   ]
 }

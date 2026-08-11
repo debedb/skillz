@@ -104,6 +104,8 @@ environments and older Codex versions.
 | [`spa-request-capture-and-block` plugin](./plugins/spa-request-capture-and-block/) | plugin | Claude, Codex | Single-skill plugin: spa-request-capture-and-block |
 | [us-federal-open-data-claim-verification](./skills/us-federal-open-data-claim-verification/SKILL.md) | skill | Claude, Codex | Verify quantitative claims about US federal grants/awards/revenue against NIH RePORTER, USAspending and Treasury FiscalData |
 | [`us-federal-open-data-claim-verification` plugin](./plugins/us-federal-open-data-claim-verification/) | plugin | Claude, Codex | Single-skill plugin: us-federal-open-data-claim-verification |
+| [verbatim-social-post-retrieval](./skills/verbatim-social-post-retrieval/SKILL.md) | skill | Claude, Codex | Retrieve verbatim Truth Social / X posts, including deleted ones, for fact-checking |
+| [`verbatim-social-post-retrieval` plugin](./plugins/verbatim-social-post-retrieval/) | plugin | Claude, Codex | Single-skill plugin: verbatim-social-post-retrieval |
 
 Machine-readable index: [`catalog.json`](./catalog.json). The
 installer and validation script both read from it, so new entries
