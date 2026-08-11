@@ -102,6 +102,8 @@ environments and older Codex versions.
 | [`spring-profile-config-overlay-dedupe` plugin](./plugins/spring-profile-config-overlay-dedupe/) | plugin | Claude, Codex | Single-skill plugin: spring-profile-config-overlay-dedupe |
 | [spa-request-capture-and-block](./skills/spa-request-capture-and-block/SKILL.md) | skill | Claude, Codex | Capture the exact outbound request body a single-page app sends and block it before it leaves the browser: patch `window.fetch` **and** `XMLHttpRequest` together (the XHR half is the one usually missed, so a fetch-only wrapper lets the request through), read the parsed payload off `window`, disarm with a reload, and why a hash-route change does not remove the patch — for actions whose side effect costs credits or creates an irreversible record |
 | [`spa-request-capture-and-block` plugin](./plugins/spa-request-capture-and-block/) | plugin | Claude, Codex | Single-skill plugin: spa-request-capture-and-block |
+| [us-federal-open-data-claim-verification](./skills/us-federal-open-data-claim-verification/SKILL.md) | skill | Claude, Codex | Verify quantitative claims about US federal grants/awards/revenue against NIH RePORTER, USAspending and Treasury FiscalData |
+| [`us-federal-open-data-claim-verification` plugin](./plugins/us-federal-open-data-claim-verification/) | plugin | Claude, Codex | Single-skill plugin: us-federal-open-data-claim-verification |
 
 Machine-readable index: [`catalog.json`](./catalog.json). The
 installer and validation script both read from it, so new entries
