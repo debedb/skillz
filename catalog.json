@@ -700,8 +700,13 @@
       "name": "codex-adversarial-pr-review",
       "claude_manifest": "plugins/codex-adversarial-pr-review/.claude-plugin/plugin.json",
       "codex_manifest": "plugins/codex-adversarial-pr-review/.codex-plugin/plugin.json",
-      "hosts": ["claude", "codex"],
-      "skills": ["codex-adversarial-pr-review"],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "codex-adversarial-pr-review"
+      ],
       "summary": "Single-skill plugin: codex-adversarial-pr-review."
     }
   ],
