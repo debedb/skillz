@@ -62,6 +62,38 @@ for s in skills:
 
 skill_hosts = {s.get("name"): s.get("hosts", []) for s in skills}
 
+# `files` must list every non-SKILL.md file in the skill's directory. install.sh
+# copies the whole directory from a local clone, but over curl it can only fetch
+# what is declared here - so an undeclared sibling installs for clone users and
+# silently goes missing for curl users, which is the worse of the two failures
+# because nothing errors.
+for s in skills:
+    name, path = s.get("name"), s.get("path")
+    if not name or not path:
+        continue
+    skill_dir = os.path.join(root, os.path.dirname(path))
+    if not os.path.isdir(skill_dir):
+        continue
+    on_disk = set()
+    for dirpath, dirnames, filenames in os.walk(skill_dir):
+        dirnames[:] = [d for d in dirnames if d != "__pycache__"]
+        for fn in filenames:
+            rel = os.path.relpath(os.path.join(dirpath, fn), skill_dir)
+            if rel == "SKILL.md" or fn.endswith((".pyc", ".pyo")) or fn == ".DS_Store":
+                continue
+            on_disk.add(rel)
+    declared = set(s.get("files", []))
+    for missing in sorted(on_disk - declared):
+        errors.append(
+            f"skill '{name}' ships {missing} but does not declare it in "
+            f"`files` - curl installs would silently omit it"
+        )
+    for extra in sorted(declared - on_disk):
+        errors.append(
+            f"skill '{name}' declares files entry '{extra}' which is not on "
+            f"disk - a curl install would 404"
+        )
+
 # Reverse of the check above: every skill dir on disk must be declared.
 # An undeclared dir is invisible to install.sh (including --all), to the
 # skillz bundle plugin, and to the README table - it ships as a silent no-op,

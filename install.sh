@@ -188,7 +188,8 @@ else:
 
 for s in selected:
     hosts = ",".join(s.get("hosts", []))
-    print(f'{s["name"]}\t{s["path"]}\t{hosts}')
+    files = ",".join(s.get("files", []))
+    print(f'{s["name"]}\t{s["path"]}\t{hosts}\t{files}')
 PY
 }
 
@@ -221,6 +222,47 @@ fetch_to() {
   fi
 }
 
+# Install a skill's non-SKILL.md files: the runnable script, template, or
+# reference doc that sits next to it. A skill whose SKILL.md says "run
+# slack_client.py" is inert without them, and copying SKILL.md alone fails
+# silently - the skill installs, then misbehaves only at use time.
+#
+# Locally we copy the whole directory, so a new sibling file needs no catalog
+# edit. Over curl we cannot list a remote directory, so the file list has to
+# be declared: that is what the catalog's `files` is for, and
+# validate-catalog.sh checks it against the tree so the two cannot drift.
+fetch_skill_extras() {
+  local src_path="$1"   # skills/<name>/SKILL.md
+  local dest_dir="$2"
+  local files_csv="$3"
+  local src_dir="${src_path%/*}"
+
+  if [[ -n "$SCRIPT_DIR" && -d "$SCRIPT_DIR/$src_dir" ]]; then
+    if (( DRY_RUN )); then
+      echo "DRY: cp -R $SCRIPT_DIR/$src_dir/. -> $dest_dir/"
+    else
+      cp -R "$SCRIPT_DIR/$src_dir/." "$dest_dir/"
+    fi
+    return 0
+  fi
+
+  [[ -n "$files_csv" ]] || return 0
+
+  local rel old_ifs
+  old_ifs="$IFS"
+  IFS=','
+  for rel in $files_csv; do
+    [[ -n "$rel" ]] || continue
+    if (( DRY_RUN )); then
+      echo "DRY: curl $SKILLZ_RAW_BASE/$src_dir/$rel -> $dest_dir/$rel"
+    else
+      mkdir -p "$dest_dir/$(dirname "$rel")"
+      curl -fsSL "$SKILLZ_RAW_BASE/$src_dir/$rel" -o "$dest_dir/$rel"
+    fi
+  done
+  IFS="$old_ifs"
+}
+
 for root in "${DEST_ROOTS[@]}"; do
   # Label each destination root with the host it serves so we can skip skills
   # whose declared `hosts` do not include it (e.g. a claude-only skill must not
@@ -233,7 +275,10 @@ for root in "${DEST_ROOTS[@]}"; do
     name="${line%%$'\t'*}"
     rest="${line#*$'\t'}"
     src_path="${rest%%$'\t'*}"
-    hosts="${rest#*$'\t'}"
+    rest="${rest#*$'\t'}"
+    hosts="${rest%%$'\t'*}"
+    files_csv="${rest#*$'\t'}"
+    [[ "$files_csv" == "$hosts" ]] && files_csv=""
     if [[ -n "$root_host" && -n "$hosts" && ",$hosts," != *",$root_host,"* ]]; then
       echo "skip: $name (hosts=$hosts) not for $root_host root"
       continue
@@ -246,6 +291,7 @@ for root in "${DEST_ROOTS[@]}"; do
       mkdir -p "$dest_dir"
     fi
     fetch_to "$src_path" "$dest_file"
+    fetch_skill_extras "$src_path" "$dest_dir" "$files_csv"
     echo "installed: $dest_file"
   done
 done

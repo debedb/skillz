@@ -33,6 +33,9 @@
     {
       "name": "codex-adversarial-pr-review",
       "path": "skills/codex-adversarial-pr-review/SKILL.md",
+      "files": [
+        "scripts/codex-adversarial-pr-review.mjs"
+      ],
       "hosts": [
         "claude",
         "codex"
@@ -122,6 +125,17 @@
     {
       "name": "claudeception",
       "path": "skills/claudeception/SKILL.md",
+      "files": [
+        "LICENSE",
+        "README.md",
+        "WARP.md",
+        "examples/nextjs-server-side-error-debugging/SKILL.md",
+        "examples/prisma-connection-pool-exhaustion/SKILL.md",
+        "examples/typescript-circular-dependency/SKILL.md",
+        "resources/research-references.md",
+        "resources/skill-template.md",
+        "scripts/claudeception-activator.sh"
+      ],
       "hosts": [
         "claude"
       ],
@@ -193,6 +207,10 @@
     {
       "name": "slack-xoxc-session-client",
       "path": "skills/slack-xoxc-session-client/SKILL.md",
+      "files": [
+        "README.md",
+        "slack_client.py"
+      ],
       "hosts": [
         "claude",
         "codex"
