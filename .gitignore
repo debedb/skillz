@@ -20,3 +20,7 @@
 .claude/tasks/
 .claude/scheduled_tasks.lock
 .handoffs/
+
+# Python bytecode
+__pycache__/
+*.py[cod]
