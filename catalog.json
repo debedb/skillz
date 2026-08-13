@@ -288,6 +288,15 @@
         "codex"
       ],
       "summary": "Stacked PRs: merging the upstream PR with branch deletion AUTO-CLOSES the dependent PR instead of retargeting it, and gh pr reopen then fails because the base ref is gone; recover by recreating the ref, or prevent by retargeting downstream PRs first"
+    },
+    {
+      "name": "weighted-split-weight-vs-pod-capacity",
+      "path": "skills/weighted-split-weight-vs-pod-capacity/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Weighted ALB target-group split where routing is correct but the weight does not match pod capacity: p99 regression, per-pod imbalance, canary HPA pinned."
     }
   ],
   "collections": [
@@ -344,7 +353,8 @@
         "terraform-state-version-apply-forensics",
         "terraform-ecs-capacity-provider-staged-teardown",
         "gh-pr-merge-delete-branch-closes-dependent-pr",
-        "aws-http-server-on-lambda-web-adapter"
+        "aws-http-server-on-lambda-web-adapter",
+        "weighted-split-weight-vs-pod-capacity"
       ],
       "summary": "Full repo bundle: every skill in one plugin."
     },
@@ -708,6 +718,19 @@
         "codex-adversarial-pr-review"
       ],
       "summary": "Single-skill plugin: codex-adversarial-pr-review."
+    },
+    {
+      "name": "weighted-split-weight-vs-pod-capacity",
+      "claude_manifest": "plugins/weighted-split-weight-vs-pod-capacity/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/weighted-split-weight-vs-pod-capacity/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "weighted-split-weight-vs-pod-capacity"
+      ],
+      "summary": "Weighted ALB target-group split where routing is correct but the weight does not match pod capacity: p99 regression, per-pod imbalance, canary HPA pinned."
     }
   ],
   "defaults": {

@@ -1,0 +1,12 @@
+{
+  "name": "weighted-split-weight-vs-pod-capacity",
+  "description": "Diagnose a p99 regression after moving traffic onto a weighted ALB target-group split where routing is correct but the weight does not match each fleet's pod capacity -- a 1-pod canary weighted off a Deployment's seed replica count saturates and cannot scale.",
+  "version": "1.0.0",
+  "author": {
+    "name": "voitta-ai"
+  },
+  "homepage": "https://github.com/voitta-ai/skillz",
+  "repository": "https://github.com/voitta-ai/skillz",
+  "license": "MIT",
+  "skills": "./skills/"
+}
