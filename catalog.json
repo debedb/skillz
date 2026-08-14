@@ -268,6 +268,15 @@
       "summary": "Reviewer-side PR iteration loop."
     },
     {
+      "name": "secrets-in-agent-sessions",
+      "path": "skills/secrets-in-agent-sessions/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Handle credentials during a coding-agent session without writing them into the transcript, tool-output cache, permission allowlist or logs. Fingerprint comparison, ask-the-service identification, and env-to-file transfer that never passes through the model."
+    },
+    {
       "name": "slack-app-token-rotation",
       "path": "skills/slack-app-token-rotation/SKILL.md",
       "hosts": [
@@ -382,7 +391,8 @@
         "gh-pr-merge-delete-branch-closes-dependent-pr",
         "aws-http-server-on-lambda-web-adapter",
         "slack-app-token-rotation",
-        "agent-credential-leak-surfaces"
+        "agent-credential-leak-surfaces",
+        "secrets-in-agent-sessions"
       ],
       "summary": "Full repo bundle: every skill in one plugin."
     },
@@ -694,6 +704,19 @@
         "review-pr-loop"
       ],
       "summary": "Single-skill plugin: review-pr-loop."
+    },
+    {
+      "name": "secrets-in-agent-sessions",
+      "claude_manifest": "plugins/secrets-in-agent-sessions/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/secrets-in-agent-sessions/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "secrets-in-agent-sessions"
+      ],
+      "summary": "Single-skill plugin: secrets-in-agent-sessions."
     },
     {
       "name": "slack-app-token-rotation",
