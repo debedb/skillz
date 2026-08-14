@@ -15,6 +15,7 @@ description: |
   high-entropy matching is unusable, and the fingerprint-not-echo technique.
 author: Claude Code
 version: 1.0.0
+date: 2026-08-14
 ---
 
 # Where a coding agent leaves copies of your secrets
@@ -28,6 +29,24 @@ configured, and none of them are in git.
 
 The failure mode is not "a secret leaked." It is **"we rotated the copy we knew
 about."**
+
+## The pattern set, defined once
+
+Every sweep below uses the same union. Defining it once is the point: the most
+common way an audit produces a false "clean" is a snippet that checks fewer
+shapes than the reader assumes.
+
+```bash
+SECRET_RE='(gh[posru]_|github_pat_|glpat-|xox[baprse]-|xapp-|AKIA|ASIA|sk-)[A-Za-z0-9_-]{10,}'
+PEM_RE='-----BEGIN [A-Z ]*PRIVATE KEY-----'
+```
+
+Note `github_pat_` (fine-grained PATs), `ASIA` (STS temporary keys) and the `e`
+in `xox[baprse]-` -- each is a whole credential family, and each is easy to
+leave out. The PEM block needs its own pattern because it has no compact prefix.
+
+If you extend this, extend it here and re-run every sweep, rather than editing
+one snippet.
 
 ## The six surfaces
 
@@ -44,9 +63,14 @@ ten copies of the token, which then age independently of wherever you think the
 canonical copy lives.
 
 ```bash
-find ~ -maxdepth 5 -name config -path '*/.git/*' \
+find ~ -maxdepth 8 -name config -path '*/.git/*' \
   -exec grep -lE 'url = https?://[^/]*:[^@/]+@' {} \;
 ```
+
+`-maxdepth 8` rather than something tighter because `ghq` and GOPATH-style
+layouts put a clone at `~/ghq/github.com/<org>/<repo>/.git/config`, which is
+depth 6. A bound that silently drops an entire checkout convention defeats the
+purpose of the sweep.
 
 Strip them without touching anything else:
 
@@ -80,8 +104,8 @@ Symptom that gives it away: a token you rotated months ago is still on disk, in
 a directory you have never opened, under an opaque filename.
 
 ```bash
-grep -rlE '(gh[posru]_|xox[baprs]-|xapp-|glpat-|AKIA)[A-Za-z0-9_-]{10,}' \
-  <agent-state-dir> 2>/dev/null
+grep -rlE "$SECRET_RE" <agent-state-dir> 2>/dev/null
+grep -rlE "$PEM_RE"    <agent-state-dir> 2>/dev/null
 ```
 
 Rotating without clearing these leaves the old values sitting next to the new
@@ -102,12 +126,17 @@ copy and one place to rotate. Audit with:
 python3 - <<'PY'
 import json, os, re
 d = json.load(open(os.path.expanduser("<config>.json")))
-pat = re.compile(r"(gh[posru]_|xox|xapp-|glpat-|AKIA|sk-)[A-Za-z0-9_-]{10,}")
+pat = re.compile(
+    r"(gh[posru]_|github_pat_|glpat-|xox[baprse]-|xapp-|AKIA|ASIA|sk-)[A-Za-z0-9_-]{10,}"
+    r"|-----BEGIN [A-Z ]*PRIVATE KEY-----")
+# Test strings at the TOP, not inside the dict branch: a literal reached via a
+# list (args: ["--token", "<value>"]) would otherwise hit neither branch and be
+# silently skipped -- and args arrays are where secrets most often sit.
 def walk(n, p=""):
-    if isinstance(n, dict):
-        for k, v in n.items():
-            if isinstance(v, str) and pat.search(v): print("LITERAL at %s.%s" % (p, k))
-            else: walk(v, p + "." + k)
+    if isinstance(n, str):
+        if pat.search(n): print("LITERAL at %s" % p)
+    elif isinstance(n, dict):
+        for k, v in n.items(): walk(v, p + "." + k)
     elif isinstance(n, list):
         for i, v in enumerate(n): walk(v, p + "[%d]" % i)
 walk(d)
@@ -135,9 +164,11 @@ Sweeping for one token shape finds one token shape. A sweep for `gh[posru]_`
 across a machine came back "clean" while an API key, a chat bot token and an
 app-level token sat untouched in the same files.
 
-**Sweep for the union of shapes, not the one you are chasing.** Minimum useful
-set: `gh[posru]_`, `github_pat_`, `glpat-`, `xox[baprse]-`, `xapp-`, `AKIA`,
-`ASIA`, `sk-`, and `-----BEGIN * PRIVATE KEY-----`.
+**Sweep for the union of shapes, not the one you are chasing** -- `$SECRET_RE`
+and `$PEM_RE` as defined at the top. Every snippet in this skill uses those two
+variables rather than its own copy, because a partial regex that has drifted out
+of sync with the documented set is the same false-clean failure wearing a
+different hat.
 
 ### Keyword-adjacency regexes lose to prose
 
