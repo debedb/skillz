@@ -4,6 +4,15 @@
   "description": "Catalog of skills, collections, and plugin bundles distributable from this repo.",
   "skills": [
     {
+      "name": "agent-credential-leak-surfaces",
+      "path": "skills/agent-credential-leak-surfaces/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Find and clean the six local surfaces where a coding agent accumulates copies of your secrets (git remote URLs, memory stores, file-history snapshots, tool config literals, permission allowlists, tool-output caches). Covers why prefix-grep gives false confidence and why keyword-adjacency redaction loses to prose."
+    },
+    {
       "name": "agent-team-orchestration",
       "path": "skills/agent-team-orchestration/SKILL.md",
       "hosts": [
@@ -372,9 +381,23 @@
         "terraform-ecs-capacity-provider-staged-teardown",
         "gh-pr-merge-delete-branch-closes-dependent-pr",
         "aws-http-server-on-lambda-web-adapter",
-        "slack-app-token-rotation"
+        "slack-app-token-rotation",
+        "agent-credential-leak-surfaces"
       ],
       "summary": "Full repo bundle: every skill in one plugin."
+    },
+    {
+      "name": "agent-credential-leak-surfaces",
+      "claude_manifest": "plugins/agent-credential-leak-surfaces/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/agent-credential-leak-surfaces/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "agent-credential-leak-surfaces"
+      ],
+      "summary": "Single-skill plugin: agent-credential-leak-surfaces."
     },
     {
       "name": "agent-team-orchestration",
