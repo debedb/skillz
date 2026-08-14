@@ -14,6 +14,7 @@ description: |
   techniques that avoid all of them.
 author: Claude Code
 version: 1.0.0
+date: 2026-08-14
 ---
 
 # Keeping secrets out of agent sessions and logs
@@ -55,12 +56,28 @@ key reached disk this way in four separate files, none of which were the file
 anyone was looking at.
 
 **Instead:** put it in the environment and reference it, so the value never
-appears in argv.
+appears in the *recorded command string*:
 
 ```bash
 KEY="$(read-from-secret-store)" \
   sh -c 'curl -H "X-Api-Key: $KEY" https://service/endpoint'
 ```
+
+**This fixes trap 1 but not trap 2, and the difference matters.** What gets
+recorded -- transcript, task summary, allowlist -- is the unexpanded `$KEY`, so
+the durable copies are gone. But the inner shell expands `$KEY` before exec'ing
+curl, so the *live process* still carries the value in its argument vector for
+the duration of the call.
+
+To close both, hand the header to curl on stdin, which never touches argv:
+
+```bash
+KEY="$(read-from-secret-store)" sh -c \
+  'printf "header = \"X-Api-Key: %s\"\n" "$KEY" | curl -K - https://service/endpoint'
+```
+
+A `chmod 600` file with `curl -H @file` works too. Readers will otherwise
+assume the env form covers both surfaces; it covers the one that persists.
 
 ### 2. `argv` is world-readable while the process runs
 
@@ -96,8 +113,14 @@ that outlive the session.
 **Filter at the point of capture**, not after:
 
 ```bash
-some-command | sed -E 's/(gh[posru]_|xox[baprs]-|xapp-|glpat-|AKIA)[A-Za-z0-9_-]+/<REDACTED>/g'
+SECRET_RE='(gh[posru]_|github_pat_|glpat-|xox[baprse]-|xapp-|AKIA|ASIA|sk-)[A-Za-z0-9_-]{10,}'
+some-command | sed -E "s/$SECRET_RE/<REDACTED>/g"
 ```
+
+That union is the one defined in `agent-credential-leak-surfaces`; keep the two
+in step. A capture-time filter missing `github_pat_` or `ASIA` passes a
+fine-grained PAT or an STS key straight into the spilled output this is meant to
+protect.
 
 ## Techniques that avoid all four
 
@@ -119,10 +142,17 @@ To find a token in a web UI you need its identity, not its value. Nearly every
 API will tell you:
 
 ```bash
-curl -s -D - -o /tmp/r -H "Authorization: token $T" <api>/user \
+r="$(mktemp)"; trap 'rm -f "$r"' EXIT
+curl -s -D - -o "$r" -H "Authorization: token $T" <api>/user \
   | grep -i '^x-oauth-scopes:'          # scopes
-python3 -c "import json;print(json.load(open('/tmp/r'))['login'])"   # account
+python3 -c "import json,os;print(json.load(open(os.environ['r']))['login'])"  # account
 ```
+
+Use `mktemp` and a cleanup trap rather than a fixed path. `-o /tmp/r` leaves an
+authenticated API response at a predictable, world-readable location that
+outlives the command, and a predictable name in a shared `/tmp` is
+symlink-attackable. Spilled response bodies are their own small surface -- the
+same "one secret becomes several copies" failure in miniature.
 
 Account plus scopes plus "last used" is almost always enough to pick the right
 row out of a token list. Same for chat platforms: an `auth.test`-style endpoint
