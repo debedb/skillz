@@ -790,6 +790,15 @@
         "codex"
       ],
       "summary": "Audit a credential-redaction layer you own: find the holes a normal test suite misses (fixtures that hide the bug, patterns that bypass the value guard, dropped overlap spans, non-idempotence, backwards allow-lists, fail-open imports), then scrub what already leaked."
+    },
+    {
+      "name": "git-default-branch-detection",
+      "path": "skills/git-default-branch-detection/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Determine a repo's actual default branch: init.defaultBranch is a preference for repos that do not exist yet, not a fact about this one, and origin/HEAD is often absent; treat every source as a candidate verified against a real ref."
     }
   ],
   "collections": [
@@ -893,7 +902,8 @@
         "verbatim-social-post-retrieval",
         "wordpress-com-publish",
         "work-on-pr",
-        "credential-redactor-audit"
+        "credential-redactor-audit",
+        "git-default-branch-detection"
       ],
       "summary": "Bundle: every catalog skill in one plugin, except skills whose own plugin ships hooks - install those plugins directly."
     },
@@ -2015,6 +2025,19 @@
         "credential-redactor-audit"
       ],
       "summary": "Single-skill plugin: credential-redactor-audit."
+    },
+    {
+      "name": "git-default-branch-detection",
+      "claude_manifest": "plugins/git-default-branch-detection/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/git-default-branch-detection/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "git-default-branch-detection"
+      ],
+      "summary": "Single-skill plugin: git-default-branch-detection."
     }
   ],
   "defaults": {

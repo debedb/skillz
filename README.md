@@ -210,6 +210,8 @@ environments and older Codex versions.
 | [`codex-hook-wire-schema-from-binary` plugin](./plugins/codex-hook-wire-schema-from-binary/) | plugin | Claude, Codex | Single-skill plugin: codex-hook-wire-schema-from-binary |
 | [credential-redactor-audit](./skills/credential-redactor-audit/SKILL.md) | skill | Claude, Codex | Audit a credential-redaction layer you own: find the holes a normal test suite misses (fixtures that hide the bug, patterns that bypass the value guard, dropped overlap spans, non-idempotence, backwards allow-lists, fail-open imports), then scrub what already leaked |
 | [`credential-redactor-audit` plugin](./plugins/credential-redactor-audit/) | plugin | Claude, Codex | Single-skill plugin: credential-redactor-audit |
+| [git-default-branch-detection](./skills/git-default-branch-detection/SKILL.md) | skill | Claude, Codex | Detect a repo's real default branch; `init.defaultBranch` is a preference for repos that don't exist yet, not the answer |
+| [`git-default-branch-detection` plugin](./plugins/git-default-branch-detection/) | plugin | Claude, Codex | Single-skill plugin: git-default-branch-detection |
 
 Machine-readable index: [`catalog.json`](./catalog.json). The
 installer and validation script both read from it, so new entries
