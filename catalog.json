@@ -4,6 +4,15 @@
   "description": "Catalog of skills, collections, and plugin bundles distributable from this repo.",
   "skills": [
     {
+      "name": "agent-team-orchestration",
+      "path": "skills/agent-team-orchestration/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Run a team of agents over a repo's open issues: architect plans the parallel set, per-issue squads (dev + adversarial reviewer + SDET + productivity engineer), each individually watchable."
+    },
+    {
       "name": "aws-http-server-on-lambda-web-adapter",
       "path": "skills/aws-http-server-on-lambda-web-adapter/SKILL.md",
       "hosts": [
@@ -11,135 +20,6 @@
         "codex"
       ],
       "summary": "Host an unmodified HTTP server (incl. LLM-proxy demos) as a scale-to-zero Lambda via the Web Adapter; Function-URL-403 fallback to API Gateway and its 30s-cap latency tradeoff; cost guardrails."
-    },
-    {
-      "name": "work-on-pr",
-      "path": "skills/work-on-pr/SKILL.md",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "summary": "Author-side PR iteration loop."
-    },
-    {
-      "name": "review-pr-loop",
-      "path": "skills/review-pr-loop/SKILL.md",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "summary": "Reviewer-side PR iteration loop."
-    },
-    {
-      "name": "codex-adversarial-pr-review",
-      "path": "skills/codex-adversarial-pr-review/SKILL.md",
-      "files": [
-        "scripts/codex-adversarial-pr-review.mjs"
-      ],
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "summary": "Post /codex:adversarial-review findings as a batched GitHub PR review (inline + out-of-diff rollup)."
-    },
-    {
-      "name": "continuous-learning",
-      "path": "skills/continuous-learning/SKILL.md",
-      "hosts": [
-        "codex"
-      ],
-      "summary": "End-of-task retrospective: extract reusable, verified learnings as Codex skills."
-    },
-    {
-      "name": "cmux-search",
-      "path": "skills/cmux-search/SKILL.md",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "summary": "Search all open cmux workspaces/tabs/panes - live scrollback + agent transcripts."
-    },
-    {
-      "name": "cmux-agent-tabs",
-      "path": "skills/cmux-agent-tabs/SKILL.md",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "summary": "Make AI agents show as watchable cmux tabs; Claude needs the claude-teams wrapper, Codex tabs via codex-teams/hooks."
-    },
-    {
-      "name": "python-ast-static-analyzer-scoping",
-      "path": "skills/python-ast-static-analyzer-scoping/SKILL.md",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "summary": "Build a Python ast analyzer that resolves import aliases and models module-load vs deferred execution."
-    },
-    {
-      "name": "wordpress-com-publish",
-      "path": "skills/wordpress-com-publish/SKILL.md",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "summary": "Acquire a WordPress.com OAuth2 token (authorization-code flow) and publish/update posts via public-api.wordpress.com."
-    },
-    {
-      "name": "git-graft-worktree-onto-remote",
-      "path": "skills/git-graft-worktree-onto-remote/SKILL.md",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "summary": "Graft a local worktree's commits onto a remote branch without re-cloning."
-    },
-    {
-      "name": "multi-phase-feature-pr-worktrees",
-      "path": "skills/multi-phase-feature-pr-worktrees/SKILL.md",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "summary": "Run a multi-phase feature as stacked worktree PRs so each phase reviews independently."
-    },
-    {
-      "name": "gist-to-repo-migration",
-      "path": "skills/gist-to-repo-migration/SKILL.md",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "summary": "Migrate a gist's full revision history into a real git repo, preserving commits."
-    },
-    {
-      "name": "neon-vercel-db-identify-and-migrate",
-      "path": "skills/neon-vercel-db-identify-and-migrate/SKILL.md",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "summary": "Identify which Neon project backs a Vercel app and migrate/split it; pg_dump>=server; safe non-destructive cutover."
-    },
-    {
-      "name": "claudeception",
-      "path": "skills/claudeception/SKILL.md",
-      "files": [
-        "LICENSE",
-        "README.md",
-        "WARP.md",
-        "examples/nextjs-server-side-error-debugging/SKILL.md",
-        "examples/prisma-connection-pool-exhaustion/SKILL.md",
-        "examples/typescript-circular-dependency/SKILL.md",
-        "resources/research-references.md",
-        "resources/skill-template.md",
-        "scripts/claudeception-activator.sh"
-      ],
-      "hosts": [
-        "claude"
-      ],
-      "summary": "Continuous-learning meta-skill: extract verified, reusable knowledge. Repeatable procedures become catalog skills via PR; specific recollections go to memory (local or a shared git-backed vault)."
     },
     {
       "name": "claude-code-codex-plugin-parity",
@@ -158,6 +38,15 @@
         "codex"
       ],
       "summary": "Convert a repo that ships Claude Code commands/hooks (manual copy-in) into an installable plugin without breaking manual install."
+    },
+    {
+      "name": "claude-code-plugin-publish-anthropic-marketplace",
+      "path": "skills/claude-code-plugin-publish-anthropic-marketplace/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Publish a Claude Code plugin to Anthropic's plugin marketplace, including the pre-submission validation pass."
     },
     {
       "name": "claude-code-plugin-python-bootstrap",
@@ -187,35 +76,106 @@
       "summary": "Identify the exact ~/.claude.json slice that carries MCP config for cross-machine migration vs session bookkeeping."
     },
     {
-      "name": "playwright-mcp-upload-hidden-file-input",
-      "path": "skills/playwright-mcp-upload-hidden-file-input/SKILL.md",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "summary": "Upload a file via Playwright MCP when the input is hidden: unhide+tag via evaluate, upload by id, verify via CDN/S3 URL."
-    },
-    {
-      "name": "agent-team-orchestration",
-      "path": "skills/agent-team-orchestration/SKILL.md",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "summary": "Run a team of agents over a repo's open issues: architect plans the parallel set, per-issue squads (dev + adversarial reviewer + SDET + productivity engineer), each individually watchable."
-    },
-    {
-      "name": "slack-xoxc-session-client",
-      "path": "skills/slack-xoxc-session-client/SKILL.md",
+      "name": "claudeception",
+      "path": "skills/claudeception/SKILL.md",
       "files": [
+        "LICENSE",
         "README.md",
-        "slack_client.py"
+        "WARP.md",
+        "examples/nextjs-server-side-error-debugging/SKILL.md",
+        "examples/prisma-connection-pool-exhaustion/SKILL.md",
+        "examples/typescript-circular-dependency/SKILL.md",
+        "resources/research-references.md",
+        "resources/skill-template.md",
+        "scripts/claudeception-activator.sh"
+      ],
+      "hosts": [
+        "claude"
+      ],
+      "summary": "Continuous-learning meta-skill: extract verified, reusable knowledge. Repeatable procedures become catalog skills via PR; specific recollections go to memory (local or a shared git-backed vault)."
+    },
+    {
+      "name": "cmux-agent-tabs",
+      "path": "skills/cmux-agent-tabs/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Make AI agents show as watchable cmux tabs; Claude needs the claude-teams wrapper, Codex tabs via codex-teams/hooks."
+    },
+    {
+      "name": "cmux-autoresume-after-reboot",
+      "path": "skills/cmux-autoresume-after-reboot/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Diagnose why cmux does not resume agent sessions after a macOS reboot even though terminal.autoResumeAgentSessions is enabled."
+    },
+    {
+      "name": "cmux-search",
+      "path": "skills/cmux-search/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Search all open cmux workspaces/tabs/panes - live scrollback + agent transcripts."
+    },
+    {
+      "name": "codex-adversarial-pr-review",
+      "path": "skills/codex-adversarial-pr-review/SKILL.md",
+      "files": [
+        "scripts/codex-adversarial-pr-review.mjs"
       ],
       "hosts": [
         "claude",
         "codex"
       ],
-      "summary": "Drive the Slack web API as yourself via a live browser session (xoxc token + httpOnly d cookie) when you cannot install a Slack app; ships a runnable Python client that self-labels agent posts by default."
+      "summary": "Post /codex:adversarial-review findings as a batched GitHub PR review (inline + out-of-diff rollup)."
+    },
+    {
+      "name": "continuous-learning",
+      "path": "skills/continuous-learning/SKILL.md",
+      "hosts": [
+        "codex"
+      ],
+      "summary": "End-of-task retrospective: extract reusable, verified learnings as Codex skills."
+    },
+    {
+      "name": "gh-pr-merge-delete-branch-closes-dependent-pr",
+      "path": "skills/gh-pr-merge-delete-branch-closes-dependent-pr/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Stacked PRs: merging the upstream PR with branch deletion AUTO-CLOSES the dependent PR instead of retargeting it, and gh pr reopen then fails because the base ref is gone; recover by recreating the ref, or prevent by retargeting downstream PRs first"
+    },
+    {
+      "name": "gist-to-repo-migration",
+      "path": "skills/gist-to-repo-migration/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Migrate a gist's full revision history into a real git repo, preserving commits."
+    },
+    {
+      "name": "git-graft-worktree-onto-remote",
+      "path": "skills/git-graft-worktree-onto-remote/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Graft a local worktree's commits onto a remote branch without re-cloning."
+    },
+    {
+      "name": "git-worktree-add-relative-path-nests-inside-repo",
+      "path": "skills/git-worktree-add-relative-path-nests-inside-repo/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "git worktree add resolves a relative path against CWD, so running it from inside the repo nests the worktree under the repo instead of the sibling worktrees dir; use an absolute path or git worktree move to fix."
     },
     {
       "name": "istio-multicluster-endpointless-mesh-service",
@@ -236,22 +196,22 @@
       "summary": "Fix macOS Sparkle updater error 4005 / 'Failed to create installation cache directory' that persists after stripping quarantine: relaunch the un-quarantined bundle."
     },
     {
-      "name": "pre-open-source-credential-audit",
-      "path": "skills/pre-open-source-credential-audit/SKILL.md",
+      "name": "multi-phase-feature-pr-worktrees",
+      "path": "skills/multi-phase-feature-pr-worktrees/SKILL.md",
       "hosts": [
         "claude",
         "codex"
       ],
-      "summary": "Audit a git repo for leaked secrets before making it public: scan tracked files AND full history, avoid the git grep -E word-boundary false-negative, catch tracked editor-backup files, and decide rewrite+rotate vs. accept an inert identifier."
+      "summary": "Run a multi-phase feature as stacked worktree PRs so each phase reviews independently."
     },
     {
-      "name": "git-worktree-add-relative-path-nests-inside-repo",
-      "path": "skills/git-worktree-add-relative-path-nests-inside-repo/SKILL.md",
+      "name": "neon-vercel-db-identify-and-migrate",
+      "path": "skills/neon-vercel-db-identify-and-migrate/SKILL.md",
       "hosts": [
         "claude",
         "codex"
       ],
-      "summary": "git worktree add resolves a relative path against CWD, so running it from inside the repo nests the worktree under the repo instead of the sibling worktrees dir; use an absolute path or git worktree move to fix."
+      "summary": "Identify which Neon project backs a Vercel app and migrate/split it; pg_dump>=server; safe non-destructive cutover."
     },
     {
       "name": "openclaw-model-cascade-debugging",
@@ -263,31 +223,62 @@
       "summary": "Diagnose OpenClaw model-cascade failures (gateway process up but every run FailoverErrors because all providers are down), build a free OpenRouter fallback basket to survive codex cooldowns, and verify with one-shot `openclaw agent`."
     },
     {
-      "name": "claude-code-plugin-publish-anthropic-marketplace",
-      "path": "skills/claude-code-plugin-publish-anthropic-marketplace/SKILL.md",
+      "name": "playwright-mcp-upload-hidden-file-input",
+      "path": "skills/playwright-mcp-upload-hidden-file-input/SKILL.md",
       "hosts": [
         "claude",
         "codex"
       ],
-      "summary": "Publish a Claude Code plugin to Anthropic's plugin marketplace, including the pre-submission validation pass."
+      "summary": "Upload a file via Playwright MCP when the input is hidden: unhide+tag via evaluate, upload by id, verify via CDN/S3 URL."
     },
     {
-      "name": "cmux-autoresume-after-reboot",
-      "path": "skills/cmux-autoresume-after-reboot/SKILL.md",
+      "name": "pre-open-source-credential-audit",
+      "path": "skills/pre-open-source-credential-audit/SKILL.md",
       "hosts": [
         "claude",
         "codex"
       ],
-      "summary": "Diagnose why cmux does not resume agent sessions after a macOS reboot even though terminal.autoResumeAgentSessions is enabled."
+      "summary": "Audit a git repo for leaked secrets before making it public: scan tracked files AND full history, avoid the git grep -E word-boundary false-negative, catch tracked editor-backup files, and decide rewrite+rotate vs. accept an inert identifier."
     },
     {
-      "name": "terraform-state-version-apply-forensics",
-      "path": "skills/terraform-state-version-apply-forensics/SKILL.md",
+      "name": "python-ast-static-analyzer-scoping",
+      "path": "skills/python-ast-static-analyzer-scoping/SKILL.md",
       "hosts": [
         "claude",
         "codex"
       ],
-      "summary": "Prove a terraform change really was applied to an env: census versioned S3 tfstate objects (serial + resource-type counts) + cross-check CloudTrail; separates a real apply from a reverted one, identifies which variant of a stacked change ran, and tells untracked orphans from failed destroys"
+      "summary": "Build a Python ast analyzer that resolves import aliases and models module-load vs deferred execution."
+    },
+    {
+      "name": "review-pr-loop",
+      "path": "skills/review-pr-loop/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Reviewer-side PR iteration loop."
+    },
+    {
+      "name": "slack-app-token-rotation",
+      "path": "skills/slack-app-token-rotation/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Actually rotate a leaked Slack bot or app-level token: reinstalling does NOT mint a new xoxb-, only destroying the OAuth grant does. Covers the channel-membership fallout, the incoming-webhook channel picker, and verification without printing tokens."
+    },
+    {
+      "name": "slack-xoxc-session-client",
+      "path": "skills/slack-xoxc-session-client/SKILL.md",
+      "files": [
+        "README.md",
+        "slack_client.py"
+      ],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Drive the Slack web API as yourself via a live browser session (xoxc token + httpOnly d cookie) when you cannot install a Slack app; ships a runnable Python client that self-labels agent posts by default."
     },
     {
       "name": "terraform-ecs-capacity-provider-staged-teardown",
@@ -299,13 +290,31 @@
       "summary": "Tear down an ECS-on-EC2 capacity-provider stack when one apply deadlocks with ResourceInUseException: destroy order is reverse-dependency, so compute tears down before the workload; split into two sequential untargeted applies, workload first"
     },
     {
-      "name": "gh-pr-merge-delete-branch-closes-dependent-pr",
-      "path": "skills/gh-pr-merge-delete-branch-closes-dependent-pr/SKILL.md",
+      "name": "terraform-state-version-apply-forensics",
+      "path": "skills/terraform-state-version-apply-forensics/SKILL.md",
       "hosts": [
         "claude",
         "codex"
       ],
-      "summary": "Stacked PRs: merging the upstream PR with branch deletion AUTO-CLOSES the dependent PR instead of retargeting it, and gh pr reopen then fails because the base ref is gone; recover by recreating the ref, or prevent by retargeting downstream PRs first"
+      "summary": "Prove a terraform change really was applied to an env: census versioned S3 tfstate objects (serial + resource-type counts) + cross-check CloudTrail; separates a real apply from a reverted one, identifies which variant of a stacked change ran, and tells untracked orphans from failed destroys"
+    },
+    {
+      "name": "wordpress-com-publish",
+      "path": "skills/wordpress-com-publish/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Acquire a WordPress.com OAuth2 token (authorization-code flow) and publish/update posts via public-api.wordpress.com."
+    },
+    {
+      "name": "work-on-pr",
+      "path": "skills/work-on-pr/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Author-side PR iteration loop."
     }
   ],
   "collections": [
@@ -362,153 +371,23 @@
         "terraform-state-version-apply-forensics",
         "terraform-ecs-capacity-provider-staged-teardown",
         "gh-pr-merge-delete-branch-closes-dependent-pr",
-        "aws-http-server-on-lambda-web-adapter"
+        "aws-http-server-on-lambda-web-adapter",
+        "slack-app-token-rotation"
       ],
       "summary": "Full repo bundle: every skill in one plugin."
     },
     {
-      "name": "pr-loop",
-      "claude_manifest": "plugins/pr-loop/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/pr-loop/.codex-plugin/plugin.json",
+      "name": "agent-team-orchestration",
+      "claude_manifest": "plugins/agent-team-orchestration/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/agent-team-orchestration/.codex-plugin/plugin.json",
       "hosts": [
         "claude",
         "codex"
       ],
       "skills": [
-        "work-on-pr",
-        "review-pr-loop"
+        "agent-team-orchestration"
       ],
-      "summary": "Paired PR-loop plugin: work-on-pr + review-pr-loop."
-    },
-    {
-      "name": "work-on-pr",
-      "claude_manifest": "plugins/work-on-pr/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/work-on-pr/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "work-on-pr"
-      ],
-      "summary": "Single-skill plugin: work-on-pr."
-    },
-    {
-      "name": "review-pr-loop",
-      "claude_manifest": "plugins/review-pr-loop/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/review-pr-loop/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "review-pr-loop"
-      ],
-      "summary": "Single-skill plugin: review-pr-loop."
-    },
-    {
-      "name": "cmux-search",
-      "claude_manifest": "plugins/cmux-search/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/cmux-search/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "cmux-search"
-      ],
-      "summary": "Single-skill plugin: cmux-search."
-    },
-    {
-      "name": "cmux-agent-tabs",
-      "claude_manifest": "plugins/cmux-agent-tabs/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/cmux-agent-tabs/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "cmux-agent-tabs"
-      ],
-      "summary": "Single-skill plugin: cmux-agent-tabs."
-    },
-    {
-      "name": "python-ast-static-analyzer-scoping",
-      "claude_manifest": "plugins/python-ast-static-analyzer-scoping/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/python-ast-static-analyzer-scoping/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "python-ast-static-analyzer-scoping"
-      ],
-      "summary": "Single-skill plugin: python-ast-static-analyzer-scoping."
-    },
-    {
-      "name": "wordpress-com-publish",
-      "claude_manifest": "plugins/wordpress-com-publish/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/wordpress-com-publish/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "wordpress-com-publish"
-      ],
-      "summary": "Single-skill plugin: wordpress-com-publish."
-    },
-    {
-      "name": "git-graft-worktree-onto-remote",
-      "claude_manifest": "plugins/git-graft-worktree-onto-remote/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/git-graft-worktree-onto-remote/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "git-graft-worktree-onto-remote"
-      ],
-      "summary": "Single-skill plugin: git-graft-worktree-onto-remote."
-    },
-    {
-      "name": "multi-phase-feature-pr-worktrees",
-      "claude_manifest": "plugins/multi-phase-feature-pr-worktrees/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/multi-phase-feature-pr-worktrees/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "multi-phase-feature-pr-worktrees"
-      ],
-      "summary": "Single-skill plugin: multi-phase-feature-pr-worktrees."
-    },
-    {
-      "name": "gist-to-repo-migration",
-      "claude_manifest": "plugins/gist-to-repo-migration/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/gist-to-repo-migration/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "gist-to-repo-migration"
-      ],
-      "summary": "Single-skill plugin: gist-to-repo-migration."
-    },
-    {
-      "name": "neon-vercel-db-identify-and-migrate",
-      "claude_manifest": "plugins/neon-vercel-db-identify-and-migrate/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/neon-vercel-db-identify-and-migrate/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "neon-vercel-db-identify-and-migrate"
-      ],
-      "summary": "Single-skill plugin: neon-vercel-db-identify-and-migrate."
+      "summary": "Single-skill plugin: agent-team-orchestration."
     },
     {
       "name": "claude-code-codex-plugin-parity",
@@ -576,41 +455,43 @@
       "summary": "Single-skill plugin: claude-json-mcp-migration-slice."
     },
     {
-      "name": "playwright-mcp-upload-hidden-file-input",
-      "claude_manifest": "plugins/playwright-mcp-upload-hidden-file-input/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/playwright-mcp-upload-hidden-file-input/.codex-plugin/plugin.json",
+      "name": "cmux-agent-tabs",
+      "claude_manifest": "plugins/cmux-agent-tabs/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/cmux-agent-tabs/.codex-plugin/plugin.json",
       "hosts": [
         "claude",
         "codex"
       ],
       "skills": [
-        "playwright-mcp-upload-hidden-file-input"
+        "cmux-agent-tabs"
       ],
-      "summary": "Single-skill plugin: playwright-mcp-upload-hidden-file-input."
+      "summary": "Single-skill plugin: cmux-agent-tabs."
     },
     {
-      "name": "slack-xoxc-session-client",
-      "claude_manifest": "plugins/slack-xoxc-session-client/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/slack-xoxc-session-client/.codex-plugin/plugin.json",
+      "name": "cmux-search",
+      "claude_manifest": "plugins/cmux-search/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/cmux-search/.codex-plugin/plugin.json",
       "hosts": [
         "claude",
         "codex"
       ],
       "skills": [
-        "slack-xoxc-session-client"
+        "cmux-search"
       ],
-      "summary": "Single-skill plugin: slack-xoxc-session-client (ships a runnable Python client)."
+      "summary": "Single-skill plugin: cmux-search."
     },
     {
-      "name": "continuous-learning",
-      "codex_manifest": "plugins/continuous-learning/.codex-plugin/plugin.json",
+      "name": "codex-adversarial-pr-review",
+      "claude_manifest": "plugins/codex-adversarial-pr-review/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/codex-adversarial-pr-review/.codex-plugin/plugin.json",
       "hosts": [
+        "claude",
         "codex"
       ],
       "skills": [
-        "continuous-learning"
+        "codex-adversarial-pr-review"
       ],
-      "summary": "Codex-only single-skill plugin: continuous-learning (no hooks)."
+      "summary": "Single-skill plugin: codex-adversarial-pr-review."
     },
     {
       "name": "codex-continuous-learning",
@@ -624,82 +505,15 @@
       "summary": "Codex-only plugin bundle: continuous-learning skill plus UserPromptSubmit + Stop hooks that drive an end-of-task retrospective."
     },
     {
-      "name": "agent-team-orchestration",
-      "claude_manifest": "plugins/agent-team-orchestration/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/agent-team-orchestration/.codex-plugin/plugin.json",
+      "name": "continuous-learning",
+      "codex_manifest": "plugins/continuous-learning/.codex-plugin/plugin.json",
       "hosts": [
-        "claude",
         "codex"
       ],
       "skills": [
-        "agent-team-orchestration"
+        "continuous-learning"
       ],
-      "summary": "Single-skill plugin: agent-team-orchestration."
-    },
-    {
-      "name": "istio-multicluster-endpointless-mesh-service",
-      "claude_manifest": "plugins/istio-multicluster-endpointless-mesh-service/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/istio-multicluster-endpointless-mesh-service/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "istio-multicluster-endpointless-mesh-service"
-      ],
-      "summary": "Single-skill plugin: istio-multicluster-endpointless-mesh-service."
-    },
-    {
-      "name": "pre-open-source-credential-audit",
-      "claude_manifest": "plugins/pre-open-source-credential-audit/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/pre-open-source-credential-audit/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "pre-open-source-credential-audit"
-      ],
-      "summary": "Single-skill plugin: pre-open-source-credential-audit."
-    },
-    {
-      "name": "openclaw-model-cascade-debugging",
-      "claude_manifest": "plugins/openclaw-model-cascade-debugging/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/openclaw-model-cascade-debugging/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "openclaw-model-cascade-debugging"
-      ],
-      "summary": "Single-skill plugin: openclaw-model-cascade-debugging."
-    },
-    {
-      "name": "terraform-state-version-apply-forensics",
-      "claude_manifest": "plugins/terraform-state-version-apply-forensics/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/terraform-state-version-apply-forensics/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "terraform-state-version-apply-forensics"
-      ],
-      "summary": "Single-skill plugin: terraform-state-version-apply-forensics."
-    },
-    {
-      "name": "terraform-ecs-capacity-provider-staged-teardown",
-      "claude_manifest": "plugins/terraform-ecs-capacity-provider-staged-teardown/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/terraform-ecs-capacity-provider-staged-teardown/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "terraform-ecs-capacity-provider-staged-teardown"
-      ],
-      "summary": "Single-skill plugin: terraform-ecs-capacity-provider-staged-teardown."
+      "summary": "Codex-only single-skill plugin: continuous-learning (no hooks)."
     },
     {
       "name": "gh-pr-merge-delete-branch-closes-dependent-pr",
@@ -715,17 +529,226 @@
       "summary": "Single-skill plugin: gh-pr-merge-delete-branch-closes-dependent-pr."
     },
     {
-      "name": "codex-adversarial-pr-review",
-      "claude_manifest": "plugins/codex-adversarial-pr-review/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/codex-adversarial-pr-review/.codex-plugin/plugin.json",
+      "name": "gist-to-repo-migration",
+      "claude_manifest": "plugins/gist-to-repo-migration/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/gist-to-repo-migration/.codex-plugin/plugin.json",
       "hosts": [
         "claude",
         "codex"
       ],
       "skills": [
-        "codex-adversarial-pr-review"
+        "gist-to-repo-migration"
       ],
-      "summary": "Single-skill plugin: codex-adversarial-pr-review."
+      "summary": "Single-skill plugin: gist-to-repo-migration."
+    },
+    {
+      "name": "git-graft-worktree-onto-remote",
+      "claude_manifest": "plugins/git-graft-worktree-onto-remote/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/git-graft-worktree-onto-remote/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "git-graft-worktree-onto-remote"
+      ],
+      "summary": "Single-skill plugin: git-graft-worktree-onto-remote."
+    },
+    {
+      "name": "istio-multicluster-endpointless-mesh-service",
+      "claude_manifest": "plugins/istio-multicluster-endpointless-mesh-service/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/istio-multicluster-endpointless-mesh-service/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "istio-multicluster-endpointless-mesh-service"
+      ],
+      "summary": "Single-skill plugin: istio-multicluster-endpointless-mesh-service."
+    },
+    {
+      "name": "multi-phase-feature-pr-worktrees",
+      "claude_manifest": "plugins/multi-phase-feature-pr-worktrees/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/multi-phase-feature-pr-worktrees/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "multi-phase-feature-pr-worktrees"
+      ],
+      "summary": "Single-skill plugin: multi-phase-feature-pr-worktrees."
+    },
+    {
+      "name": "neon-vercel-db-identify-and-migrate",
+      "claude_manifest": "plugins/neon-vercel-db-identify-and-migrate/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/neon-vercel-db-identify-and-migrate/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "neon-vercel-db-identify-and-migrate"
+      ],
+      "summary": "Single-skill plugin: neon-vercel-db-identify-and-migrate."
+    },
+    {
+      "name": "openclaw-model-cascade-debugging",
+      "claude_manifest": "plugins/openclaw-model-cascade-debugging/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/openclaw-model-cascade-debugging/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "openclaw-model-cascade-debugging"
+      ],
+      "summary": "Single-skill plugin: openclaw-model-cascade-debugging."
+    },
+    {
+      "name": "playwright-mcp-upload-hidden-file-input",
+      "claude_manifest": "plugins/playwright-mcp-upload-hidden-file-input/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/playwright-mcp-upload-hidden-file-input/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "playwright-mcp-upload-hidden-file-input"
+      ],
+      "summary": "Single-skill plugin: playwright-mcp-upload-hidden-file-input."
+    },
+    {
+      "name": "pr-loop",
+      "claude_manifest": "plugins/pr-loop/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/pr-loop/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "work-on-pr",
+        "review-pr-loop"
+      ],
+      "summary": "Paired PR-loop plugin: work-on-pr + review-pr-loop."
+    },
+    {
+      "name": "pre-open-source-credential-audit",
+      "claude_manifest": "plugins/pre-open-source-credential-audit/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/pre-open-source-credential-audit/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "pre-open-source-credential-audit"
+      ],
+      "summary": "Single-skill plugin: pre-open-source-credential-audit."
+    },
+    {
+      "name": "python-ast-static-analyzer-scoping",
+      "claude_manifest": "plugins/python-ast-static-analyzer-scoping/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/python-ast-static-analyzer-scoping/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "python-ast-static-analyzer-scoping"
+      ],
+      "summary": "Single-skill plugin: python-ast-static-analyzer-scoping."
+    },
+    {
+      "name": "review-pr-loop",
+      "claude_manifest": "plugins/review-pr-loop/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/review-pr-loop/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "review-pr-loop"
+      ],
+      "summary": "Single-skill plugin: review-pr-loop."
+    },
+    {
+      "name": "slack-app-token-rotation",
+      "claude_manifest": "plugins/slack-app-token-rotation/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/slack-app-token-rotation/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "slack-app-token-rotation"
+      ],
+      "summary": "Single-skill plugin: slack-app-token-rotation."
+    },
+    {
+      "name": "slack-xoxc-session-client",
+      "claude_manifest": "plugins/slack-xoxc-session-client/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/slack-xoxc-session-client/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "slack-xoxc-session-client"
+      ],
+      "summary": "Single-skill plugin: slack-xoxc-session-client (ships a runnable Python client)."
+    },
+    {
+      "name": "terraform-ecs-capacity-provider-staged-teardown",
+      "claude_manifest": "plugins/terraform-ecs-capacity-provider-staged-teardown/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/terraform-ecs-capacity-provider-staged-teardown/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "terraform-ecs-capacity-provider-staged-teardown"
+      ],
+      "summary": "Single-skill plugin: terraform-ecs-capacity-provider-staged-teardown."
+    },
+    {
+      "name": "terraform-state-version-apply-forensics",
+      "claude_manifest": "plugins/terraform-state-version-apply-forensics/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/terraform-state-version-apply-forensics/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "terraform-state-version-apply-forensics"
+      ],
+      "summary": "Single-skill plugin: terraform-state-version-apply-forensics."
+    },
+    {
+      "name": "wordpress-com-publish",
+      "claude_manifest": "plugins/wordpress-com-publish/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/wordpress-com-publish/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "wordpress-com-publish"
+      ],
+      "summary": "Single-skill plugin: wordpress-com-publish."
+    },
+    {
+      "name": "work-on-pr",
+      "claude_manifest": "plugins/work-on-pr/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/work-on-pr/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "work-on-pr"
+      ],
+      "summary": "Single-skill plugin: work-on-pr."
     }
   ],
   "defaults": {
