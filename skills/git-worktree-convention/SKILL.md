@@ -92,10 +92,29 @@ git -C "$WORKTREE" rev-parse --abbrev-ref HEAD   # detached HEAD?
   and duplicated by the repo dir itself is just clutter; removing it is the
   fix, not moving it.
 
+## Fix order when a repo has several drift shapes at once
+
+Do **removals first, then the repo-dir checkout, then the moves.** Fix 1
+tells you to put the repo back on its default branch — but if a stale
+worktree is itself sitting on that default branch, the checkout fails:
+
+```
+$ git -C skillz checkout master
+fatal: 'master' is already used by worktree at '.../skillz-wt-87'
+```
+
+Same constraint as Fix 1, from the other direction: a branch can be
+checked out in exactly one place. Clear the stale worktrees holding it
+before you try to take it.
+
 ## Fix 1: repo dir is on a non-default branch
 
 Switch the repo back to default **first**, then add the worktree for the
 now-free branch.
+
+If the branch has commits the remote does not, push it before the
+checkout — the branch is about to stop being the thing you have open, and
+an unpushed commit is easy to forget once it is.
 
 Do NOT try `git worktree add <path> <current-branch>` while still on that
 branch — git refuses with `fatal: '<current-branch>' is already used by
