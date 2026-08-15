@@ -95,6 +95,23 @@ layouts put a clone at `~/ghq/github.com/<org>/<repo>/.git/config`, which is
 depth 6. A bound that silently drops an entire checkout convention defeats the
 purpose of the sweep.
 
+**That predicate still cannot see four real locations**, so sweep them
+separately rather than assuming one `find` covers git:
+
+```bash
+grep -lE 'https?://[^/@]+@' ~/.git-credentials ~/.config/git/config 2>/dev/null
+find ~ -maxdepth 8 -name '*.git' -type d -name config          # bare clones
+```
+
+- `~/.git-credentials` -- the `store` helper's plaintext file. Not under a
+  `.git/` directory, and its lines have no `url = ` prefix.
+- `~/.config/git/config` -- where an `insteadOf` rewrite carrying a token
+  lives, and it applies to **every** repo on the machine.
+- **Bare clones** (`repo.git/config`) -- the path contains `o.git/`, never the
+  literal `/.git/`.
+- **`--separate-git-dir` and `git worktree`** layouts, where `.git` is a *file*
+  and the real config sits outside any `.git` directory.
+
 Strip them without touching anything else:
 
 ```bash
@@ -106,6 +123,14 @@ case "$old" in
   *) echo "not an http(s) remote, leaving alone: $old" ;;
 esac
 ```
+
+Use `--all` and repeat for push URLs. `git remote get-url <name>` returns only
+the first *fetch* URL, and `set-url` without `--push` writes only fetch URLs --
+so a token sitting in `pushurl` is **flagged by the sweep** (because `pushurl`
+contains the substring `url`) and then **silently untouched by the fix**, which
+exits 0 and looks like success. `git remote get-url --all <name>` and a matching
+`--push` pass close it; `git config --unset` on the specific key is the blunt
+alternative.
 
 The `case` guard matters: run the bare `sed` against `ssh://git@host/o/r.git`
 and it strips the required `git@`, leaving `ssh://host/o/r.git`, which then
@@ -239,12 +264,17 @@ phrasings**, and that pattern caught four of them. The misses:
 
 | written as | why it missed |
 |---|---|
-| `API key: \`<value>\`` | value is in **backticks**; `["']?` has no backtick. In markdown transcripts this is the *common* case |
-| `API key value: \`<value>\`` | a word sits between the name and the delimiter |
-| `Fetched API key from Secrets Manager: <value>` | several words do |
-| `**API key**: <value>` | markdown emphasis is punctuation between name and delimiter |
-| `Authorization: <value>` | "Authorization" was not in the keyword list |
-| `API key \`<value>\`` | no delimiter at all |
+| `API key: \`<value>\`` | **`api[_-]?key` cannot match `API key`** -- `[_-]?` matches an underscore, a hyphen, or nothing, never a space. This alone defeats it; the missing backtick in `["']?` would defeat it a second time |
+| `API key value: \`<value>\`` | same space, plus a word between the name and the delimiter |
+| `Fetched API key from Secrets Manager: <value>` | same space, plus several words (this one does reach the `secret` alternative via "Secrets Manager") |
+| `**API key**: <value>` | same space, plus markdown emphasis between name and delimiter |
+| `Authorization: <value>` | "Authorization" was not in the keyword list at all |
+| `API key \`<value>\`` | same space, and no delimiter either |
+
+The space is the finding, and it is easy to misdiagnose: four of these six look
+like punctuation problems and are actually a keyword problem. A fix that adds
+backticks and allows intervening words still misses rows 1, 2 and 4 until
+`api[_-]?key` becomes `api[_ -]?key`. Verified by running both versions.
 
 Widening to allow intervening text then broke other things (see below). **Do not
 try to win this.** For cleaning a known leak, do a **literal replacement of the
@@ -274,6 +304,9 @@ _KNOWN_SECRET = re.compile(
     r"|^(AKIA|ASIA)[0-9A-Z]{16}$")
 
 _IDENTIFIER_SHAPES = (
+    # Unreachable with the capture class above, which excludes `$` -- so a
+    # `$VAR` value is never captured in the first place. Kept because a wider
+    # capture class is a natural extension and this is the guard it would need.
     re.compile(r"^\$"),                            # $ENV_REFERENCE
     re.compile(r"^[A-Z][A-Z0-9_]*$"),              # ENV_VAR_NAME
     re.compile(r"^[a-z0-9]+(?:[-_][a-z0-9]+)+$"),  # kebab-or-snake resource name
