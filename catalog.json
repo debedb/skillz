@@ -1,6 +1,6 @@
 {
   "$schema": "https://github.com/voitta-ai/skillz/blob/master/scripts/catalog.schema.json",
-  "version": 1,
+  "version": 2,
   "description": "Catalog of skills, collections, and plugin bundles distributable from this repo.",
   "skills": [
     {
