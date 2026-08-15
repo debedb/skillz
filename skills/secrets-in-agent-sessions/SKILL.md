@@ -113,14 +113,18 @@ that outlive the session.
 **Filter at the point of capture**, not after:
 
 ```bash
-SECRET_RE='(gh[posru]_|github_pat_|glpat-|xox[baprse]-|xapp-|AKIA|ASIA|sk-)[A-Za-z0-9_-]{10,}'
-some-command | sed -E "s/$SECRET_RE/<REDACTED>/g"
+SECRET_RE='(^|[^A-Za-z0-9_-])(gh[posru]_|github_pat_|glpat-|xox[baprsedc]-|xapp-|sk-(ant-|or-)?|nvapi-|AIza)[A-Za-z0-9_-]{16,}'
+AWSID_RE='\b(AKIA|ASIA)[0-9A-Z]{16}\b'
+some-command | sed -E "s/$SECRET_RE|$AWSID_RE/<REDACTED>/g"
 ```
 
-That union is the one defined in `agent-credential-leak-surfaces`; keep the two
-in step. A capture-time filter missing `github_pat_` or `ASIA` passes a
-fine-grained PAT or an STS key straight into the spilled output this is meant to
-protect.
+That union is the one defined in `agent-credential-leak-surfaces` -- keep the
+two in step, and read that skill for why it is shaped this way. Two properties
+it took a round of review to get right: it is **left-anchored**, or it matches
+`flask-sqlalchemy` and `dask-distributed` on the `sk-` branch; and AWS key ids
+get their own exactly-anchored pattern rather than being folded into the generic
+suffix. A filter missing `github_pat_`, `ASIA`, `xoxc-`/`xoxd-` or `AIza` passes
+that whole family into the spilled output this exists to protect.
 
 ## Techniques that avoid all four
 
