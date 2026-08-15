@@ -25,7 +25,11 @@ date: 2026-08-14
 You rotate a leaked credential and consider it handled. But rotation only closes
 the exposure you found. Around a coding agent, one secret typically exists in
 **several** places you did not put it, created by machinery you never
-configured, and none of them are in git.
+configured, and most of which no audit covers.
+
+Most are untracked local state. Two are not: a permission allowlist and a
+project-scoped tool config both get committed routinely, which is why the
+git-history audit and this one overlap rather than partition cleanly.
 
 The failure mode is not "a secret leaked." It is **"we rotated the copy we knew
 about."**
@@ -37,16 +41,32 @@ common way an audit produces a false "clean" is a snippet that checks fewer
 shapes than the reader assumes.
 
 ```bash
-SECRET_RE='(gh[posru]_|github_pat_|glpat-|xox[baprse]-|xapp-|AKIA|ASIA|sk-)[A-Za-z0-9_-]{10,}'
+# Left-anchored so `flask-sqlalchemy` and `dask-distributed` do not match `sk-`.
+SECRET_RE='(^|[^A-Za-z0-9_-])(gh[posru]_|github_pat_|glpat-|xox[baprsedc]-|xapp-|sk-(ant-|or-)?|nvapi-|AIza)[A-Za-z0-9_-]{16,}'
+AWSID_RE='\b(AKIA|ASIA)[0-9A-Z]{16}\b'
 PEM_RE='-----BEGIN [A-Z ]*PRIVATE KEY-----'
 ```
 
-Note `github_pat_` (fine-grained PATs), `ASIA` (STS temporary keys) and the `e`
-in `xox[baprse]-` -- each is a whole credential family, and each is easy to
-leave out. The PEM block needs its own pattern because it has no compact prefix.
+Families that are easy to leave out, and were left out of the first draft of
+this very file: `github_pat_` (fine-grained PATs), `ASIA` (STS temporary keys),
+`xoxc-`/`xoxd-` (browser session token and cookie -- a whole sibling skill
+exists for those), `AIza` (Google), `sk-ant-`/`sk-or-`/`nvapi-`. AWS key IDs get
+their own exactly-anchored pattern rather than the loose suffix, because
+`AKIA[0-9A-Z]{16}` is a known fixed shape and folding it into a generic
+`[A-Za-z0-9_-]{16,}` both over- and under-matches.
 
-If you extend this, extend it here and re-run every sweep, rather than editing
-one snippet.
+**Not covered here, deliberately:** the AWS *secret* access key is a bare 40-char
+base64-ish string with no prefix, so it cannot be found by prefix matching at
+all -- see "Bare high-entropy matching is unusable" below for why a generic
+pattern for it is not workable in a transcript. `scripts/check-sensitive-terms.sh`
+in this repo carries a length-and-boundary-anchored version for the narrower
+case of scanning repo files.
+
+**This is not the only copy in the repo, and that is a known problem.**
+`scripts/check-sensitive-terms.sh` is the CI-enforced set,
+`pre-open-source-credential-audit` carries a third. They disagree today. If you
+extend this list, extend the enforced script too -- a prose union that drifts
+from the gate is a false-clean generator.
 
 ## The six surfaces
 
@@ -63,9 +83,12 @@ ten copies of the token, which then age independently of wherever you think the
 canonical copy lives.
 
 ```bash
-find ~ -maxdepth 8 -name config -path '*/.git/*' \
-  -exec grep -lE 'url = https?://[^/]*:[^@/]+@' {} \;
-```
+# Two userinfo forms exist and BOTH leak:
+#   https://user:<token>@host/...     (username + token)
+#   https://<token>@host/...          (token only -- git clone accepts this)
+# A pattern requiring the colon silently misses the second.
+find ~ -maxdepth 8 -name config -path '*/.git/*' -print0 \
+  | xargs -0 grep -lE 'url *= *https?://[^/@]+@'
 
 `-maxdepth 8` rather than something tighter because `ghq` and GOPATH-style
 layouts put a clone at `~/ghq/github.com/<org>/<repo>/.git/config`, which is
@@ -75,13 +98,34 @@ purpose of the sweep.
 Strip them without touching anything else:
 
 ```bash
-git -C <repo> remote set-url <name> \
-  "$(git -C <repo> remote get-url <name> | sed -E 's|://[^/@]+@|://|')"
+old="$(git -C <repo> remote get-url <name>)" || exit 1
+case "$old" in
+  http://*|https://*)                                   # ONLY http(s)
+    new="$(printf '%s' "$old" | sed -E 's|://[^/@]+@|://|')"
+    [ -n "$new" ] && git -C <repo> remote set-url <name> "$new" ;;
+  *) echo "not an http(s) remote, leaving alone: $old" ;;
+esac
 ```
 
+The `case` guard matters: run the bare `sed` against `ssh://git@host/o/r.git`
+and it strips the required `git@`, leaving `ssh://host/o/r.git`, which then
+authenticates as your local username and fails. Since the remediation below is
+"use an SSH remote", an unguarded cleanup would break the very thing this
+section tells you to switch to. The `[ -n "$new" ]` guard stops a failed
+substitution from setting the URL to an empty string.
+
 Then give git a real credential source, or the next person just pastes the token
-back in. A credential helper or an SSH remote is the fix; a token in the URL is
-the symptom.
+back in. A token in the URL is the symptom, not the disease.
+
+Pick the fix with care, because one of them just relocates the problem:
+
+- **SSH remote** -- no token anywhere. Best option where keys are available.
+- **A keychain-backed helper** (`osxkeychain`, `libsecret`, `gh auth setup-git`)
+  -- the credential leaves the filesystem.
+- **`credential.helper store`** -- writes `https://user:<token>@host` in
+  cleartext to `~/.git-credentials`. That path is matched by **none** of the
+  sweeps in this skill: it is not under a `.git/` directory and its lines have
+  no `url = ` prefix. If you use it, add it to your sweep list explicitly.
 
 ### 2. Agent memory / session-transcript stores
 
@@ -104,9 +148,15 @@ Symptom that gives it away: a token you rotated months ago is still on disk, in
 a directory you have never opened, under an opaque filename.
 
 ```bash
-grep -rlE "$SECRET_RE" <agent-state-dir> 2>/dev/null
-grep -rlE "$PEM_RE"    <agent-state-dir> 2>/dev/null
+DIR=~/.claude          # or ~/.codex, ~/.cursor, ... -- whatever your agent uses
+[ -d "$DIR" ] || { echo "no such dir: $DIR" >&2; exit 1; }
+grep -rlE "$SECRET_RE|$AWSID_RE|$PEM_RE" "$DIR"
 ```
+
+Check the directory exists first and do **not** blanket-redirect stderr: a
+mistyped or unsubstituted path makes `grep` print nothing and exit non-zero,
+which with `2>/dev/null` is byte-identical to a clean sweep. A false clean from
+a typo is the same outcome as a false clean from a bad regex.
 
 Rotating without clearing these leaves the old values sitting next to the new
 ones, and the next rotation adds another generation.
@@ -123,12 +173,14 @@ Prefer an environment reference (`"${MY_TOKEN}"`) over a literal, so there is on
 copy and one place to rotate. Audit with:
 
 ```bash
-python3 - <<'PY'
+SECRET_RE="$SECRET_RE" AWSID_RE="$AWSID_RE" PEM_RE="$PEM_RE" \
+CONFIG=~/.claude.json python3 - <<'PY'
 import json, os, re
-d = json.load(open(os.path.expanduser("<config>.json")))
-pat = re.compile(
-    r"(gh[posru]_|github_pat_|glpat-|xox[baprse]-|xapp-|AKIA|ASIA|sk-)[A-Za-z0-9_-]{10,}"
-    r"|-----BEGIN [A-Z ]*PRIVATE KEY-----")
+d = json.load(open(os.path.expanduser(os.environ["CONFIG"])))
+# Read the patterns from the environment rather than restating them: a quoted
+# heredoc does not expand $SECRET_RE, so an inline copy here is guaranteed to
+# drift the first time the union is extended.
+pat = re.compile("|".join(os.environ[k] for k in ("SECRET_RE", "AWSID_RE", "PEM_RE")))
 # Test strings at the TOP, not inside the dict branch: a literal reached via a
 # list (args: ["--token", "<value>"]) would otherwise hit neither branch and be
 # silently skipped -- and args arrays are where secrets most often sit.
@@ -156,7 +208,9 @@ commit, because it looks like configuration rather than a secret.
 Large tool results get spilled to files. Anything a command printed — including
 a secret it legitimately fetched — can persist there long after the session.
 
-## Three lessons about detection, learned the hard way
+## Four lessons about detection, learned the hard way
+
+Three failure modes, and the thing that actually works.
 
 ### Prefix-grep gives false confidence
 
@@ -164,11 +218,13 @@ Sweeping for one token shape finds one token shape. A sweep for `gh[posru]_`
 across a machine came back "clean" while an API key, a chat bot token and an
 app-level token sat untouched in the same files.
 
-**Sweep for the union of shapes, not the one you are chasing** -- `$SECRET_RE`
-and `$PEM_RE` as defined at the top. Every snippet in this skill uses those two
-variables rather than its own copy, because a partial regex that has drifted out
-of sync with the documented set is the same false-clean failure wearing a
-different hat.
+**Sweep for the union of shapes, not the one you are chasing** -- `$SECRET_RE`,
+`$AWSID_RE` and `$PEM_RE` as defined at the top. Every snippet here consumes
+those variables rather than restating them, including the Python one, which has
+to import them through the environment because a quoted heredoc will not expand
+them. That detail is the whole point: the first draft of this file restated the
+union inline "just there", which is precisely how a partial regex drifts out of
+sync with the documented set and produces a false clean.
 
 ### Keyword-adjacency regexes lose to prose
 
@@ -211,12 +267,39 @@ run of **letters and spaces only** between the name and the delimiter, and then
 reject captures that are *names* rather than values:
 
 ```python
+# Order matters: anything that IS a known credential shape must win before the
+# name-shaped tests run.
+_KNOWN_SECRET = re.compile(
+    r"^(gh[posru]_|github_pat_|glpat-|xox[baprsedc]-|xapp-|sk-|nvapi-|AIza)"
+    r"|^(AKIA|ASIA)[0-9A-Z]{16}$")
+
 _IDENTIFIER_SHAPES = (
     re.compile(r"^\$"),                            # $ENV_REFERENCE
     re.compile(r"^[A-Z][A-Z0-9_]*$"),              # ENV_VAR_NAME
     re.compile(r"^[a-z0-9]+(?:[-_][a-z0-9]+)+$"),  # kebab-or-snake resource name
 )
+
+def is_identifier(v):
+    if _KNOWN_SECRET.search(v):
+        return False
+    retval = any(p.search(v) for p in _IDENTIFIER_SHAPES)
+    return retval
 ```
+
+**Check the credential shapes first, or the guard eats real secrets.** Two
+failures that a naive version has by construction:
+
+- An AWS key id is `AKIA` followed by 16 uppercase alphanumerics -- i.e. it is
+  `[A-Z0-9]{20}` end to end, so it matches the `ENV_VAR_NAME` test and **every**
+  AWS key id is silently exempted. A 100% false-negative rate for a family this
+  file lists as mandatory.
+- A lowercase UUID (`8-4-4-4-12` hex groups) matches the kebab test, so
+  UUID-shaped API keys and client secrets are exempted too.
+
+Writing that first bullet is itself an example of the problem: spelling out a
+full example key id trips this repo's own pre-publish gate, because a structural
+scanner cannot tell an illustration from a live credential. Describe the shape
+instead of instantiating it.
 
 Without that guard the redactor eats `MY_SERVICE_API_KEY`, `some-service-auth-token-dev`
 and `$SOME_TOKEN` — protecting nothing while making the stored text useless.
@@ -230,8 +313,9 @@ evidence. A run that changes 300 lines is a bug.
 ## Do not let the cleanup become another copy
 
 An agent investigating a leak must never print the values it finds, or the
-investigation itself lands the secret in the session transcript, the tool-output
-cache and the logs — i.e. three more of the six surfaces above.
+investigation itself lands the secret in the session transcript (surface 2) and
+the tool-output cache and logs (surface 6) — plus surface 3, if it writes its
+findings to a file the agent then snapshots.
 
 The short version: compare by **fingerprint** (`printf '%s' "$T" | shasum | cut -c1-10`),
 identify a token by **asking the service who it is** rather than by reading it,
@@ -255,6 +339,11 @@ that put secrets into transcripts in the first place.
 
 ## Related
 
-- `pre-open-source-credential-audit` — the adjacent problem: auditing a git repo
-  and its **history** before making it public. Disjoint from this skill; nothing
-  here is git-tracked.
+- `pre-open-source-credential-audit` — auditing a git repo and its **history**
+  before making it public. Mostly disjoint from this skill, but **not entirely**:
+  permission allowlists (surface 5) and project-scoped tool configs (surface 4)
+  do get committed, and a secret in git history survives any amount of local
+  sweeping. Run both before publishing a repo.
+- `secrets-in-agent-sessions` — the behavioural counterpart: not creating these
+  copies in the first place. **Merge-order note:** that skill ships in a sibling
+  PR; if this one lands first the reference resolves only once both are in.
