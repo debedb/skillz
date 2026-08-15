@@ -151,6 +151,15 @@
       "summary": "End-of-task retrospective: extract reusable, verified learnings as Codex skills."
     },
     {
+      "name": "credential-redactor-audit",
+      "path": "skills/credential-redactor-audit/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Audit a credential-redaction layer you own: find the holes a normal test suite misses (fixtures that hide the bug, patterns that bypass the value guard, dropped overlap spans, non-idempotence, backwards allow-lists, fail-open imports), then scrub what already leaked."
+    },
+    {
       "name": "gh-pr-merge-delete-branch-closes-dependent-pr",
       "path": "skills/gh-pr-merge-delete-branch-closes-dependent-pr/SKILL.md",
       "hosts": [
@@ -358,41 +367,42 @@
         "codex"
       ],
       "skills": [
-        "work-on-pr",
-        "review-pr-loop",
-        "codex-adversarial-pr-review",
-        "continuous-learning",
-        "cmux-search",
-        "cmux-agent-tabs",
-        "python-ast-static-analyzer-scoping",
-        "wordpress-com-publish",
-        "git-graft-worktree-onto-remote",
-        "multi-phase-feature-pr-worktrees",
-        "gist-to-repo-migration",
-        "neon-vercel-db-identify-and-migrate",
-        "claudeception",
+        "agent-credential-leak-surfaces",
+        "agent-team-orchestration",
+        "aws-http-server-on-lambda-web-adapter",
         "claude-code-codex-plugin-parity",
         "claude-code-plugin-from-existing-repo",
+        "claude-code-plugin-publish-anthropic-marketplace",
         "claude-code-plugin-python-bootstrap",
         "claude-code-plugin-update-flow",
         "claude-json-mcp-migration-slice",
-        "playwright-mcp-upload-hidden-file-input",
-        "agent-team-orchestration",
-        "slack-xoxc-session-client",
+        "claudeception",
+        "cmux-agent-tabs",
+        "cmux-autoresume-after-reboot",
+        "cmux-search",
+        "codex-adversarial-pr-review",
+        "continuous-learning",
+        "credential-redactor-audit",
+        "gh-pr-merge-delete-branch-closes-dependent-pr",
+        "gist-to-repo-migration",
+        "git-graft-worktree-onto-remote",
+        "git-worktree-add-relative-path-nests-inside-repo",
         "istio-multicluster-endpointless-mesh-service",
         "macos-sparkle-update-quarantine-relaunch",
-        "pre-open-source-credential-audit",
-        "git-worktree-add-relative-path-nests-inside-repo",
+        "multi-phase-feature-pr-worktrees",
+        "neon-vercel-db-identify-and-migrate",
         "openclaw-model-cascade-debugging",
-        "claude-code-plugin-publish-anthropic-marketplace",
-        "cmux-autoresume-after-reboot",
-        "terraform-state-version-apply-forensics",
-        "terraform-ecs-capacity-provider-staged-teardown",
-        "gh-pr-merge-delete-branch-closes-dependent-pr",
-        "aws-http-server-on-lambda-web-adapter",
+        "playwright-mcp-upload-hidden-file-input",
+        "pre-open-source-credential-audit",
+        "python-ast-static-analyzer-scoping",
+        "review-pr-loop",
+        "secrets-in-agent-sessions",
         "slack-app-token-rotation",
-        "agent-credential-leak-surfaces",
-        "secrets-in-agent-sessions"
+        "slack-xoxc-session-client",
+        "terraform-ecs-capacity-provider-staged-teardown",
+        "terraform-state-version-apply-forensics",
+        "wordpress-com-publish",
+        "work-on-pr"
       ],
       "summary": "Full repo bundle: every skill in one plugin."
     },
@@ -547,6 +557,19 @@
         "continuous-learning"
       ],
       "summary": "Codex-only single-skill plugin: continuous-learning (no hooks)."
+    },
+    {
+      "name": "credential-redactor-audit",
+      "claude_manifest": "plugins/credential-redactor-audit/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/credential-redactor-audit/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "credential-redactor-audit"
+      ],
+      "summary": "Single-skill plugin: credential-redactor-audit."
     },
     {
       "name": "gh-pr-merge-delete-branch-closes-dependent-pr",
