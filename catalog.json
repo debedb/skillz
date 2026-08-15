@@ -781,6 +781,15 @@
         "codex"
       ],
       "summary": "Author-side PR iteration loop."
+    },
+    {
+      "name": "credential-redactor-audit",
+      "path": "skills/credential-redactor-audit/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Audit a credential-redaction layer you own: find the holes a normal test suite misses (fixtures that hide the bug, patterns that bypass the value guard, dropped overlap spans, non-idempotence, backwards allow-lists, fail-open imports), then scrub what already leaked."
     }
   ],
   "collections": [
@@ -883,7 +892,8 @@
         "us-federal-open-data-claim-verification",
         "verbatim-social-post-retrieval",
         "wordpress-com-publish",
-        "work-on-pr"
+        "work-on-pr",
+        "credential-redactor-audit"
       ],
       "summary": "Bundle: every catalog skill in one plugin, except skills whose own plugin ships hooks - install those plugins directly."
     },
@@ -1992,6 +2002,19 @@
         "codex-hook-wire-schema-from-binary"
       ],
       "summary": "Single-skill plugin: codex-hook-wire-schema-from-binary."
+    },
+    {
+      "name": "credential-redactor-audit",
+      "claude_manifest": "plugins/credential-redactor-audit/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/credential-redactor-audit/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "credential-redactor-audit"
+      ],
+      "summary": "Single-skill plugin: credential-redactor-audit."
     }
   ],
   "defaults": {

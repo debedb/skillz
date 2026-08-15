@@ -208,6 +208,8 @@ environments and older Codex versions.
 | [`claude-transcript-permission-mining` plugin](./plugins/claude-transcript-permission-mining/) | plugin | Claude, Codex | Single-skill plugin: claude-transcript-permission-mining |
 | [codex-hook-wire-schema-from-binary](./skills/codex-hook-wire-schema-from-binary/SKILL.md) | skill | Claude, Codex | Read the Codex CLI hook contract out of the shipped native binary with strings rather than a live probe turn: |
 | [`codex-hook-wire-schema-from-binary` plugin](./plugins/codex-hook-wire-schema-from-binary/) | plugin | Claude, Codex | Single-skill plugin: codex-hook-wire-schema-from-binary |
+| [credential-redactor-audit](./skills/credential-redactor-audit/SKILL.md) | skill | Claude, Codex | Audit a credential-redaction layer you own: find the holes a normal test suite misses (fixtures that hide the bug, patterns that bypass the value guard, dropped overlap spans, non-idempotence, backwards allow-lists, fail-open imports), then scrub what already leaked |
+| [`credential-redactor-audit` plugin](./plugins/credential-redactor-audit/) | plugin | Claude, Codex | Single-skill plugin: credential-redactor-audit |
 
 Machine-readable index: [`catalog.json`](./catalog.json). The
 installer and validation script both read from it, so new entries
