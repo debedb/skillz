@@ -39,10 +39,14 @@ _SHAPES = (
     ("github fine-grained PAT", re.compile(r"github_pat_[A-Za-z0-9_]{20,}")),
     ("github token", re.compile(r"gh[posru]_[A-Za-z0-9]{20,}")),
     ("gitlab PAT", re.compile(r"glpat-[A-Za-z0-9\-_]{20,}")),
-    ("slack token", re.compile(r"xox[baprse]-[A-Za-z0-9-]{10,}")),
+    # Includes c and d: the browser session token and session cookie. Those
+    # are pasted into sessions at least as often as bot tokens.
+    ("slack token", re.compile(r"xox[baprsedc]-[A-Za-z0-9-]{10,}")),
     ("slack app token", re.compile(r"xapp-[0-9]-[A-Za-z0-9-]{10,}")),
     ("aws access key id", re.compile(r"\b(?:AKIA|ASIA)[0-9A-Z]{16}\b")),
-    ("openai-style key", re.compile(r"\bsk-(?:proj-)?[A-Za-z0-9]{20,}")),
+    ("openai-style key", re.compile(r"\bsk-(?:proj-|ant-|or-)?[A-Za-z0-9-]{20,}")),
+    ("nvidia key", re.compile(r"\bnvapi-[A-Za-z0-9_-]{20,}")),
+    ("google api key", re.compile(r"\bAIza[A-Za-z0-9_-]{30,}")),
     ("private key block", re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----")),
     ("credentials in url", re.compile(r"(?<=://)[^/\s:@]+:[^/\s@]+(?=@)")),
 )
@@ -66,8 +70,18 @@ _IDENTIFIER_SHAPES = (
 )
 
 
+# Checked BEFORE the name-shaped tests. An AWS key id is [A-Z0-9]{20} end to
+# end, so it matches the ENV_VAR_NAME shape -- without this, the guard would
+# exempt every AWS key id it ever saw.
+_KNOWN_SECRET = re.compile(
+    r"^(gh[posru]_|github_pat_|glpat-|xox[baprsedc]-|xapp-|sk-|nvapi-|AIza)"
+    r"|^(AKIA|ASIA)[0-9A-Z]{16}$")
+
+
 def _is_identifier(value):
     """True when a captured value is a name rather than a credential."""
+    if _KNOWN_SECRET.search(value):
+        return False
     retval = any(p.search(value) for p in _IDENTIFIER_SHAPES)
     return retval
 
