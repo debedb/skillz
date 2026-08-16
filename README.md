@@ -41,6 +41,7 @@ environments and older Codex versions.
 | [cmux-autoresume-after-reboot](./skills/cmux-autoresume-after-reboot/SKILL.md) | skill | Claude, Codex | Why cmux does not resume agent sessions after a macOS reboot despite `autoResumeAgentSessions` |
 | [python-ast-static-analyzer-scoping](./skills/python-ast-static-analyzer-scoping/SKILL.md) | skill | Claude, Codex | Build a Python `ast` analyzer: import-alias resolution + load-time vs deferred scoping |
 | [wordpress-com-publish](./skills/wordpress-com-publish/SKILL.md) | skill | Claude, Codex | Acquire a WordPress.com OAuth2 token (authorization-code flow) and publish/update posts |
+| [git-worktree-convention](./skills/git-worktree-convention/SKILL.md) | skill | Claude, Codex | Repo on default branch, branch work in sibling `<repo>.worktrees/`; drift detection, ask-before-reorganizing, and recovery |
 | [git-graft-worktree-onto-remote](./skills/git-graft-worktree-onto-remote/SKILL.md) | skill | Claude, Codex | Graft a local worktree's commits onto a remote branch without re-cloning |
 | [multi-phase-feature-pr-worktrees](./skills/multi-phase-feature-pr-worktrees/SKILL.md) | skill | Claude, Codex | Run a multi-phase feature as stacked worktree PRs, each reviewed independently |
 | [gist-to-repo-migration](./skills/gist-to-repo-migration/SKILL.md) | skill | Claude, Codex | Migrate a gist's full revision history into a real git repo |
@@ -67,6 +68,7 @@ environments and older Codex versions.
 | [`cmux-agent-tabs` plugin](./plugins/cmux-agent-tabs/) | plugin | Claude, Codex | Single-skill plugin: cmux-agent-tabs |
 | [`python-ast-static-analyzer-scoping` plugin](./plugins/python-ast-static-analyzer-scoping/) | plugin | Claude, Codex | Single-skill plugin: python-ast-static-analyzer-scoping |
 | [`wordpress-com-publish` plugin](./plugins/wordpress-com-publish/) | plugin | Claude, Codex | Single-skill plugin: WordPress.com token + publish |
+| [`git-worktree-convention` plugin](./plugins/git-worktree-convention/) | plugin | Claude, Codex | Single-skill plugin: git-worktree-convention |
 | [`git-graft-worktree-onto-remote` plugin](./plugins/git-graft-worktree-onto-remote/) | plugin | Claude, Codex | Single-skill plugin: git-graft-worktree-onto-remote |
 | [`multi-phase-feature-pr-worktrees` plugin](./plugins/multi-phase-feature-pr-worktrees/) | plugin | Claude, Codex | Single-skill plugin: multi-phase-feature-pr-worktrees |
 | [`gist-to-repo-migration` plugin](./plugins/gist-to-repo-migration/) | plugin | Claude, Codex | Single-skill plugin: gist-to-repo-migration |
@@ -109,6 +111,7 @@ skills/                            # canonical skill content
   wordpress-com-publish/SKILL.md
   git-add-u-rename-pitfall/SKILL.md
   git-branch-cleanup-script-races/SKILL.md
+  git-worktree-convention/SKILL.md
   git-graft-worktree-onto-remote/SKILL.md
   multi-phase-feature-pr-worktrees/SKILL.md
   gist-to-repo-migration/SKILL.md
