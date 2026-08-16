@@ -85,17 +85,36 @@ The older spelling `gitleaks protect --staged` still runs but the subcommand is
 hidden and deprecated; `gitleaks git --staged` replaced it. Check
 `gitleaks version` before copying a snippet found online.
 
+That hook **fails closed**: with gitleaks not installed, `exec` exits 127 and
+git aborts the commit. Correct, but the message a colleague sees is
+`gitleaks: not found`, and the tempting fix is to delete the hook. Install
+gitleaks instead.
+
 ## Install: every future repo, automatically
 
 Hooks are per-repo, so the leverage is in the template git copies into each new
-`.git/`:
+`.git/`. With the framework, one command does it:
+
+```bash
+pre-commit init-templatedir ~/.git-template
+git config --global init.templateDir ~/.git-template
+```
+
+`init-templatedir` installs with skip-on-missing-config, so repos cloned without
+a `.pre-commit-config.yaml` are not broken by the template hook; it also warns if
+`init.templateDir` does not point at the directory you just populated. Without
+the framework, copy the raw hook in yourself:
 
 ```bash
 mkdir -p ~/.git-template/hooks
-cp "$hooks/pre-commit" ~/.git-template/hooks/pre-commit
+cp "$(git rev-parse --git-path hooks)/pre-commit" ~/.git-template/hooks/pre-commit
 chmod +x ~/.git-template/hooks/pre-commit
 git config --global init.templateDir ~/.git-template
 ```
+
+The raw version has no such tolerance: every repo created afterwards blocks every
+commit on any machine where gitleaks is missing. That is the right default for a
+secret gate, but decide it deliberately.
 
 `git init` **and** `git clone` copy the template's hooks into the new repo, so
 this is the answer to "install a scanner whenever a repo is created". Existing
@@ -117,9 +136,11 @@ git init .          # in an existing repo: adds the hook, overwrites nothing
 3. **Commits git creates by replay** — rebase, cherry-pick, `git commit-tree`,
    and anything writing objects directly. Only `git commit` runs `pre-commit`.
 4. **`core.hooksPath` is set.** Then `.git/hooks/` is ignored entirely and a hook
-   written there never runs; the pre-commit framework refuses to install at all.
-   `git rev-parse --git-path hooks` (used above) resolves to the real directory,
-   so use it rather than hardcoding `.git/hooks`.
+   written there never runs; the framework refuses outright —
+   `Cowardly refusing to install hooks with core.hooksPath set` (fix:
+   `git config --unset-all core.hooksPath`, or put the hook in the configured
+   directory). `git rev-parse --git-path hooks` (used above) resolves to the real
+   directory, so use it rather than hardcoding `.git/hooks`.
 
 And the one that gives false confidence: **the hook only sees the staged diff.**
 It says nothing about what is already in the repo. Installing it is not evidence
@@ -129,6 +150,13 @@ the repo is clean, so scan the history once, at install time:
 gitleaks git --redact .          # full history
 gitleaks dir  --redact .         # working tree, including untracked
 ```
+
+A clean scan is also not proof. gitleaks' default config is ~222 provider-shaped
+rules plus one `generic-api-key` rule that needs a keyword (`key`, `token`,
+`secret`, `password`, …) within ~50 characters of the value **and** entropy ≥ 3.5.
+A credential in a field named `"k"`, a bare base64 blob, or an internal token
+format with no recognizable prefix passes both the hook and GitHub's push
+protection. Treat the scanners as catching the known shapes, not as an oracle.
 
 For the deeper version of that audit — history rewrites, placeholders vs. real
 values, the `git grep -E` `\b` false negative — see
@@ -186,9 +214,16 @@ Prove the hook actually blocks, in a throwaway repo:
 d="$(mktemp -d)" && cd "$d" && git init -q .        # picks up init.templateDir
 printf 'aws_key = %s%s\n' 'AKIA' 'IOSFODNN7EXAMPLE' > leak.txt
 git add leak.txt
-git commit -m t ; echo "exit=$?"                    # expect non-zero, no commit
+git -c user.email=t@example.invalid -c user.name=t commit -m t 2>&1 | tee out
 git log --oneline 2>/dev/null | wc -l               # expect 0
+grep -qiE 'finding|leaks found' out && echo "BLOCKED BY THE HOOK"
+grep -qi 'not found'            out && echo "HOOK COULD NOT RUN - install gitleaks"
 ```
+
+Pin the identity and check *why* it failed, because three different failures all
+produce "no commit": an unconfigured `user.email` aborts on its own (exit 128), a
+missing gitleaks binary makes the hook exit 127, and only the third is the hook
+actually finding something. Each looks like protection from the outside.
 
 The fake key is assembled from two halves at runtime on purpose. A document or
 test fixture *about* secret scanning will trip secret scanners — including this
