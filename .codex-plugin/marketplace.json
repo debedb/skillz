@@ -192,6 +192,11 @@
       "description": "Audit a git repo for leaked secrets before making it public: scan tracked files AND full history, avoid the git grep -E word-boundary false-negative, catch tracked editor-backup files, and decide rewrite+rotate vs. accept an inert identifier."
     },
     {
+      "name": "prevent-committing-secrets",
+      "source": "./plugins/prevent-committing-secrets/",
+      "description": "Block a credential at commit time with a pre-commit secret scanner (gitleaks), and cover new repos automatically via init.templateDir. The four paths that skip the hook, why a staged-diff scan is not a history scan, and GitHub push protection as the non-bypassable half."
+    },
+    {
       "name": "python-ast-static-analyzer-scoping",
       "source": "./plugins/python-ast-static-analyzer-scoping/",
       "description": "Build a Python ast analyzer: import-alias resolution plus module-load vs deferred execution scoping."

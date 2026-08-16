@@ -1,0 +1,12 @@
+{
+  "name": "prevent-committing-secrets",
+  "version": "1.0.0",
+  "description": "Block a credential at commit time with a pre-commit secret scanner (gitleaks), and cover new repos automatically via init.templateDir. The four paths that skip the hook, why a staged-diff scan is not a history scan, and GitHub push protection as the non-bypassable half.",
+  "author": {
+    "name": "voitta-ai"
+  },
+  "homepage": "https://github.com/voitta-ai/skillz",
+  "repository": "https://github.com/voitta-ai/skillz",
+  "license": "MIT",
+  "skills": "./skills/"
+}
