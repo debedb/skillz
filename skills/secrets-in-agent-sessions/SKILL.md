@@ -236,3 +236,6 @@ beats regex for cleanup.
   accumulate, and how to find and clean them.
 - `pre-open-source-credential-audit` — auditing a git repo and its history
   before making it public.
+- `prevent-committing-secrets` — the commit-time gate on the other leak path: a
+  pre-commit secret scanner, and the git template that puts one in every new
+  repo without anyone remembering to.

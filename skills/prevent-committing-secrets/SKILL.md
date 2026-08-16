@@ -57,18 +57,24 @@ repos:
   - repo: https://github.com/gitleaks/gitleaks
     rev: v8.30.1
     hooks:
-      - id: gitleaks-system
+      - id: gitleaks
 ```
 
 ```bash
 pre-commit install
-pre-commit install --hook-type pre-merge-commit     # see trap 2
+pre-commit install --hook-type pre-merge-commit     # see "does not cover", 2
 ```
 
-Pick the hook id by what you have: `gitleaks` is `language: golang` and builds
-from source (needs a Go toolchain); `gitleaks-system` uses a `gitleaks` already
-on `PATH` (`brew install gitleaks`); `gitleaks-docker` needs neither. All three
-run the same command.
+All three hook ids run the same command and differ only in where the scanner
+comes from, which is what decides whether `rev` means anything:
+
+- `gitleaks` — `language: golang`, builds the pinned revision from source, so
+  the pin is real. Needs Go (pre-commit can fetch a toolchain itself).
+- `gitleaks-system` — runs whatever `gitleaks` is on `PATH`
+  (`brew install gitleaks`). `rev` then pins only the hook definition, not the
+  scanner: two machines can be on the same config and different rulesets.
+- `gitleaks-docker` — needs neither, but does need a running Docker daemon,
+  which is the usual reason this id fails in CI.
 
 **Raw hook**, for a repo not using the framework:
 
@@ -165,14 +171,14 @@ values, the `git grep -E` `\b` false negative — see
 ## The half that cannot be bypassed locally: push protection
 
 ```bash
-gh api repos/$O/$R --jq .security_and_analysis
+gh api repos/$ORG/$REPO --jq .security_and_analysis
 ```
 
 Do not assume it is on because the repo is public; check. Enable per repo (push
 protection requires secret scanning, so set both):
 
 ```bash
-gh api -X PATCH repos/$O/$R --input - <<'JSON'
+gh api -X PATCH repos/$ORG/$REPO --input - <<'JSON'
 {"security_and_analysis":{"secret_scanning":{"status":"enabled"},
  "secret_scanning_push_protection":{"status":"enabled"}}}
 JSON

@@ -1,6 +1,6 @@
 {
   "name": "skillz",
-  "description": "Full skillz bundle: every skill in the catalog (work-on-pr, review-pr-loop, continuous-learning, cmux-search).",
+  "description": "Full skillz bundle: every skill in the catalog (see catalog.json).",
   "version": "1.1.0",
   "author": {
     "name": "voitta-ai"

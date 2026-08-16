@@ -357,19 +357,6 @@
   ],
   "plugins": [
     {
-      "name": "prevent-committing-secrets",
-      "claude_manifest": "plugins/prevent-committing-secrets/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/prevent-committing-secrets/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "prevent-committing-secrets"
-      ],
-      "summary": "Pre-commit secret scanning: install it, cover new repos via init.templateDir, and pair it with GitHub push protection."
-    },
-    {
       "name": "skillz",
       "claude_manifest": "plugins/skillz/.claude-plugin/plugin.json",
       "codex_manifest": "plugins/skillz/.codex-plugin/plugin.json",
@@ -701,6 +688,19 @@
         "pre-open-source-credential-audit"
       ],
       "summary": "Single-skill plugin: pre-open-source-credential-audit."
+    },
+    {
+      "name": "prevent-committing-secrets",
+      "claude_manifest": "plugins/prevent-committing-secrets/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/prevent-committing-secrets/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "prevent-committing-secrets"
+      ],
+      "summary": "Single-skill plugin: prevent-committing-secrets."
     },
     {
       "name": "python-ast-static-analyzer-scoping",
