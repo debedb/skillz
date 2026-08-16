@@ -380,3 +380,6 @@ that put secrets into transcripts in the first place.
 - `secrets-in-agent-sessions` — the behavioural counterpart: not creating these
   copies in the first place. **Merge-order note:** that skill ships in a sibling
   PR; if this one lands first the reference resolves only once both are in.
+- `prevent-committing-secrets` — the gate on the one surface that is versioned
+  and shared with everyone: a pre-commit secret scanner, so the value never
+  reaches history to begin with.

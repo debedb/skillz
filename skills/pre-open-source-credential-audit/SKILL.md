@@ -110,3 +110,7 @@ history scan (step 4) confirmed clean before the public flip.
   a backstop, not a substitute for this audit.
 - Prefer `--data`-free, read-only commands here; none of the scan steps mutate the
   repo, so they are safe to run before deciding anything.
+- **Once this audit passes, stop the next one at the source:**
+  `prevent-committing-secrets` installs a pre-commit scanner (and a git template
+  so new repos get it), which is the gate that makes this audit boring instead of
+  urgent.

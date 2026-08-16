@@ -250,6 +250,15 @@
       "summary": "Audit a git repo for leaked secrets before making it public: scan tracked files AND full history, avoid the git grep -E word-boundary false-negative, catch tracked editor-backup files, and decide rewrite+rotate vs. accept an inert identifier."
     },
     {
+      "name": "prevent-committing-secrets",
+      "path": "skills/prevent-committing-secrets/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Block a credential at commit time with a gitleaks pre-commit hook, and cover new repos automatically via init.templateDir. The six paths that skip the hook, where the default ruleset is blind, why a staged-diff scan is not a history scan, and GitHub push protection plus CI as the halves that cannot be bypassed locally."
+    },
+    {
       "name": "python-ast-static-analyzer-scoping",
       "path": "skills/python-ast-static-analyzer-scoping/SKILL.md",
       "hosts": [
@@ -392,7 +401,8 @@
         "aws-http-server-on-lambda-web-adapter",
         "slack-app-token-rotation",
         "agent-credential-leak-surfaces",
-        "secrets-in-agent-sessions"
+        "secrets-in-agent-sessions",
+        "prevent-committing-secrets"
       ],
       "summary": "Full repo bundle: every skill in one plugin."
     },
@@ -678,6 +688,19 @@
         "pre-open-source-credential-audit"
       ],
       "summary": "Single-skill plugin: pre-open-source-credential-audit."
+    },
+    {
+      "name": "prevent-committing-secrets",
+      "claude_manifest": "plugins/prevent-committing-secrets/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/prevent-committing-secrets/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "prevent-committing-secrets"
+      ],
+      "summary": "Single-skill plugin: prevent-committing-secrets."
     },
     {
       "name": "python-ast-static-analyzer-scoping",
