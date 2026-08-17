@@ -22,6 +22,10 @@ permissions:
 # own pace (secrets-in-agent-sessions is already at 2.0.0).
 env:
   VERSION_FILE: plugins/skillz/.claude-plugin/plugin.json
+  # Codex pins on its own manifest's version string exactly as Claude Code
+  # does, so the two must move together or Codex installs freeze on a cached
+  # copy. See skills/claude-code-codex-plugin-parity.
+  CODEX_VERSION_FILE: plugins/skillz/.codex-plugin/plugin.json
 
 jobs:
   # PR side. Nothing ships without a version bump: the version is the cache
@@ -49,7 +53,12 @@ jobs:
             echo "::error::$new does not advance past $old."
             exit 1
           fi
-          echo "$old -> $new"
+          codex=$(jq -r .version "$CODEX_VERSION_FILE")
+          if [ "$codex" != "$new" ]; then
+            echo "::error::$CODEX_VERSION_FILE is $codex, expected $new - bump both manifests."
+            exit 1
+          fi
+          echo "$old -> $new (claude + codex in sync)"
 
   # master side. The version is new by the time we get here, so cut the tag
   # and the release. Notes come from the merged PR titles since the previous

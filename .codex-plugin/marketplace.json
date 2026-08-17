@@ -47,6 +47,11 @@
       "description": "Update an installed Claude Code plugin via /plugin marketplace update + /reload-plugins, not the discovery-picker /plugin update."
     },
     {
+      "name": "claude-code-plugin-release-automation",
+      "source": "./plugins/claude-code-plugin-release-automation/",
+      "description": "Tag and publish release notes automatically from a plugin repo's manifest version, with CI enforcing the bump."
+    },
+    {
       "name": "claude-code-static-allow-bypasses-hook",
       "source": "./plugins/claude-code-static-allow-bypasses-hook/",
       "description": "Why a Claude Code PreToolUse hook never fires for some commands: static permissions.allow Bash globs short-circuit it."
