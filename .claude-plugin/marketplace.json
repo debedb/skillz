@@ -187,6 +187,11 @@
       "description": "Block a credential at commit time with a gitleaks pre-commit hook, and cover new repos automatically via init.templateDir. The six paths that skip the hook, where the default ruleset is blind, why a staged-diff scan is not a history scan, and GitHub push protection plus CI as the halves that cannot be bypassed locally."
     },
     {
+      "name": "agent-session-credential-audit",
+      "source": "./plugins/agent-session-credential-audit/",
+      "description": "Triage, rotate and scrub credentials that leaked into an agent session transcript. The surfaces a naive scan misses, the false-positive taxonomy, the key-id-vs-secret severity test, non-destructive liveness probes validated with a known-bad control, how to verify a rotation actually rotated, and a kill-list scrub that cannot erase a live secret."
+    },
+    {
       "name": "python-ast-static-analyzer-scoping",
       "source": "./plugins/python-ast-static-analyzer-scoping/",
       "description": "Build a Python ast analyzer: import-alias resolution plus module-load vs deferred execution scoping."

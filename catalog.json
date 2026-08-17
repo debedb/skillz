@@ -13,6 +13,15 @@
       "summary": "Find and clean the six local surfaces where a coding agent accumulates copies of your secrets (git remote URLs, memory stores, file-history snapshots, tool config literals, permission allowlists, tool-output caches). Covers why prefix-grep gives false confidence and why keyword-adjacency redaction loses to prose."
     },
     {
+      "name": "agent-session-credential-audit",
+      "path": "skills/agent-session-credential-audit/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Triage, rotate and scrub credentials that leaked into agent session transcripts: the surfaces a naive scan misses, the false-positive taxonomy, the key-id-vs-secret severity test, non-destructive liveness probes with a known-bad control, verifying a rotation actually rotated, and a kill-list scrub that cannot erase a live secret."
+    },
+    {
       "name": "agent-team-orchestration",
       "path": "skills/agent-team-orchestration/SKILL.md",
       "hosts": [
@@ -402,7 +411,8 @@
         "slack-app-token-rotation",
         "agent-credential-leak-surfaces",
         "secrets-in-agent-sessions",
-        "prevent-committing-secrets"
+        "prevent-committing-secrets",
+        "agent-session-credential-audit"
       ],
       "summary": "Full repo bundle: every skill in one plugin."
     },
@@ -831,6 +841,19 @@
         "work-on-pr"
       ],
       "summary": "Single-skill plugin: work-on-pr."
+    },
+    {
+      "name": "agent-session-credential-audit",
+      "claude_manifest": "plugins/agent-session-credential-audit/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/agent-session-credential-audit/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "agent-session-credential-audit"
+      ],
+      "summary": "Single-skill plugin: agent-session-credential-audit."
     }
   ],
   "defaults": {
