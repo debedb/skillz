@@ -1,0 +1,82 @@
+name: release
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+    # Maintainer-only paths: a PR touching nothing else is not shipping
+    # anything to an install, so it does not owe a version bump.
+    paths-ignore:
+      - '.github/**'
+      - 'scripts/**'
+
+permissions:
+  contents: read
+
+# This repo publishes ~32 per-skill plugins, each with its own version, plus
+# the 'skillz' full-bundle plugin. The bundle version is the repo-level
+# release anchor: one tag and one release per shipping merge, whose notes
+# name the skills that changed. Per-plugin versions stay independent -- they
+# are the cache key that makes THAT plugin re-extract, and they move at their
+# own pace (secrets-in-agent-sessions is already at 2.0.0).
+env:
+  VERSION_FILE: plugins/skillz/.claude-plugin/plugin.json
+
+jobs:
+  # PR side. Nothing ships without a version bump: the version is the cache
+  # key for ~/.claude/plugins/cache/<marketplace>/<plugin>/<version>/, so an
+  # unchanged version means no install ever re-extracts and every user keeps
+  # running the old build, with no error reported anywhere.
+  version-bumped:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Version must advance
+        env:
+          BASE: ${{ github.base_ref }}
+        run: |
+          git fetch --no-tags --depth=1 origin "$BASE"
+          old=$(git show "FETCH_HEAD:$VERSION_FILE" | jq -r .version)
+          new=$(jq -r .version "$VERSION_FILE")
+          if [ "$old" = "$new" ]; then
+            echo "::error::$VERSION_FILE#version is still $old - bump it."
+            exit 1
+          fi
+          if [ "$(printf '%s\n%s\n' "$old" "$new" | sort -V | head -1)" != "$old" ]; then
+            echo "::error::$new does not advance past $old."
+            exit 1
+          fi
+          echo "$old -> $new"
+
+  # master side. The version is new by the time we get here, so cut the tag
+  # and the release. Notes come from the merged PR titles since the previous
+  # tag - that IS the changelog, which is why there is no CHANGELOG.md to
+  # keep in sync. gh creates the tag itself at --target, so it lands on
+  # master's squash commit rather than on a feature-branch commit that never
+  # reaches master.
+  tag-and-release:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Tag and release if the version is new
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version=$(jq -r .version "$VERSION_FILE")
+          if git rev-parse -q --verify "refs/tags/v$version" >/dev/null; then
+            echo "v$version is already tagged; nothing to release."
+            exit 0
+          fi
+          gh release create "v$version" \
+            --title "v$version" \
+            --generate-notes \
+            --target "$GITHUB_SHA"

@@ -18,6 +18,7 @@ environments and older Codex versions.
 - [Migrating from `debedb/skillz`](#migrating-from-debedbskillz)
 - [Catalog manifest](#catalog-manifest)
 - [Updating](#updating)
+- [Releases](#releases)
 - [Verify](#verify)
 - [Collections](#collections)
   - [pr-loop](#pr-loop-collection)
@@ -516,6 +517,30 @@ under `skills` in `catalog.json`. No installer edits required.
   checkout you added, then reopen `/plugins` if needed.
 - **Script:** re-run the curl one-liner, or `git pull && ./install.sh`
   from a clone.
+
+## Releases
+
+Tagging and release notes are automatic; do not tag by hand.
+`.github/workflows/release.yml` owns both halves:
+
+- On a PR into `master`, the `version-bumped` job fails unless
+  `plugins/skillz/.claude-plugin/plugin.json#version` advances past
+  master's. PRs touching only `.github/` or `scripts/` skip the gate —
+  nothing shippable changed.
+- On the push to `master`, the `tag-and-release` job creates tag
+  `v<version>` and a GitHub release at master's squash commit, with
+  `--generate-notes`.
+
+The full-bundle plugin's version is the repo-level release anchor: one tag
+and one release per shipping merge. The ~32 single-skill plugins keep their
+own independent versions — those are each plugin's cache key in
+`~/.claude/plugins/cache/`, so **bump the version of every plugin whose
+skill you touched**, not just the bundle. Skip that and `claude plugin
+update` tells users of that single-skill plugin "up to date" forever.
+
+Release notes are the merged PR titles since the previous tag, which is why
+there is no `CHANGELOG.md`. A lazy PR title is a lazy release note — write
+the title as the line you want a reader to see.
 
 ## Verify
 
