@@ -405,6 +405,15 @@
         "codex"
       ],
       "summary": "Retrieve exact original text of Truth Social / X posts (incl. deleted ones) for fact-checking: api.fxtwitter.com JSON, trumpstruth.org archive with its query= param and deletion flags, date-bounded negatives, HTTP 451 syndication fallback."
+    },
+    {
+      "name": "chrome-localhost-mic-autoblock",
+      "path": "skills/chrome-localhost-mic-autoblock/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Fix a web app's mic failing in Chrome with a not-allowed error on localhost even though the OS granted Chrome mic access: Chrome auto-blocks the mic per-site and the OS Privacy toggle / Chrome restart never clears it; set the site to Allow."
     }
   ],
   "collections": [
@@ -472,7 +481,8 @@
         "spring-profile-config-overlay-dedupe",
         "spa-request-capture-and-block",
         "us-federal-open-data-claim-verification",
-        "verbatim-social-post-retrieval"
+        "verbatim-social-post-retrieval",
+        "chrome-localhost-mic-autoblock"
       ],
       "summary": "Full repo bundle: every skill in one plugin."
     },
@@ -998,6 +1008,19 @@
         "verbatim-social-post-retrieval"
       ],
       "summary": "Single-skill plugin: verbatim-social-post-retrieval."
+    },
+    {
+      "name": "chrome-localhost-mic-autoblock",
+      "claude_manifest": "plugins/chrome-localhost-mic-autoblock/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/chrome-localhost-mic-autoblock/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "chrome-localhost-mic-autoblock"
+      ],
+      "summary": "Single-skill plugin: chrome-localhost-mic-autoblock."
     }
   ],
   "defaults": {

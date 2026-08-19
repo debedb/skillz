@@ -106,6 +106,8 @@ environments and older Codex versions.
 | [`us-federal-open-data-claim-verification` plugin](./plugins/us-federal-open-data-claim-verification/) | plugin | Claude, Codex | Single-skill plugin: us-federal-open-data-claim-verification |
 | [verbatim-social-post-retrieval](./skills/verbatim-social-post-retrieval/SKILL.md) | skill | Claude, Codex | Retrieve verbatim Truth Social / X posts, including deleted ones, for fact-checking |
 | [`verbatim-social-post-retrieval` plugin](./plugins/verbatim-social-post-retrieval/) | plugin | Claude, Codex | Single-skill plugin: verbatim-social-post-retrieval |
+| [chrome-localhost-mic-autoblock](./skills/chrome-localhost-mic-autoblock/SKILL.md) | skill | Claude, Codex | Chrome mic fails with `not-allowed` on localhost even though the OS granted Chrome mic access: Chrome auto-blocks the mic per-site and the OS Privacy toggle / restart never clears it; set the site to Allow at `chrome://settings/content/microphone` |
+| [`chrome-localhost-mic-autoblock` plugin](./plugins/chrome-localhost-mic-autoblock/) | plugin | Claude, Codex | Single-skill plugin: chrome-localhost-mic-autoblock |
 
 Machine-readable index: [`catalog.json`](./catalog.json). The
 installer and validation script both read from it, so new entries
