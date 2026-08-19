@@ -369,6 +369,15 @@
         "codex"
       ],
       "summary": "Diagnose what cmux actually restored after a relaunch and recover panes it silently dropped."
+    },
+    {
+      "name": "spring-profile-config-overlay-dedupe",
+      "path": "skills/spring-profile-config-overlay-dedupe/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Strip an application-<profile>.yml down to real overrides and prove the effective config is unchanged, by flattening base+profile before and after and diffing the key sets. Covers confirming profiles are layered at all, and when keeping a duplicate is correct."
     }
   ],
   "collections": [
@@ -432,7 +441,8 @@
         "prevent-committing-secrets",
         "agent-session-credential-audit",
         "claude-code-plugin-release-automation",
-        "cmux-session-restore-forensics"
+        "cmux-session-restore-forensics",
+        "spring-profile-config-overlay-dedupe"
       ],
       "summary": "Full repo bundle: every skill in one plugin."
     },
@@ -900,6 +910,21 @@
         "cmux-session-restore-forensics"
       ],
       "summary": "Single-skill plugin: cmux-session-restore-forensics."
+    },
+    {
+      "name": "spring-profile-config-overlay-dedupe",
+      "claude_manifest": "plugins/spring-profile-config-overlay-dedupe/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/spring-profile-config-overlay-dedupe/.codex-plugin/plugin.json",
+      "claude_marketplace": ".claude-plugin/marketplace.json",
+      "codex_marketplace": ".codex-plugin/marketplace.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "spring-profile-config-overlay-dedupe"
+      ],
+      "summary": "Single-skill plugin: spring-profile-config-overlay-dedupe"
     }
   ],
   "defaults": {
