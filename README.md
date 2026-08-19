@@ -543,11 +543,26 @@ Tagging and release notes are automatic; do not tag by hand.
   `--generate-notes`.
 
 The full-bundle plugin's version is the repo-level release anchor: one tag
-and one release per shipping merge. The ~32 single-skill plugins keep their
-own independent versions — those are each plugin's cache key in
+and one release per shipping merge. The single-skill plugins keep their own
+independent versions — those are each plugin's cache key in
 `~/.claude/plugins/cache/`, so **bump the version of every plugin whose
 skill you touched**, not just the bundle. Skip that and `claude plugin
 update` tells users of that single-skill plugin "up to date" forever.
+
+`scripts/check-plugin-version-bumps.py` enforces this, so you no longer have
+to remember it. It maps the PR's changed paths back to the plugins that ship
+them — via `catalog.json`, so editing `skills/foo/SKILL.md` implicates both
+the `foo` plugin and the bundle — and fails the PR unless each implicated
+plugin's version advanced. It also rejects a plugin whose Claude and Codex
+manifests disagree, since the two runtimes pin independently and letting them
+drift freezes one host silently.
+
+Run it locally before pushing (it reads the working tree, so uncommitted
+changes count):
+
+```bash
+python3 scripts/check-plugin-version-bumps.py origin/master
+```
 
 Release notes are the merged PR titles since the previous tag, which is why
 there is no `CHANGELOG.md`. A lazy PR title is a lazy release note — write

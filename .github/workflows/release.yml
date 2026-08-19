@@ -60,6 +60,14 @@ jobs:
           fi
           echo "$old -> $new (claude + codex in sync)"
 
+      # The check above only watches the bundle, which is the release anchor.
+      # Every single-skill plugin has its own version and its own install
+      # cache keyed on it, so editing skills/foo/ and bumping only the bundle
+      # leaves standalone `foo` installs frozen while `plugin update` reports
+      # "up to date". This maps the diff back to the plugins that ship it.
+      - name: Every touched plugin must bump too
+        run: python3 scripts/check-plugin-version-bumps.py FETCH_HEAD
+
   # master side. The version is new by the time we get here, so cut the tag
   # and the release. Notes come from the merged PR titles since the previous
   # tag - that IS the changelog, which is why there is no CHANGELOG.md to
