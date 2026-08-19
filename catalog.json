@@ -378,6 +378,15 @@
         "codex"
       ],
       "summary": "Strip an application-<profile>.yml down to real overrides and prove the effective config is unchanged, by flattening base+profile before and after and diffing the key sets. Covers confirming profiles are layered at all, and when keeping a duplicate is correct."
+    },
+    {
+      "name": "spa-request-capture-and-block",
+      "path": "skills/spa-request-capture-and-block/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Capture the exact outbound request body a single-page app sends and block it before it leaves the browser: patch window.fetch AND XMLHttpRequest together (the XHR half is the one usually missed, so a fetch-only wrapper lets the request through), read the parsed payload off window, and disarm with a reload \u2014 including why a hash-route change does not remove the patch. For actions whose side effect costs credits or creates an irreversible record."
     }
   ],
   "collections": [
@@ -442,7 +451,8 @@
         "agent-session-credential-audit",
         "claude-code-plugin-release-automation",
         "cmux-session-restore-forensics",
-        "spring-profile-config-overlay-dedupe"
+        "spring-profile-config-overlay-dedupe",
+        "spa-request-capture-and-block"
       ],
       "summary": "Full repo bundle: every skill in one plugin."
     },
@@ -925,6 +935,19 @@
         "spring-profile-config-overlay-dedupe"
       ],
       "summary": "Single-skill plugin: spring-profile-config-overlay-dedupe"
+    },
+    {
+      "name": "spa-request-capture-and-block",
+      "claude_manifest": "plugins/spa-request-capture-and-block/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/spa-request-capture-and-block/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "spa-request-capture-and-block"
+      ],
+      "summary": "Capture the exact outbound request body a single-page app sends and block it before it leaves the browser: patch window.fetch AND XMLHttpRequest together (the XHR half is the one usually missed, so a fetch-only wrapper lets the request through), read the parsed payload off window, and disarm with a reload \u2014 including why a hash-route change does not remove the patch. For actions whose side effect costs credits or creates an irreversible record."
     }
   ],
   "defaults": {

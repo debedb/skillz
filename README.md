@@ -100,6 +100,8 @@ environments and older Codex versions.
 | [`cmux-session-restore-forensics` plugin](./plugins/cmux-session-restore-forensics/) | plugin | Claude, Codex | Single-skill plugin: cmux-session-restore-forensics |
 | [spring-profile-config-overlay-dedupe](./skills/spring-profile-config-overlay-dedupe/SKILL.md) | skill | Claude, Codex | Strip an `application-<profile>.yml` to real overrides and prove the effective config is unchanged; when a duplicate should deliberately stay |
 | [`spring-profile-config-overlay-dedupe` plugin](./plugins/spring-profile-config-overlay-dedupe/) | plugin | Claude, Codex | Single-skill plugin: spring-profile-config-overlay-dedupe |
+| [spa-request-capture-and-block](./skills/spa-request-capture-and-block/SKILL.md) | skill | Claude, Codex | Capture the exact outbound request body a single-page app sends and block it before it leaves the browser: patch `window.fetch` **and** `XMLHttpRequest` together (the XHR half is the one usually missed, so a fetch-only wrapper lets the request through), read the parsed payload off `window`, disarm with a reload, and why a hash-route change does not remove the patch — for actions whose side effect costs credits or creates an irreversible record |
+| [`spa-request-capture-and-block` plugin](./plugins/spa-request-capture-and-block/) | plugin | Claude, Codex | Single-skill plugin: spa-request-capture-and-block |
 
 Machine-readable index: [`catalog.json`](./catalog.json). The
 installer and validation script both read from it, so new entries
