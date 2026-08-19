@@ -360,6 +360,15 @@
         "codex"
       ],
       "summary": "Author-side PR iteration loop."
+    },
+    {
+      "name": "cmux-session-restore-forensics",
+      "path": "skills/cmux-session-restore-forensics/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Diagnose what cmux actually restored after a relaunch and recover panes it silently dropped."
     }
   ],
   "collections": [
@@ -422,7 +431,8 @@
         "secrets-in-agent-sessions",
         "prevent-committing-secrets",
         "agent-session-credential-audit",
-        "claude-code-plugin-release-automation"
+        "claude-code-plugin-release-automation",
+        "cmux-session-restore-forensics"
       ],
       "summary": "Full repo bundle: every skill in one plugin."
     },
@@ -877,6 +887,19 @@
         "agent-session-credential-audit"
       ],
       "summary": "Single-skill plugin: agent-session-credential-audit."
+    },
+    {
+      "name": "cmux-session-restore-forensics",
+      "claude_manifest": "plugins/cmux-session-restore-forensics/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/cmux-session-restore-forensics/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "cmux-session-restore-forensics"
+      ],
+      "summary": "Single-skill plugin: cmux-session-restore-forensics."
     }
   ],
   "defaults": {

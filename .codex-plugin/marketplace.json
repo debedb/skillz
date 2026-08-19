@@ -270,6 +270,11 @@
       "name": "work-on-pr",
       "source": "./plugins/work-on-pr/",
       "description": "Author-side PR iteration loop only."
+    },
+    {
+      "name": "cmux-session-restore-forensics",
+      "source": "./plugins/cmux-session-restore-forensics/",
+      "description": "Diagnose what cmux actually restored after a relaunch and recover panes it silently dropped."
     }
   ]
 }
