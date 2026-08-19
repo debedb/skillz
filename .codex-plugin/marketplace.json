@@ -275,6 +275,11 @@
       "name": "cmux-session-restore-forensics",
       "source": "./plugins/cmux-session-restore-forensics/",
       "description": "Diagnose what cmux actually restored after a relaunch and recover panes it silently dropped."
+    },
+    {
+      "name": "spring-profile-config-overlay-dedupe",
+      "source": "./plugins/spring-profile-config-overlay-dedupe/",
+      "description": "Strip Spring/Grails profile configs down to real overrides and prove the effective config did not change. Covers flatten-and-diff verification and when a duplicate should deliberately stay."
     }
   ]
 }
