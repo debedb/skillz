@@ -18,8 +18,8 @@ description: |
   NOT valid verification, and the release-tagging order for squash-merge
   repos.
 author: Claude Code
-version: 1.1.0
-date: 2026-07-27
+version: 1.2.0
+date: 2026-08-17
 ---
 
 # Claude Code: Updating an Installed Plugin
@@ -104,6 +104,14 @@ puts on master. Correct order:
 
 Tagging creates no commit, so this stays compatible with a
 no-direct-commits-to-master policy.
+
+**Prefer automating steps 2-3 away.** Doing this by hand is exactly the
+step that gets skipped, which is how a repo ends up with tags and no
+releases — or no tags. `claude-code-plugin-release-automation` turns the
+version field into the trigger: CI fails a PR whose version did not
+advance, then cuts the tag and a GitHub release with generated notes on
+the squash commit. Reach for the manual sequence above only when you are
+backfilling a tag or the repo has no CI.
 
 ### If you are the user
 

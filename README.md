@@ -52,6 +52,7 @@ environments and older Codex versions.
 | [claude-code-plugin-from-existing-repo](./skills/claude-code-plugin-from-existing-repo/SKILL.md) | skill | Claude, Codex | Convert a repo that ships CC commands/hooks (manual copy-in) into an installable plugin |
 | [claude-code-plugin-python-bootstrap](./skills/claude-code-plugin-python-bootstrap/SKILL.md) | skill | Claude, Codex | Bootstrap Python deps from a CC plugin hook so `/plugin install` is one-click (PEP 668-safe) |
 | [claude-code-plugin-update-flow](./skills/claude-code-plugin-update-flow/SKILL.md) | skill | Claude, Codex | Update a CC plugin via `/plugin marketplace update` + `/reload-plugins`, not the picker `/plugin update` |
+| [claude-code-plugin-release-automation](./skills/claude-code-plugin-release-automation/SKILL.md) | skill | Claude, Codex | Tag + release notes automatically from the manifest version; CI fails a PR that forgot the bump |
 | [claude-code-plugin-publish-anthropic-marketplace](./skills/claude-code-plugin-publish-anthropic-marketplace/SKILL.md) | skill | Claude, Codex | Publish a CC plugin to Anthropic's marketplace, plus the pre-submission validation pass |
 | [claude-json-mcp-migration-slice](./skills/claude-json-mcp-migration-slice/SKILL.md) | skill | Claude, Codex | The exact `~/.claude.json` slice that carries MCP config for migration vs session bookkeeping |
 | [playwright-mcp-upload-hidden-file-input](./skills/playwright-mcp-upload-hidden-file-input/SKILL.md) | skill | Claude, Codex | Upload to a hidden `<input type=file>` via Playwright MCP (unhide+tag, upload, verify via CDN URL) |
@@ -80,6 +81,7 @@ environments and older Codex versions.
 | [`claude-code-plugin-from-existing-repo` plugin](./plugins/claude-code-plugin-from-existing-repo/) | plugin | Claude, Codex | Single-skill plugin: claude-code-plugin-from-existing-repo |
 | [`claude-code-plugin-python-bootstrap` plugin](./plugins/claude-code-plugin-python-bootstrap/) | plugin | Claude, Codex | Single-skill plugin: claude-code-plugin-python-bootstrap |
 | [`claude-code-plugin-update-flow` plugin](./plugins/claude-code-plugin-update-flow/) | plugin | Claude, Codex | Single-skill plugin: claude-code-plugin-update-flow |
+| [`claude-code-plugin-release-automation` plugin](./plugins/claude-code-plugin-release-automation/) | plugin | Claude, Codex | Single-skill plugin: claude-code-plugin-release-automation |
 | [`claude-json-mcp-migration-slice` plugin](./plugins/claude-json-mcp-migration-slice/) | plugin | Claude, Codex | Single-skill plugin: claude-json-mcp-migration-slice |
 | [`continuous-learning` plugin](./plugins/continuous-learning/) | plugin | Codex | Single-skill plugin (no hooks) |
 | [`playwright-mcp-upload-hidden-file-input` plugin](./plugins/playwright-mcp-upload-hidden-file-input/) | plugin | Claude, Codex | Single-skill plugin: playwright-mcp-upload-hidden-file-input |
@@ -138,6 +140,7 @@ skills/                            # canonical skill content
   claude-code-plugin-from-existing-repo/SKILL.md
   claude-code-plugin-python-bootstrap/SKILL.md
   claude-code-plugin-update-flow/SKILL.md
+  claude-code-plugin-release-automation/SKILL.md
   claude-json-mcp-migration-slice/SKILL.md
   macos-bash-3.2-compat/SKILL.md
   emacs-batch-package-verify-pitfalls/SKILL.md
@@ -284,6 +287,10 @@ plugins/                           # per-plugin manifests + skill symlinks
     .claude-plugin/plugin.json
     .codex-plugin/plugin.json
     skills/claude-code-plugin-update-flow -> ../../../skills/claude-code-plugin-update-flow
+  claude-code-plugin-release-automation/ # single-skill plugin
+    .claude-plugin/plugin.json
+    .codex-plugin/plugin.json
+    skills/claude-code-plugin-release-automation -> ../../../skills/claude-code-plugin-release-automation
   claude-json-mcp-migration-slice/ # single-skill plugin
     .claude-plugin/plugin.json
     .codex-plugin/plugin.json
@@ -527,8 +534,10 @@ Tagging and release notes are automatic; do not tag by hand.
 
 - On a PR into `master`, the `version-bumped` job fails unless
   `plugins/skillz/.claude-plugin/plugin.json#version` advances past
-  master's. PRs touching only `.github/` or `scripts/` skip the gate —
-  nothing shippable changed.
+  master's, **and** `plugins/skillz/.codex-plugin/plugin.json#version`
+  matches it. Codex pins on its own manifest, so the two must move together.
+  PRs touching only `.github/` or `scripts/` skip the gate — nothing
+  shippable changed.
 - On the push to `master`, the `tag-and-release` job creates tag
   `v<version>` and a GitHub release at master's squash commit, with
   `--generate-notes`.

@@ -85,6 +85,15 @@
       "summary": "Why `claude plugin update` reports \"up to date\" while the plugin still runs stale code: the install cache is keyed by plugin.json#version. Authors bump on every shipping merge; verify against the cache dir, never the marketplace clone."
     },
     {
+      "name": "claude-code-plugin-release-automation",
+      "path": "skills/claude-code-plugin-release-automation/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Tag and publish release notes automatically from a plugin repo's manifest version, with CI enforcing the bump."
+    },
+    {
       "name": "claude-json-mcp-migration-slice",
       "path": "skills/claude-json-mcp-migration-slice/SKILL.md",
       "hosts": [
@@ -412,7 +421,8 @@
         "agent-credential-leak-surfaces",
         "secrets-in-agent-sessions",
         "prevent-committing-secrets",
-        "agent-session-credential-audit"
+        "agent-session-credential-audit",
+        "claude-code-plugin-release-automation"
       ],
       "summary": "Full repo bundle: every skill in one plugin."
     },
@@ -493,6 +503,19 @@
         "claude-code-plugin-update-flow"
       ],
       "summary": "Single-skill plugin: claude-code-plugin-update-flow."
+    },
+    {
+      "name": "claude-code-plugin-release-automation",
+      "claude_manifest": "plugins/claude-code-plugin-release-automation/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/claude-code-plugin-release-automation/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "claude-code-plugin-release-automation"
+      ],
+      "summary": "Single-skill plugin: claude-code-plugin-release-automation."
     },
     {
       "name": "claude-json-mcp-migration-slice",

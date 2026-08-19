@@ -1,0 +1,11 @@
+{
+  "name": "claude-code-plugin-release-automation",
+  "version": "1.0.0",
+  "description": "Make a Claude Code plugin repo tag itself and publish release notes from its manifest version, with CI enforcing the bump.",
+  "author": "voitta-ai",
+  "homepage": "https://github.com/voitta-ai/skillz",
+  "repository": "https://github.com/voitta-ai/skillz",
+  "license": "MIT",
+  "keywords": ["claude", "codex", "skills", "github-actions", "release", "versioning"],
+  "skills": "./skills/"
+}
