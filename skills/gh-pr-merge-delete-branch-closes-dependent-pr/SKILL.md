@@ -18,10 +18,15 @@ description: |
   reopen the PR, retarget its base to your real target (usually main),
   optionally delete the recreated ref again. Hit twice in one session
   on a 3-PR stack (#82 → #71 → #84) because the gh-merge of each PR's
-  predecessor cascaded the close to the next.
+  predecessor cascaded the close to the next. Also covers (4) the
+  fallback where you abandon the closed PR and open a replacement from
+  the same head branch — that path needs
+  `git rebase --onto origin/master <old-base-head> <branch>` first, or
+  the new PR's diff re-includes the whole already-merged base PR and
+  reads as a revert-and-reapply of someone else's work.
 author: Claude Code
-version: 1.0.0
-date: 2026-05-22
+version: 1.1.0
+date: 2026-08-14
 ---
 
 # `gh pr merge --delete-branch` closes (not retargets) dependent PRs
@@ -164,7 +169,52 @@ which is usually expected on a stacked workflow anyway.
   approvals, no inline comments worth preserving), it's cleaner to
   let it stay closed and open a fresh PR from the same head branch
   against the correct base. The recovery procedure above is for when
-  you *do* want the history.
+  you *do* want the history. **That fallback needs a rebase first —
+  see the next section.**
+
+## The fresh-PR fallback needs a rebase the recovery path doesn't
+
+If you take the "let it stay closed, open a fresh PR" route, do **not**
+push the head branch at the new base as-is. It still carries the base
+branch's original commits, while the target branch holds that same
+content as a *single squash commit*. Git sees two histories with no
+commits in common, so the replacement PR's diff re-includes the whole
+upstream PR — it reads as though you reverted and reapplied someone
+else's already-merged work.
+
+Drop the already-absorbed commits first:
+
+```bash
+# <old-base-head> = last commit of the branch that was merged and
+# deleted. Get it from the merged PR, or locally before it ages out:
+#   git rev-parse <deleted-branch>@{1}
+git rebase --onto origin/master <old-base-head> <feature-branch>
+
+# Confirm only your own change remains:
+git --no-pager diff origin/master --stat
+git --no-pager log --oneline origin/master..HEAD
+
+git push -f origin <feature-branch>
+gh pr create --base master --head <feature-branch> ...
+```
+
+Then comment on the auto-closed PR pointing at the replacement, so the
+old review history stays discoverable from it:
+
+```bash
+gh pr comment <closed-pr> --repo OWNER/REPO \
+  --body "Superseded by #<new>. Auto-closed when its base branch was
+deleted on merging #<base>; a closed PR whose base ref no longer exists
+cannot be reopened or retargeted."
+```
+
+**Why only this path needs it:** the recreate-the-ref recovery leaves the
+PR's own commits untouched and lets GitHub compare against the real base,
+where it resolves the duplicated content to an empty diff (see
+*Verification*). The fresh-PR path asks git to diff two histories that
+share content but no commits, which git cannot resolve on its own. That
+asymmetry is exactly why the rebase is easy to forget — the recovery path
+trains you to expect GitHub to sort it out.
 
 ## Related skills
 
