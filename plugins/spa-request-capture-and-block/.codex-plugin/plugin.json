@@ -1,0 +1,20 @@
+{
+  "name": "spa-request-capture-and-block",
+  "version": "1.0.0",
+  "description": "Capture the exact outbound request body a single-page app sends and block it before it leaves the browser: patch window.fetch AND XMLHttpRequest together (the XHR half is the one usually missed, so a fetch-only wrapper lets the request through), read the parsed payload off window, and disarm with a reload — including why a hash-route change does not remove the patch. For actions whose side effect costs credits or creates an irreversible record.",
+  "author": "voitta-ai",
+  "homepage": "https://github.com/voitta-ai/skillz",
+  "repository": "https://github.com/voitta-ai/skillz",
+  "license": "MIT",
+  "keywords": [
+    "claude",
+    "codex",
+    "skills",
+    "browser",
+    "spa",
+    "debugging",
+    "fetch",
+    "xmlhttprequest"
+  ],
+  "skills": "./skills/"
+}
