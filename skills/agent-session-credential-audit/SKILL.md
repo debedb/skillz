@@ -98,7 +98,9 @@ Four classes produce confident-looking garbage:
 - **Redaction-test fixtures.** Any secret-scrubbing library ships tests full of
   realistic samples. Plugin *cache* and *marketplace* copies double every hit.
 - **Docs examples.** Vendor docs and skill/README files carry example keys
-  (`AKIAIOSFODNN7EXAMPLE` and friends).
+  (AWS publishes an `AKIA`-prefixed 20-character sample key in its own
+  docs; that literal, and its `wJalrXUt...` secret counterpart, show up
+  verbatim across the ecosystem).
 - **Self-expiring temp creds.** STS `ASIA...` credentials expire by design - a
   separate, low-urgency class. Triage them apart from long-lived keys.
 
