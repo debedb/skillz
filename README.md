@@ -112,6 +112,7 @@ environments and older Codex versions.
 | [metrics-zero-provenance-audit](./skills/metrics-zero-provenance-audit/SKILL.md) | skill | Claude, Codex | A `0` in a multi-source metrics schema usually means the source never populates the field, not that you did not do it |
 | [`metrics-zero-provenance-audit` plugin](./plugins/metrics-zero-provenance-audit/) | plugin | Claude, Codex | Single-skill plugin: metrics-zero-provenance-audit |
 | [agent-host-skill-loading](./skills/agent-host-skill-loading/SKILL.md) | skill | Claude, Codex | Teach a third agent host (custom loop, Slack bot, service) to load this catalog: menu line in the prompt + `load_skill` tool, path precedence, gated reload |
+| [litellm-custom-provider-dispatch-order](./skills/litellm-custom-provider-dispatch-order/SKILL.md) | skill | Claude, Codex | A LiteLLM `CustomLLM` that never runs: seven bare-model-name branches dispatch before the custom-provider one, so `myprovider/gpt-5.5` is silently billed to OpenAI |
 
 Machine-readable index: [`catalog.json`](./catalog.json). The
 installer and validation script both read from it, so new entries
