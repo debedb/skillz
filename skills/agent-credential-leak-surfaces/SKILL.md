@@ -8,14 +8,14 @@ description: |
   (3) an agent echoed a secret into a session and you want to know what
   persisted it; (4) you are writing a redactor and need to know which patterns
   work and which are unwinnable; (5) periodic hygiene on a machine where an
-  agent has been editing config files. Covers the six surfaces (git remote URLs,
+  agent has been editing config files. Covers the seven surfaces (git remote URLs,
   agent memory stores, the agent's own file-history snapshots, MCP config
   literals, permission allowlists, tool-output caches), why prefix-grep gives
   false confidence, why keyword-adjacency regexes lose to prose, why bare
   high-entropy matching is unusable, and the fingerprint-not-echo technique.
 author: Claude Code
-version: 1.0.0
-date: 2026-08-14
+version: 1.1.0
+date: 2026-08-19
 ---
 
 # Where a coding agent leaves copies of your secrets
@@ -233,9 +233,39 @@ commit, because it looks like configuration rather than a secret.
 Large tool results get spilled to files. Anything a command printed — including
 a secret it legitimately fetched — can persist there long after the session.
 
-## Four lessons about detection, learned the hard way
+### 7. Credential stores that are not files
 
-Three failure modes, and the thing that actually works.
+Every sweep in this skill walks the filesystem, which means it is structurally
+blind to credentials held in a **store**. A 101,691-file sweep found nothing while
+the platform CLI reported an invalid token sitting in the **OS keychain** — the
+value lived only there, not in the CLI's own config file.
+
+Enumerate stores alongside files:
+
+| Store | How to look |
+|---|---|
+| macOS keychain | `security find-generic-password -s '<service>'` — attributes only; add `-w` to read the value |
+| Linux | `secret-tool search ...` / `libsecret`, and the GNOME/KDE wallets |
+| Windows | Credential Manager (`cmdkey /list`) |
+| Browsers | saved-password stores |
+| Credential helpers | `gh`, `docker`, `aws`, `git credential-*` |
+
+Two things that surprise people:
+
+- **Reading one may need no authorisation at all.** The keychain value above piped
+  straight into a hash command with **no prompt**: the item's ACL did not gate
+  reads. "It is in the keychain" describes protection against *other users*, not
+  against your own automation — and an agent running as you is your own
+  automation.
+- **The store's own CLI may refuse to clean it.** A logout command declined to run
+  because an environment variable was supplying a *different, working* credential,
+  and then printed, as its remedy, the command it had just refused. Unset the
+  variable for that one subprocess (`env -u VAR -u VAR2 <cli> logout ...`) rather
+  than disturbing the working surface.
+
+## Five lessons about detection, learned the hard way
+
+Four failure modes, and the thing that actually works.
 
 ### Prefix-grep gives false confidence
 
@@ -250,6 +280,29 @@ to import them through the environment because a quoted heredoc will not expand
 them. That detail is the whole point: the first draft of this file restated the
 union inline "just there", which is precisely how a partial regex drifts out of
 sync with the documented set and produces a false clean.
+
+### Prefix-anchored patterns need a LEFT boundary
+
+A pattern anchored only on the prefix matches the prefix **wherever it occurs**,
+including inside a longer string. Sweeping `gh[pousr]_[A-Za-z0-9]{20,}` over an
+agent tree returned nine distinct "credentials"; **eight were junk** — the literal
+`ghu_`/`ghs_` sequence occurring by chance inside base64url blobs (session ids,
+content hashes), whose alphabet contains `_` and `-`. Across 100k files that is
+expected, not remarkable.
+
+Two cheap diagnostics, neither of which needs the value:
+
+- **Length.** Providers issue fixed-length tokens. The junk matches were 24–39
+  characters against a real length of exactly 40. A wrong length is a wrong match.
+- **Adjacent character class.** Print the class of the byte immediately before and
+  after the match. A real token is delimited by a quote, space, `=` or `:`;
+  **alphanumeric on the left means you are inside a bigger string.** In the sweep
+  above, all eight junk hits had an alphanumeric predecessor and the one real hit
+  was quote-delimited on both sides.
+
+Fix the pattern with an explicit left boundary — `(?<![A-Za-z0-9])` — and enforce
+the provider's exact length. Otherwise the false-positive tax lands on every
+future sweep, and a genuinely clean result is indistinguishable from a dirty one.
 
 ### Keyword-adjacency regexes lose to prose
 
@@ -367,8 +420,16 @@ that put secrets into transcripts in the first place.
   nothing.
 - **Never paste a secret into an agent session** to hand it to another process.
   Move it out-of-band; the transcript is a permanent store.
-- **After rotating, sweep for the OLD value** across all six surfaces. If it is
+- **After rotating, sweep for the OLD value** across all seven surfaces. If it is
   still on disk, the rotation is not finished.
+- **Mode the config that holds the references.** Shell profiles and their whole
+  backup family are frequently `0644` inside a `0755` home. That is only a nit
+  until you ask *who else is on the box*: package managers create unprivileged
+  **build accounts** (MacPorts' `macports`, Homebrew and Nix equivalents) whose
+  entire purpose is to run third-party `configure`/`make` as a non-root user. Any
+  install therefore executes upstream build scripts under an account that can read
+  every world-readable file in your home — including the profile holding your
+  tokens. `chmod 600` the profile family; it does not affect sourcing.
 
 ## Related
 
