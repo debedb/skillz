@@ -441,6 +441,15 @@
         "codex"
       ],
       "summary": "Make a non-Claude, non-Codex agent host load skillz-format SKILL.md files: two-stage disclosure (menu line in the system prompt, body behind a load_skill tool) with the measured cost of each alternative, block-scalar-safe frontmatter parsing, ordered-path precedence with shadow reporting, refresh without restart and its turn-boundary gotcha, and why the reload belongs behind a privilege gate."
+    },
+    {
+      "name": "litellm-custom-provider-dispatch-order",
+      "path": "skills/litellm-custom-provider-dispatch-order/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "A LiteLLM CustomLLM provider that is registered correctly and still never runs: litellm.completion() dispatches through an if/elif chain in which seven branches match on the BARE MODEL NAME (open_ai_chat_completion_models and six more) before the custom-provider branch, so a custom row reusing a real upstream model id is captured earlier and silently billed to that vendor's API key. Covers the collision check, the namespaced-model fix, why custom_llm_setup() is a second required call that Router needs at construction time, and the assertion that proves the handler actually ran."
     }
   ],
   "collections": [
@@ -512,7 +521,8 @@
         "chrome-localhost-mic-autoblock",
         "metrics-zero-provenance-audit",
         "archive-today-fetcher-hierarchy",
-        "agent-host-skill-loading"
+        "agent-host-skill-loading",
+        "litellm-custom-provider-dispatch-order"
       ],
       "summary": "Full repo bundle: every skill in one plugin."
     },
