@@ -39,6 +39,30 @@ and every pass after the first must base on what is already applied:
 
 Otherwise resolving commit 2 discards commit 1's entries. Re-run
 scripts/validate-catalog.sh afterwards; it is the actual check.
+
+What this does NOT resolve
+--------------------------
+The bundle plugin's version. A stale branch almost always also conflicts in
+plugins/skillz/.claude-plugin/plugin.json and .codex-plugin/plugin.json, because
+the branch bumped the version when it was cut and master has bumped it several
+times since. This script deliberately leaves those alone - it cannot know which
+bump the rebased branch deserves.
+
+Resolve them by hand to a version ABOVE master's, identical in both manifests.
+Taking either conflict side is wrong: HEAD's version is master's, already
+released, so the branch's own change ships invisibly; the branch's version is
+older than master's and moves the bundle backwards. Keeping the two manifests in
+lockstep matters because Claude and Codex pin independently, and drifting them
+freezes one host with no error anywhere.
+
+Then verify:
+
+    bash scripts/validate-catalog.sh
+    python3 scripts/check-plugin-version-bumps.py origin/master
+
+Pass that base ref explicitly. The default is FETCH_HEAD, which CI has and a
+local checkout usually does not - without it the check dies with
+"cannot diff against FETCH_HEAD" rather than telling you anything useful.
 """
 
 import json
