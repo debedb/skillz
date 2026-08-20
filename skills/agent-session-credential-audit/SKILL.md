@@ -16,8 +16,8 @@ description: |
   granularity, and a scrub driven by a kill-list of verified-dead fingerprints
   so it cannot erase a live secret ahead of its rotation.
 author: Claude Code
-version: 1.0.0
-date: 2026-08-15
+version: 1.1.0
+date: 2026-08-19
 source: https://github.com/voitta-ai/skillz
 source_file: skills/agent-session-credential-audit/SKILL.md
 ---
@@ -223,7 +223,52 @@ Three operational traps:
 3. **Back up first, then delete the backups.** Backups contain the secrets by
    definition. Mode `0700`, and removed once the re-scan verifies.
 
-Finish by re-scanning and asserting **residual == 0**.
+### Identifying a live-writer session (both obvious methods are wrong)
+
+Trap 2 requires knowing which transcripts are session-owned. Two plausible tests
+both fail:
+
+- **mtime is wrong.** An idle-but-open session has an old mtime and appends the
+  moment it is used again. A "not modified in 15 minutes" rule marks it scrubbable
+  and then loses its next append.
+- **`lsof` is wrong.** Agent CLIs typically **append and close** rather than
+  holding the file open. `lsof` across every agent pid returned **zero** `.jsonl`
+  files while seven sessions were live.
+
+**The process list is authoritative.** Parse the session UUIDs out of the running
+command lines (`--session-id` / `--resume` in `ps -eo pid,command`) and map them to
+their transcript paths. Refuse those files structurally, and require an explicit
+`--outside-session` flag to touch them at all.
+
+### Verify by fingerprint, never by pattern count
+
+After a clean scrub, a pattern grep still returns hits - documentation, examples,
+placeholders and redaction fixtures share the pattern permanently. One post-scrub
+sweep of a fully-clean log still matched four times: a `T/B/X` doc placeholder, an
+uppercase env-var-style string, and a single-letter fragment. Counting matches
+makes every successful run look failed.
+
+Hash each match and compare against the kill-list. If no fingerprint matches,
+residual really is zero. Finish by re-scanning and asserting **residual == 0**
+*by fingerprint*.
+
+### Fingerprint the exact byte span the pattern matches
+
+A kill-list entry is only useful if its hash covers the same bytes the scanner
+will hash at run time. Two ways this silently breaks:
+
+- **A bounded quantifier truncates the span.** A pattern capped at `{20,94}`
+  against a 96-character key records the hash of the first 94 characters. Later,
+  discovery matches the full 96, hashes *that*, finds no kill-list entry, and
+  reports the file clean **with the secret still in it**. Nothing errors. It is
+  indistinguishable from success. Use unbounded tails.
+- **Scheme and delimiters count.** If the recorded hash covers
+  `hooks.example.com/services/...` without `https://`, a pattern that includes the
+  scheme hashes a different span and matches nothing.
+
+Diagnostic when a fingerprint "should" be present but is not: brute-force every
+prefix length of the on-disk value against the recorded fingerprint. A hit at
+length N tells you the original pattern stopped at N.
 
 ## Verifying a rotation actually rotated
 
@@ -257,15 +302,46 @@ call, and is the only step that distinguishes "rotated" from "believed rotated".
 ## Probes that lie: use a known-bad control
 
 Some providers return the **same status code for valid and invalid keys**, so a
-status-only probe silently misclassifies. One search API answers `422` in both
-cases; only the body differs - an invalid key returns a
-`SUBSCRIPTION_TOKEN_INVALID` error object, a valid one returns real (possibly
-gzipped, hence unreadable-looking) results.
+status-only probe silently misclassifies.
 
 So: **run a deliberately invalid control alongside every candidate.** If the
 control and the candidate produce indistinguishable responses, your probe has no
 discriminating power and its verdicts are worthless. This is the liveness
 equivalent of sanity-checking a scan regex against a value you know is present.
+
+Five distinct shapes, all observed in the field. They are different enough that
+the rule has to be treated as load-bearing, not as one vendor's quirk:
+
+| Shape | What happens | How it fools you |
+|---|---|---|
+| Same status both ways | A search API answers `422` for valid and invalid alike; only the body differs (`SUBSCRIPTION_TOKEN_INVALID` vs real, possibly gzipped, results) | Status-only check cannot separate them |
+| Unauthenticated route | A `/v1/models`-style catalogue returns `200` **with no Authorization header at all** | Every key "passes", including garbage; the endpoint enforces nothing |
+| Live but refused | A live key that is spend-capped answers `400 invalid_request_error` with a regain-access date; a dead one answers `401` | "Not 200, therefore dead" - exactly backwards |
+| Non-2xx for both states | A deleted webhook `404`s `no_service`; a live one `400`s `invalid_payload` | Both are errors; only the body separates them |
+| **Validation order** | The endpoint rejects an unrelated field *before* evaluating auth - e.g. a stale model id returns `Model not found` for a live key, a dead key, **and the control** | The endpoint answers identically for every input, so it proves nothing |
+
+Three consequences worth stating explicitly:
+
+1. **Which endpoint enforces auth is provider-specific.** For one inference vendor
+   the `POST .../chat/completions` route is the only one that authenticates and the
+   catalogue route is worthless; for another it is exactly reversed. Never port the
+   endpoint choice from one provider to another - establish it with a control.
+2. **The same status code means opposite things across providers.** `400` was
+   "dead" at one vendor and "live, merely spend-capped" at another, in the same
+   audit. Read the body.
+3. **Probe without side effects.** Where a probe would otherwise deliver something
+   (a webhook), send a payload the service rejects *before* delivery - an empty
+   body - so probing a credential that turns out live does not post to the channel.
+
+### Keep the control out of `argv` too
+
+A synthetic control is credential-shaped by construction, which has two costs.
+`argv` is visible to `ps` and is recorded in shell history, agent transcripts and
+permission allowlists - the same surfaces this skill exists to clean. And **no
+scanner can distinguish your control from a real token**, so every future sweep
+re-flags it as a candidate, and every document that quotes it inherits the same
+tax. Pass controls on stdin or via the environment, exactly like real values, and
+describe them in prose rather than pasting the literal.
 
 ## Shadow families: renames and editor backups multiply the surface
 

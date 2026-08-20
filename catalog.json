@@ -10,7 +10,7 @@
         "claude",
         "codex"
       ],
-      "summary": "Find and clean the six local surfaces where a coding agent accumulates copies of your secrets (git remote URLs, memory stores, file-history snapshots, tool config literals, permission allowlists, tool-output caches). Covers why prefix-grep gives false confidence and why keyword-adjacency redaction loses to prose."
+      "summary": "Find and clean the seven local surfaces where a coding agent accumulates copies of your secrets (git remote URLs, memory stores, file-history snapshots, tool config literals, permission allowlists, tool-output caches, and OS credential stores a filesystem sweep cannot see). Covers why prefix-grep gives false confidence, why a prefix-anchored pattern needs a left boundary, and why keyword-adjacency redaction loses to prose."
     },
     {
       "name": "agent-session-credential-audit",
@@ -19,7 +19,7 @@
         "claude",
         "codex"
       ],
-      "summary": "Triage, rotate and scrub credentials that leaked into agent session transcripts: the surfaces a naive scan misses, the false-positive taxonomy, the key-id-vs-secret severity test, non-destructive liveness probes with a known-bad control, verifying a rotation actually rotated, and a kill-list scrub that cannot erase a live secret."
+      "summary": "Triage, rotate and scrub credentials that leaked into agent session transcripts: the surfaces a naive scan misses, the false-positive taxonomy, the key-id-vs-secret severity test, five ways a liveness probe lies and the known-bad control that catches them, verifying a rotation actually rotated, identifying live-writer sessions, and a kill-list scrub that cannot erase a live secret and is verified by fingerprint rather than pattern count."
     },
     {
       "name": "agent-team-orchestration",
@@ -386,7 +386,7 @@
         "claude",
         "codex"
       ],
-      "summary": "Capture the exact outbound request body a single-page app sends and block it before it leaves the browser: patch window.fetch AND XMLHttpRequest together (the XHR half is the one usually missed, so a fetch-only wrapper lets the request through), read the parsed payload off window, and disarm with a reload \u2014 including why a hash-route change does not remove the patch. For actions whose side effect costs credits or creates an irreversible record."
+      "summary": "Capture the exact outbound request body a single-page app sends and block it before it leaves the browser: patch window.fetch AND XMLHttpRequest together (the XHR half is the one usually missed, so a fetch-only wrapper lets the request through), read the parsed payload off window, and disarm with a reload — including why a hash-route change does not remove the patch. For actions whose side effect costs credits or creates an irreversible record."
     },
     {
       "name": "us-federal-open-data-claim-verification",
@@ -977,7 +977,7 @@
       "skills": [
         "spa-request-capture-and-block"
       ],
-      "summary": "Capture the exact outbound request body a single-page app sends and block it before it leaves the browser: patch window.fetch AND XMLHttpRequest together (the XHR half is the one usually missed, so a fetch-only wrapper lets the request through), read the parsed payload off window, and disarm with a reload \u2014 including why a hash-route change does not remove the patch. For actions whose side effect costs credits or creates an irreversible record."
+      "summary": "Capture the exact outbound request body a single-page app sends and block it before it leaves the browser: patch window.fetch AND XMLHttpRequest together (the XHR half is the one usually missed, so a fetch-only wrapper lets the request through), read the parsed payload off window, and disarm with a reload — including why a hash-route change does not remove the patch. For actions whose side effect costs credits or creates an irreversible record."
     },
     {
       "name": "us-federal-open-data-claim-verification",
