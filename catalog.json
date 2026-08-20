@@ -431,7 +431,7 @@
         "claude",
         "codex"
       ],
-      "summary": "Reach archive.today when automation is refused, and cite it reproducibly."
+      "summary": "Reach archive.today when automation is refused, cite it reproducibly, and send a truthful user agent."
     }
   ],
   "collections": [
