@@ -5,11 +5,11 @@ on:
     branches: [master]
   pull_request:
     branches: [master]
-    # Maintainer-only paths: a PR touching nothing else is not shipping
-    # anything to an install, so it does not owe a version bump.
-    paths-ignore:
-      - '.github/**'
-      - 'scripts/**'
+    # No paths-ignore here. version-bumped is a REQUIRED status check, and a
+    # required check that never runs does not read as "skipped" to GitHub -
+    # the PR sits on "Expected - waiting for status to be reported" and can
+    # never merge. The job therefore always runs and decides internally
+    # whether a bump is owed; see the maintainer-only short-circuit below.
 
 permissions:
   contents: read
@@ -37,12 +37,46 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Deep enough to resolve a merge-base against the PR base. A
+          # --depth=1 checkout has no common ancestor, so the three-dot diff
+          # below cannot resolve and every path looks changed.
+          fetch-depth: 0
 
       - name: Version must advance
+        id: gate
         env:
           BASE: ${{ github.base_ref }}
         run: |
-          git fetch --no-tags --depth=1 origin "$BASE"
+          git fetch --no-tags origin "$BASE"
+
+          # Maintainer-only paths ship nothing to an install, so they owe no
+          # bump. This was paths-ignore on the trigger until the check became
+          # required; it lives here now so the job still reports a status.
+          changed=$(git diff --name-only FETCH_HEAD...HEAD)
+          owed=1
+          if [ -n "$changed" ]; then
+            owed=0
+            while IFS= read -r f; do
+              case "$f" in
+                .github/*|scripts/*) ;;
+                *) owed=1; break ;;
+              esac
+            done <<<"$changed"
+          fi
+          # Deliberately not `grep -qv`: at least one grep in the wild
+          # (ugrep, which some machines install as /usr/bin/grep) returns 1
+          # from -qv on input whose FIRST line matches, which would flip this
+          # to "no bump owed" for a PR that does ship a skill. `case` has no
+          # such variance.
+          if [ "$owed" -eq 0 ]; then
+            echo "maintainer-only diff, no version bump owed:"
+            sed 's/^/  /' <<<"$changed"
+            echo "maintainer_only=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "maintainer_only=false" >> "$GITHUB_OUTPUT"
+
           old=$(git show "FETCH_HEAD:$VERSION_FILE" | jq -r .version)
           new=$(jq -r .version "$VERSION_FILE")
           if [ "$old" = "$new" ]; then
@@ -65,7 +99,11 @@ jobs:
       # cache keyed on it, so editing skills/foo/ and bumping only the bundle
       # leaves standalone `foo` installs frozen while `plugin update` reports
       # "up to date". This maps the diff back to the plugins that ship it.
+      #
+      # Guarded on the same short-circuit: a maintainer-only diff ships no
+      # plugin, so there is nothing to map.
       - name: Every touched plugin must bump too
+        if: steps.gate.outputs.maintainer_only != 'true'
         run: python3 scripts/check-plugin-version-bumps.py FETCH_HEAD
 
   # master side. The version is new by the time we get here, so cut the tag
