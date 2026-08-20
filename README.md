@@ -25,6 +25,7 @@ environments and older Codex versions.
 - [Plugins](#plugins)
   - [codex-continuous-learning](#codex-continuous-learning-codex-only)
 - [Validation](#validation)
+  - [Rebasing a stale skill branch](#rebasing-a-stale-skill-branch)
 - [Related code-review approaches](#related-code-review-approaches)
 - [PR review workflow stack](#pr-review-workflow-stack)
 
@@ -775,6 +776,30 @@ The script:
   `--collection pr-loop`, `--skill work-on-pr`, and `--all`.
 
 Run it before opening a PR that touches the catalog or installer.
+
+### Rebasing a stale skill branch
+
+Every skill-adding PR edits the same four registry files — `catalog.json`,
+both `marketplace.json` files, and the README catalog table — so a branch that
+has sat for a few weeks will conflict in all four. **Do not resolve those
+conflicts as text.** The entry lists get reordered and re-summarised upstream,
+and the bundle plugin's description is one line naming every skill, so "keep
+both sides" yields a registry that is valid JSON, reads fine, and is wrong: it
+resurrects skills master deliberately removed and pins a stale skill list into
+the bundle description.
+
+```bash
+python3 scripts/merge-skill-registry.py         # first conflicted commit
+python3 scripts/merge-skill-registry.py HEAD    # each later commit in the branch
+```
+
+It takes the base side of each registry wholesale and re-splices only the
+entries your branch adds, keeping just the ones whose files exist in the
+rebased tree — that last filter is what stops an upstream deletion from being
+undone. Pass `HEAD` from the second conflicted commit onward, or resolving
+commit 2 discards commit 1's entries. Then `git add` the registry files,
+`git rebase --continue`, and re-run `validate-catalog.sh`, which is the real
+check.
 
 ## Pre-publish sensitive-term gate
 
