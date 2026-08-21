@@ -386,7 +386,7 @@
         "claude",
         "codex"
       ],
-      "summary": "Capture the exact outbound request body a single-page app sends and block it before it leaves the browser: patch window.fetch AND XMLHttpRequest together (the XHR half is the one usually missed, so a fetch-only wrapper lets the request through), read the parsed payload off window, and disarm with a reload \u2014 including why a hash-route change does not remove the patch. For actions whose side effect costs credits or creates an irreversible record."
+      "summary": "Capture the exact outbound request body a single-page app sends and block it before it leaves the browser: patch window.fetch AND XMLHttpRequest together (the XHR half is the one usually missed, so a fetch-only wrapper lets the request through), read the parsed payload off window, and disarm with a reload — including why a hash-route change does not remove the patch. For actions whose side effect costs credits or creates an irreversible record."
     },
     {
       "name": "us-federal-open-data-claim-verification",
@@ -450,6 +450,15 @@
         "codex"
       ],
       "summary": "A LiteLLM CustomLLM provider that is registered correctly and still never runs: litellm.completion() dispatches through an if/elif chain in which seven branches match on the BARE MODEL NAME (open_ai_chat_completion_models and six more) before the custom-provider branch, so a custom row reusing a real upstream model id is captured earlier and silently billed to that vendor's API key. Covers the collision check, the namespaced-model fix, why custom_llm_setup() is a second required call that Router needs at construction time, and the assertion that proves the handler actually ran."
+    },
+    {
+      "name": "secretsmanager-prove-no-consumer-before-destroy",
+      "path": "skills/secretsmanager-prove-no-consumer-before-destroy/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Prove nothing consumes a Secrets Manager secret before a terraform destroy: per-resource CloudTrail lookup + GetSecretValue-vs-metadata classification, minus your own terraform refresh -- because a populated LastAccessedDate is NOT evidence of use (a secret with zero GetSecretValue still reports one)"
     }
   ],
   "collections": [
@@ -522,7 +531,8 @@
         "metrics-zero-provenance-audit",
         "archive-today-fetcher-hierarchy",
         "agent-host-skill-loading",
-        "litellm-custom-provider-dispatch-order"
+        "litellm-custom-provider-dispatch-order",
+        "secretsmanager-prove-no-consumer-before-destroy"
       ],
       "summary": "Full repo bundle: every skill in one plugin."
     },
@@ -1017,7 +1027,7 @@
       "skills": [
         "spa-request-capture-and-block"
       ],
-      "summary": "Capture the exact outbound request body a single-page app sends and block it before it leaves the browser: patch window.fetch AND XMLHttpRequest together (the XHR half is the one usually missed, so a fetch-only wrapper lets the request through), read the parsed payload off window, and disarm with a reload \u2014 including why a hash-route change does not remove the patch. For actions whose side effect costs credits or creates an irreversible record."
+      "summary": "Capture the exact outbound request body a single-page app sends and block it before it leaves the browser: patch window.fetch AND XMLHttpRequest together (the XHR half is the one usually missed, so a fetch-only wrapper lets the request through), read the parsed payload off window, and disarm with a reload — including why a hash-route change does not remove the patch. For actions whose side effect costs credits or creates an irreversible record."
     },
     {
       "name": "us-federal-open-data-claim-verification",
@@ -1074,6 +1084,19 @@
         "metrics-zero-provenance-audit"
       ],
       "summary": "Single-skill plugin: metrics-zero-provenance-audit."
+    },
+    {
+      "name": "secretsmanager-prove-no-consumer-before-destroy",
+      "claude_manifest": "plugins/secretsmanager-prove-no-consumer-before-destroy/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/secretsmanager-prove-no-consumer-before-destroy/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "secretsmanager-prove-no-consumer-before-destroy"
+      ],
+      "summary": "Single-skill plugin: secretsmanager-prove-no-consumer-before-destroy."
     }
   ],
   "defaults": {
