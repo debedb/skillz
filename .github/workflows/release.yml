@@ -4,7 +4,12 @@ on:
   push:
     branches: [master]
   pull_request:
-    branches: [master]
+    # `next` is included so the per-plugin half of version-bumped still runs
+    # there. The bundle half is exempted inside the job (see the base-ref
+    # short-circuit below); the per-plugin half is the one that actually stops
+    # a standalone install freezing on a stale copy, so it must not be lost
+    # just because a PR targets the integration branch.
+    branches: [master, next]
     # No paths-ignore here. version-bumped is a REQUIRED status check, and a
     # required check that never runs does not read as "skipped" to GitHub -
     # the PR sits on "Expected - waiting for status to be reported" and can
