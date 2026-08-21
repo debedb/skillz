@@ -38,6 +38,21 @@ if ! bash scripts/check-sensitive-terms.sh \
   fail=1
 fi
 
+echo "pre-push: plugin version bumps..."
+# The gate that is easiest to miss: CI's `version-bumped` job fails a PR whose
+# touched plugins did not bump. Catching it here costs a second; catching it in
+# CI costs a round trip, and the failure names a file you have already pushed.
+# Needs origin/master to compare against - if the ref is missing, say so rather
+# than passing silently, since a silent pass is exactly the failure mode.
+if git rev-parse --verify --quiet origin/master >/dev/null; then
+  if ! python3 scripts/check-plugin-version-bumps.py origin/master; then
+    fail=1
+  fi
+else
+  echo "pre-push: origin/master not present - run 'git fetch origin master' to enable the version-bump check" >&2
+  fail=1
+fi
+
 if [ "$fail" -ne 0 ]; then
   echo "" >&2
   echo "pre-push: BLOCKED - fix the above before pushing." >&2

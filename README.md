@@ -885,6 +885,15 @@ checked anything. A check that silently no-ops is worse than no check. Names
 are therefore enforced pre-push, on the machine where the wordlist already
 lives.
 
+It also runs `scripts/check-plugin-version-bumps.py` against `origin/master`,
+for a different reason: that gate is not impossible in CI, it is just the one
+contributors hit most. Learning about a missed bump from a red `version-bumped`
+job costs a round trip, and the error names files you have already pushed.
+Learning about it from the hook costs a second. If `origin/master` is not
+present the hook **fails** rather than skipping — a version check that quietly
+passes because it could not compare is the same silent-green failure mode the
+name gate exists to avoid.
+
 ## Related code-review approaches
 
 The pr-loop collection operates at the **workflow** layer — when to

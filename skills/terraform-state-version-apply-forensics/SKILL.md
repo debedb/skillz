@@ -12,8 +12,8 @@ description: |
   tfstate objects over time (serial + resource-type counts per version) and cross-check
   with CloudTrail delete/create events. Read-only; safe to run against prod.
 author: Claude Code
-version: 1.0.0
-date: 2026-07-27
+version: 1.1.0
+date: 2026-08-20
 ---
 
 # Terraform state-version apply forensics
@@ -36,6 +36,8 @@ can't tell whether the apply silently failed or those resources were never in st
 - Teardown/destroy work where live resources survive: is that a failed destroy or an
   untracked orphan?
 - Suspicion of the manual-apply-then-CI-reapply race.
+- Catching a lagging environment up: what does prod not have that dev does, and will the
+  plan rename those resources or destroy-and-recreate them? (step 6)
 
 Prerequisite: the S3 backend bucket has **versioning enabled** (standard for TF backends).
 Without versioning you get only the current object and this method degrades to CloudTrail
@@ -119,6 +121,53 @@ Also useful: provider `default_tags` (`application` / `environment` / `terraform
 usually appear on TF-managed resources. Absent tags are a hint — but not proof, since some
 resource types (notably `aws_autoscaling_group`) don't receive provider default tags.
 
+### 6. Diff two environments against each other
+
+Same census, different axis: instead of one environment over time, compare two
+environments *now*. This answers "how far behind is prod?" without running
+`terraform init` against either backend -- so there is no local `.terraform`
+reconfigure to undo afterwards, and no chance of leaving a checkout pointed at the
+wrong environment.
+
+```bash
+for e in dev prod; do
+  aws s3 cp "s3://$BUCKET/$(key_for "$e")" - --profile "$PROFILE" --no-cli-pager 2>/dev/null \
+  | jq -r --arg e "$e" '
+      "=== \($e): serial=\(.serial) tfver=\(.terraform_version) resources=\(.resources|length) ===",
+      (.resources[] | ((.module // "root")+" "+.mode+"."+.type+"."+.name))' > "states-$e.txt"
+done
+diff <(tail -n +2 states-dev.txt | sort) <(tail -n +2 states-prod.txt | sort)
+```
+
+A large `serial` gap plus a **strict-subset** resource list is the signature of an
+environment that has not applied in a while: everything the lagging one has, the leading
+one has too, plus whole stacks it is missing entirely.
+
+**Then read the `for_each` index keys.** This is the part a resource-address diff misses:
+
+```bash
+jq -r '.resources[]
+  | select((.instances|length)>1 or (.instances[0].index_key? != null))
+  | .type+"."+.name+": "+([.instances[].index_key|tostring]|sort|join(", "))' state.json
+```
+
+Two things fall out that neither an address diff nor a resource-type census can see:
+
+1. **Membership drift.** Same resource, same instance count, different keys -- a
+   `for_each` over a caller/tenant/account list where the lagging environment still holds
+   a member that was removed from the config and lacks one that was added. A count census
+   reports "5 vs 5, no change"; the plan is a 10-resource create plus a 10-resource
+   destroy.
+
+2. **A pre-refactor shape.** An address with **no** index key, where the current config
+   uses `for_each`, means that environment predates the refactor to a map. Terraform has
+   no rename to offer: absent a `moved` block it plans a **destroy + create**, not an
+   in-place change. Seeing this before the apply is the difference between an expected
+   churn line and a surprise.
+
+Neither shows up in the plan's summary counts either -- `N to add, M to destroy` does not
+tell you the destroys are the same logical objects returning under new keys.
+
 ## Verification
 
 You have an answer when you can state: at time T the state held N resources including
@@ -127,6 +176,13 @@ calls by user U at the same timestamps. If state and CloudTrail disagree, trust 
 for "what AWS did" and treat the gap as drift or an out-of-band change.
 
 ## Notes
+
+- The downloaded state files contain **secret values in plaintext** --
+  `aws_secretsmanager_secret_version.secret_string`, DB passwords, client secrets. Delete
+  them when the census is done (`shred -u`, or `rm` at minimum), and do not leave them in
+  a shared or synced scratch directory.
+- `moved` / `removed` blocks defeat `-target` scoping -- they are full-or-nothing. So a
+  shape migration found by step 6 cannot be applied surgically alongside unrelated drift.
 
 - Entirely read-only. Safe against prod.
 - Cheap: a state file is typically well under 1 MB; a dozen versions is a few seconds.
