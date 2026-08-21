@@ -386,7 +386,7 @@
         "claude",
         "codex"
       ],
-      "summary": "Capture the exact outbound request body a single-page app sends and block it before it leaves the browser: patch window.fetch AND XMLHttpRequest together (the XHR half is the one usually missed, so a fetch-only wrapper lets the request through), read the parsed payload off window, and disarm with a reload — including why a hash-route change does not remove the patch. For actions whose side effect costs credits or creates an irreversible record."
+      "summary": "Capture the exact outbound request body a single-page app sends and block it before it leaves the browser: patch window.fetch AND XMLHttpRequest together (the XHR half is the one usually missed, so a fetch-only wrapper lets the request through), read the parsed payload off window, and disarm with a reload \u2014 including why a hash-route change does not remove the patch. For actions whose side effect costs credits or creates an irreversible record."
     },
     {
       "name": "us-federal-open-data-claim-verification",
@@ -459,6 +459,15 @@
         "codex"
       ],
       "summary": "Prove nothing consumes a Secrets Manager secret before a terraform destroy: per-resource CloudTrail lookup + GetSecretValue-vs-metadata classification, minus your own terraform refresh -- because a populated LastAccessedDate is NOT evidence of use (a secret with zero GetSecretValue still reports one)"
+    },
+    {
+      "name": "claude-code-cross-session-messaging",
+      "path": "skills/claude-code-cross-session-messaging/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Talk to a Claude Code session that is already running via the native ListAgents + SendMessage pair instead of a headless `claude -p` call or a terminal-scraping bridge. Covers addressing (the name is the address; refs do not survive outside the listing that produced them), the idle-subscription primitive that replaces every polling loop, the no-TTY law that makes headless and in-process transports wedge silently rather than fail, multi-hop transport dependency failures, the per-session permission boundary that forbids delegating around your own denials, and the honest dividing line where a launch-a-callee tool is still the right answer."
     }
   ],
   "collections": [
@@ -532,7 +541,8 @@
         "archive-today-fetcher-hierarchy",
         "agent-host-skill-loading",
         "litellm-custom-provider-dispatch-order",
-        "secretsmanager-prove-no-consumer-before-destroy"
+        "secretsmanager-prove-no-consumer-before-destroy",
+        "claude-code-cross-session-messaging"
       ],
       "summary": "Full repo bundle: every skill in one plugin."
     },
@@ -1027,7 +1037,7 @@
       "skills": [
         "spa-request-capture-and-block"
       ],
-      "summary": "Capture the exact outbound request body a single-page app sends and block it before it leaves the browser: patch window.fetch AND XMLHttpRequest together (the XHR half is the one usually missed, so a fetch-only wrapper lets the request through), read the parsed payload off window, and disarm with a reload — including why a hash-route change does not remove the patch. For actions whose side effect costs credits or creates an irreversible record."
+      "summary": "Capture the exact outbound request body a single-page app sends and block it before it leaves the browser: patch window.fetch AND XMLHttpRequest together (the XHR half is the one usually missed, so a fetch-only wrapper lets the request through), read the parsed payload off window, and disarm with a reload \u2014 including why a hash-route change does not remove the patch. For actions whose side effect costs credits or creates an irreversible record."
     },
     {
       "name": "us-federal-open-data-claim-verification",
