@@ -1107,6 +1107,19 @@
         "secretsmanager-prove-no-consumer-before-destroy"
       ],
       "summary": "Single-skill plugin: secretsmanager-prove-no-consumer-before-destroy."
+    },
+    {
+      "name": "claude-code-cross-session-messaging",
+      "claude_manifest": "plugins/claude-code-cross-session-messaging/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/claude-code-cross-session-messaging/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "claude-code-cross-session-messaging"
+      ],
+      "summary": "Single-skill plugin: claude-code-cross-session-messaging."
     }
   ],
   "defaults": {

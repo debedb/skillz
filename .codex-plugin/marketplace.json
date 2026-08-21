@@ -310,6 +310,11 @@
       "name": "secretsmanager-prove-no-consumer-before-destroy",
       "source": "./plugins/secretsmanager-prove-no-consumer-before-destroy/",
       "description": "Single-skill plugin: secretsmanager-prove-no-consumer-before-destroy."
+    },
+    {
+      "name": "claude-code-cross-session-messaging",
+      "source": "./plugins/claude-code-cross-session-messaging/",
+      "description": "Single-skill plugin: claude-code-cross-session-messaging."
     }
   ]
 }
