@@ -140,6 +140,32 @@ The primitive that replaces every hand-rolled wait loop:
 **Never poll `ListAgents` in a loop, and never send "are you done?" messages.**
 Both burn tokens on both sides and are strictly worse than the subscription.
 
+### The reply and the idle notice are two different signals
+
+Easy to conflate, and conflating them makes you wait for something that already
+happened. They are separate, and they arrive in this order:
+
+1. **The peer's reply** arrives on its own, delivered at the peer's next tool
+   round, wrapped as `<cross-session-message from="...">`. This carries the
+   answer. Nothing you do makes it arrive sooner.
+2. **The idle notice** arrives later, when that session finishes its *turn*.
+   It carries no answer - only "that session is done for now", plus whatever
+   one-line summary its harness reports.
+
+So: **read the answer from the reply, not from the notice.** A quick question
+needs no subscription at all - the reply is the whole mechanism. Subscribe when
+you care that the peer has gone quiet (a work order whose result you will read
+from the repo, a handoff you must not follow up on too early), not when you are
+waiting for text.
+
+Observed directly: a peer answered a read-only question at its tool round, and
+the idle notice landed afterwards reporting unrelated work it had moved on to.
+Treating the notice as the answer signal would have meant waiting past an
+answer already in hand, then reading a summary that was about something else.
+
+An idle notice is also **not** a completion guarantee. It fires when the turn
+ends, whatever the turn achieved - success, refusal, or abandonment.
+
 ## The no-TTY law
 
 The reason to prefer a live peer over any headless or in-process transport,
