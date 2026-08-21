@@ -13,10 +13,17 @@ description: |
   from `cmux codex-teams` / `cmux hooks setup codex`. Also covers the two other
   causes of "no tabs": subagents spawned via the Agent tool never tab even under
   `cmux claude-teams` (they surface in Claude Code's native agent list), and the
-  tmux shim can be on PATH while the `cmux` CLI itself is not installed.
+  tmux shim can be on PATH while the `cmux` CLI itself is not installed. Also
+  use when: (5) `which tmux` returns a REAL tmux and teammates run but never
+  tab; (6) the shim resolves yet dies with `exec: cmux: not found`, which reads
+  as a tmux bug and is not one; (7) teammates spawned from a RESUMED pane start
+  an invisible real tmux server; (8) every teammate wedges with no output, no
+  error and no permission dialog because teammate mode resolved to
+  `in-process`; (9) you need to tell a wedged transport apart from an agent
+  that was never launched at all.
 author: Claude Code
-version: 1.1.0
-date: 2026-07-25
+version: 1.2.0
+date: 2026-08-20
 source: https://github.com/voitta-ai/skillz
 source_file: skills/cmux-agent-tabs/SKILL.md
 ---
@@ -28,7 +35,9 @@ source_file: skills/cmux-agent-tabs/SKILL.md
 >
 > Companion: the [cmux setup](https://blog.debedb.com/2026/06/17/cmux-setup/)
 > post covers running Claude Teams + OMX (Oh My Codex) workspaces and surviving
-> reboots; this skill covers why agents do/don't appear as tabs.
+> reboots; this skill covers why agents do/don't appear as tabs. The follow-up
+> [two-hop PATH trap](https://blog.debedb.com/2026/08/10/cmux-eight-weeks-later-the-two-hop-path-trap/)
+> post is the worked example behind the two-hop section below.
 
 # cmux-agent-tabs
 
@@ -87,14 +96,164 @@ which cmux        # the cmux CLI itself - separate from the shim
 - `tmux: command not found` and/or `TMUX` unset => the `claude-teams` shim is
   **not** active => Claude teammates will NOT tab. (The env var may still be set
   and is a red herring on its own.)
-- Shim present and `TMUX` set, but `cmux: command not found` => you are inside a
-  claude-teams session with **no CLI to drive it**: `cmux tree --all` and
-  `cmux tab-action` are both unavailable, so surfaces cannot be listed or named.
-  Install the `cmux` CLI, or proceed without tab naming.
+- `which tmux` resolves to a **real tmux** (e.g. `/opt/homebrew/bin/tmux`) =>
+  the shim is *shadowed*, not missing. This is hop one below, and it is the
+  case a "command not found" check silently passes.
+- Shim present and `TMUX` set, but `cmux: command not found` => **not merely a
+  naming problem.** The shim body execs bare `cmux`, so tmux itself fails. This
+  is hop two below.
 - Shim present, `TMUX` set, `cmux` CLI present, and **still** no new tabs => the
   agents were spawned through **Claude Code's Agent tool**, not teammate
   spawning. See the section above - this is a different cause and the launch
   wrapper is not the problem.
+
+## The two-hop PATH trap
+
+The bridge rests on `PATH` resolution in **two** places, and winning one hop
+buys nothing if the other loses. Both failures present as "teammates don't
+tab", and neither is a missing-shim error.
+
+### Hop one: which `tmux` wins
+
+The shim lives at `~/.cmuxterm/claude-teams-bin/tmux`:
+
+```bash
+#!/usr/bin/env bash
+exec "${CMUX_CLAUDE_TEAMS_CMUX_BIN:-cmux}" __tmux-compat "$@"
+```
+
+cmux also sets `$TMUX` to a synthetic socket path. No tmux server exists
+anywhere - Claude Code thinks it is talking to tmux, cmux answers, and each
+`new-window` becomes a tab. When healthy, `tmux -V` returns `tmux 3.4` and
+`tmux list-windows` enumerates your cmux workspaces as tmux windows.
+
+If the launching process resolves `tmux` to a **real** tmux instead of the
+shim, real tmux tries to connect to a socket that was never a socket:
+
+```
+error connecting to /tmp/cmux-claude-teams/... (No such file or directory)
+```
+
+Teammates then run but do not tab - no watchable panes. Typical cause is a
+`PATH` re-prepend that floats a package manager's `bin` ahead of the shim,
+from the workspace command itself, from `.bash_profile`, or from `path_helper`
+re-floating it after cmux prepends.
+
+Fix by prepending the shim directory in the launch command:
+
+```bash
+export PATH="$HOME/.cmuxterm/claude-teams-bin:$PATH"
+```
+
+**Version note:** on cmux 0.64.16 `cmux claude-teams` already puts the shim at
+`PATH` position 1 itself. The prepend is belt-and-braces on current builds, not
+the load-bearing fix - which matters, because assuming it is the fix sends you
+looking in the wrong place.
+
+A same-session `export PATH=` does **not** help: the parent `claude` already
+resolved its environment, and each teammate spawn does a fresh `execvp("tmux")`
+against the parent's `PATH`, not a subshell's. Fix it in the launch path and
+relaunch.
+
+### Hop two: the shim's own `cmux`
+
+Look at the shim again - it execs **bare `cmux`**. The bundled binary is at
+`/Applications/cmux.app/Contents/Resources/bin/cmux`, which is **not** on a
+normal login shell's `PATH`:
+
+```bash
+$ env -i HOME=$HOME /bin/bash -lc 'command -v cmux'
+$
+```
+
+So winning hop one buys you nothing if hop two loses:
+
+```bash
+$ env -i HOME=$HOME /bin/bash -lc \
+    'export PATH="$HOME/.cmuxterm/claude-teams-bin:$PATH"; tmux -V'
+.../claude-teams-bin/tmux: line 3: exec: cmux: not found
+```
+
+One symlink fixes it (it shadows nothing):
+
+```bash
+ln -s /Applications/cmux.app/Contents/Resources/bin/cmux ~/.local/bin/cmux
+```
+
+**Test both hops in one shot** - this is the check that matters, and it must
+print `tmux 3.4`:
+
+```bash
+env -i HOME=$HOME /bin/bash -lc \
+  'export PATH="$HOME/.cmuxterm/claude-teams-bin:$PATH"; tmux -V'
+```
+
+The general law, worth carrying to any shim-based transport: **a shim that is
+on `PATH` but whose own dependency is off `PATH` fails in a way that reads as a
+bug in whatever subsystem the shim impersonates.** Here it reads as a tmux
+problem and is not one.
+
+## Telling "wedged" apart from "never launched"
+
+A queued teammate and a shadowed shim look identical from outside: the pane
+sits there, nothing tabs. One check separates them.
+
+**If `ps` shows no `__tmux-compat` process ever appeared, the spawn never
+reached tmux - so `PATH` is not your problem.** A launcher pane showing
+`manual mode on` leaves teammates at their pending marker indefinitely, having
+called nothing at all. Check this before spending an evening on `PATH`.
+
+The companion habit: **read the live process environment, not the shell's.** A
+pane's shell will happily report a `PATH` the long-running agent inside it
+never saw.
+
+```bash
+ps -Eww -o command= -p <pid> | tr ' ' '\n' | grep -E '^(TMUX|PATH)='
+```
+
+## Resumed panes are a different, weaker case
+
+An agent-hook-resumed pane has **neither `$TMUX` nor the shim directory** -
+confirmed by reading the live process env as above. With no `$TMUX`, a `tmux`
+teammate mode there starts a **real tmux server**, whose windows are invisible
+from cmux.
+
+Two consequences:
+
+- A CLI flag in the workspace command covers only freshly opened workspaces.
+  cmux's `agent-hook` rewrites each pane's resume command to call `claude`
+  directly rather than the `cmux claude-teams` wrapper, so resumed panes never
+  see that flag.
+- **Operating rule: start team runs from the `claude-teams` workspace command,
+  never from a resumed pane.**
+
+## Teammate mode: `auto` can silently pick `in-process`
+
+Distinct from `PATH`, same symptom class, worse failure. The wrapper defaults
+teammate mode to `auto`, and `auto` can resolve to **`in-process`** - which
+gives the teammate no cmux pane and therefore **no TTY**. Every background
+subagent then wedges: first tool call never returns, no result, no error, no
+timeout, and no permission dialog or pending indicator anywhere in the TUI,
+because a prompt has nowhere to render.
+
+Allowed values (not in `claude --help`; obtain them by passing an invalid one):
+`auto, tmux, iterm2, in-process`.
+
+**Fix it in settings, not with a CLI flag.** `teammateMode` is a top-level
+Claude Code settings key, so it applies to every launch path including resumed
+panes:
+
+```jsonc
+// ~/.claude/settings.json
+{ "teammateMode": "tmux" }
+```
+
+Setting the mode is necessary but not sufficient - the shim must also win both
+`PATH` hops above. And do **not** reach for a bypass-permissions flag here:
+issuing the same operation from a pane that *does* have a TTY returns
+instantly, which proves the parent is already permissive and the call never
+reached the permission layer at all. Bypassing that layer fixes nothing and
+costs real safety.
 
 ## Fix
 - **Claude agents as tabs:** launch the root session through the wrapper:
@@ -123,11 +282,15 @@ cmux tab-action --action clear-name --tab surface:16        # revert to auto tit
 ## Caveats
 - `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` being present does **not** imply the
   cmux bridge is active - always check for the tmux shim.
-- The tmux shim and the `cmux` CLI install separately. The shim can be on PATH
-  (so you're demonstrably in a claude-teams session) while `which cmux` returns
-  `command not found`, leaving `cmux tree` / `cmux tab-action` unusable.
-- "No tabs" has three distinct causes - wrong launch path, Agent-tool spawn
-  path, or missing `cmux` CLI. Only the first is fixed by re-launching.
+- The tmux shim and the `cmux` CLI install separately, and a missing CLI is
+  **not** merely a lost-tooling inconvenience: the shim execs bare `cmux`, so
+  with the CLI off `PATH` the shim itself dies with `exec: cmux: not found` and
+  tabbing fails outright. See the two-hop section.
+- "No tabs" has **six** distinct causes - wrong launch path, Agent-tool spawn
+  path, shadowed shim (hop one), shim's own `cmux` off `PATH` (hop two), a
+  resumed pane with no `$TMUX`, and a teammate mode that resolved to
+  `in-process`. Only the first is fixed by re-launching alone, and the
+  never-launched case is fixed by nothing environmental at all.
 - `cmux open <path-or-url>` opens files/dirs/URLs (markdown/file/browser
   previews); it is **not** a way to spawn a terminal running a chosen command in
   a titled tab. Don't reach for it to "open an agent in a tab."
@@ -142,5 +305,11 @@ cmux tab-action --action clear-name --tab surface:16        # revert to auto tit
 | Codex agents -> cmux tabs | `cmux codex-teams ...` or `cmux hooks setup codex` |
 | Is the Claude bridge active? | `which tmux` (shim present) + `TMUX` set |
 | Can I name tabs at all? | `which cmux` (CLI present, separate from the shim) |
+| Both PATH hops healthy? | `env -i HOME=$HOME /bin/bash -lc 'export PATH="$HOME/.cmuxterm/claude-teams-bin:$PATH"; tmux -V'` -> `tmux 3.4` |
+| Shim shadowed by real tmux? | `which tmux` -> must NOT be `/opt/homebrew/bin/tmux` |
+| Shim's own `cmux` reachable? | `ln -s /Applications/cmux.app/Contents/Resources/bin/cmux ~/.local/bin/cmux` |
+| Wedged or never launched? | `ps` for a `__tmux-compat` process; absent => spawn never reached tmux |
+| What env did the agent really get? | `ps -Eww -o command= -p <pid> \| tr ' ' '\n' \| grep -E '^(TMUX\|PATH)='` |
+| Teammates wedge with no prompt | set `"teammateMode": "tmux"` in `~/.claude/settings.json` |
 | List surfaces + refs | `cmux tree --all` |
 | Rename a tab | `cmux tab-action --action rename --tab surface:N --title "..."` |
