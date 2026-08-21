@@ -763,6 +763,43 @@ Install (when supported by the local Codex CLI):
 Or, from a clone, point Codex at `plugins/codex-continuous-learning/`
 as a local plugin folder.
 
+## The `next` integration branch
+
+`master` is what people install. `next` is a long-lived branch where
+experimental skills accumulate before a major release, so work in progress does
+not destabilise a catalog already in use.
+
+**The one rule that makes it work: nothing on `next` touches the bundle
+version** (`plugins/skillz/.claude-plugin/plugin.json` and its Codex twin).
+
+The bundle version is a monotonic counter shared by *every* skill PR. On a
+branch that batches many of them it stops being a safeguard and becomes a lock:
+each PR bumps the same integer, so every PR after the first is stale by
+construction no matter how disjoint its subject matter (issue #188). Leaving it
+alone on `next` removes the only file that all skill PRs must fight over. One
+real bump happens at merge-back to `master`, where the counter means something
+because that is what ships.
+
+Per-skill plugin versions are **not** exempt and still must advance. Those are
+independent per-plugin cache keys rather than a shared counter, so they never
+collide, and they are what stops a standalone install from freezing on a stale
+copy while `plugin update` reports "up to date".
+
+CI enforces exactly that split: `version-bumped` skips the bundle when
+`github.base_ref` is `next`, and passes `--exempt skillz` to
+`check-plugin-version-bumps.py` so the per-plugin half still runs.
+
+| Target | Bundle version | Per-skill plugin version |
+|---|---|---|
+| PR into `master` | must advance | must advance |
+| PR into `next` | **leave it alone** | must advance |
+| merge `next` -> `master` | one bump, major | already advanced |
+
+Contributor rule that applies on both branches: edit `catalog.json`, both
+`marketplace.json` files and the README table **in place**. Never regenerate or
+re-sort a shared list - that turns a clean three-way merge into hundreds of
+lines of churn in exactly the files everyone else is also touching.
+
 ## Validation
 
 ```bash

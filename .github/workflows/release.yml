@@ -77,6 +77,28 @@ jobs:
           fi
           echo "maintainer_only=false" >> "$GITHUB_OUTPUT"
 
+          # Integration-branch short-circuit. `next` is the long-lived branch
+          # where experimental skills accumulate before a major release. The
+          # bundle version is a MONOTONIC COUNTER SHARED BY EVERY SKILL PR, so
+          # on a branch that batches many of them it is a lock, not a
+          # safeguard: each PR would bump it, and every PR after the first is
+          # stale by construction no matter how disjoint its subject matter.
+          # See issue #188. So on `next` the bundle is exempt and stays put;
+          # one real bump happens at merge-back to master, where the counter
+          # means something because that is what ships.
+          #
+          # Per-skill plugins are NOT exempt. Their versions are independent
+          # per-plugin cache keys, not a shared counter, so they never collide
+          # and they still must advance - that is the check that keeps a
+          # standalone install from freezing on a stale copy.
+          if [ "$BASE" = "next" ]; then
+            echo "base is 'next': bundle counter exempt (see issue #188);"
+            echo "per-skill plugin versions still enforced below."
+            echo "exempt_bundle=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "exempt_bundle=false" >> "$GITHUB_OUTPUT"
+
           old=$(git show "FETCH_HEAD:$VERSION_FILE" | jq -r .version)
           new=$(jq -r .version "$VERSION_FILE")
           if [ "$old" = "$new" ]; then
@@ -104,7 +126,12 @@ jobs:
       # plugin, so there is nothing to map.
       - name: Every touched plugin must bump too
         if: steps.gate.outputs.maintainer_only != 'true'
-        run: python3 scripts/check-plugin-version-bumps.py FETCH_HEAD
+        run: |
+          args=""
+          if [ "${{ steps.gate.outputs.exempt_bundle }}" = "true" ]; then
+            args="--exempt skillz"
+          fi
+          python3 scripts/check-plugin-version-bumps.py $args FETCH_HEAD
 
   # master side. The version is new by the time we get here, so cut the tag
   # and the release. Notes come from the merged PR titles since the previous
