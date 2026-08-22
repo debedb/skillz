@@ -103,10 +103,17 @@ jobs:
             # the bundle version must be UNCHANGED, and that is enforced, not
             # merely unchecked. (Observed: a PR authored before this policy was
             # retargeted onto `next` carrying a bump, and nothing stopped it.)
+            # The invariant is "next's bundle equals master's bundle", NOT
+            # "unchanged since next". Comparing against next would freeze
+            # whatever drift already leaked in and make correcting it
+            # impossible; comparing against master is self-correcting, and it
+            # still forbids the thing that matters - advancing the counter on
+            # a branch that batches many PRs.
+            git fetch --no-tags origin master
             old=$(git show "FETCH_HEAD:$VERSION_FILE" | jq -r .version)
             new=$(jq -r .version "$VERSION_FILE")
             if [ "$old" != "$new" ]; then
-              echo "::error::base is 'next', so $VERSION_FILE#version must stay $old (found $new)."
+              echo "::error::base is 'next', so $VERSION_FILE#version must match master's $old (found $new)."
               echo "::error::The bundle counter is bumped once at merge-back to master, not per PR."
               exit 1
             fi
@@ -149,11 +156,17 @@ jobs:
       # plugin, so there is nothing to map.
       - name: Every touched plugin must bump too
         if: steps.gate.outputs.maintainer_only != 'true'
+        env:
+          BASE: ${{ github.base_ref }}
         run: |
           args=""
           if [ "${{ steps.gate.outputs.exempt_bundle }}" = "true" ]; then
             args="--exempt skillz"
           fi
+          # Diff against the PR's own base, not FETCH_HEAD: the next-branch
+          # path above re-fetches master, which would otherwise move FETCH_HEAD
+          # out from under this step and diff a next PR against master.
+          git fetch --no-tags origin "$BASE"
           python3 scripts/check-plugin-version-bumps.py $args FETCH_HEAD
 
   # master side. The version is new by the time we get here, so cut the tag
