@@ -315,6 +315,11 @@
       "name": "cmux-cross-session-visibility",
       "source": "./plugins/cmux-cross-session-visibility/",
       "description": "Single-skill plugin: cmux-cross-session-visibility."
+    },
+    {
+      "name": "agent-traffic-log",
+      "source": "./plugins/agent-traffic-log/",
+      "description": "Single-skill plugin: agent-traffic-log."
     }
   ]
 }

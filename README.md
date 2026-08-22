@@ -118,6 +118,7 @@ environments and older Codex versions.
 | [`secretsmanager-prove-no-consumer-before-destroy` plugin](./plugins/secretsmanager-prove-no-consumer-before-destroy/) | plugin | Claude, Codex | Single-skill plugin: secretsmanager-prove-no-consumer-before-destroy |
 | [claude-code-cross-session-messaging](./skills/claude-code-cross-session-messaging/SKILL.md) | skill | Claude, Codex | Message a Claude Code session that is already running via native `ListAgents` + `SendMessage`; idle-subscription instead of polling, and the no-TTY law that wedges headless/in-process transports |
 | [cmux-cross-session-visibility](./skills/cmux-cross-session-visibility/SKILL.md) | skill | Claude, Codex | Make agent-to-agent traffic visible: structured `SendMessage` summary envelope + a cmux sidebar status pill per workspace, and what must clear a stale pill |
+| [agent-traffic-log](./skills/agent-traffic-log/SKILL.md) | skill | Claude, Codex | Append-only JSONL log of agent-to-agent traffic + a live pane; lock-free concurrent appends, and `xs status` derives who is blocked from the events |
 
 Machine-readable index: [`catalog.json`](./catalog.json). The
 installer and validation script both read from it, so new entries
