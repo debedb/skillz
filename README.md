@@ -788,8 +788,10 @@ independent per-plugin cache keys rather than a shared counter, so they never
 collide, and they are what stops a standalone install from freezing on a stale
 copy while `plugin update` reports "up to date".
 
-CI enforces exactly that split: `version-bumped` skips the bundle when
-`github.base_ref` is `next`, and passes `--exempt skillz` to
+CI enforces exactly that split: when `github.base_ref` is `next`,
+`version-bumped` requires the bundle version to be **unchanged** - exempt is
+not optional, since a counter that may still move keeps advancing and
+merge-back fights it again - and passes `--exempt skillz` to
 `check-plugin-version-bumps.py` so the per-plugin half still runs.
 
 | Target | Bundle version | Per-skill plugin version |

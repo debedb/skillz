@@ -18,8 +18,8 @@ description: |
   other multiplexers. Also use when (5) a spawned wave produces no commits, no
   dirty files and no replies - agents that are visible but wedged.
 author: Claude Code
-version: 1.4.0
-date: 2026-07-28
+version: 1.5.0
+date: 2026-08-21
 source: https://github.com/voitta-ai/skillz
 source_file: skills/agent-team-orchestration/SKILL.md
 ---
@@ -239,6 +239,55 @@ already makes.
 
 Run a wave, integrate, then re-plan the next wave from what's left - dependencies
 look different once the first wave merges.
+
+## Shared indexes need one writer, not N
+
+A repo usually has a few files that **every** contribution touches no matter how
+independent its subject matter: a catalog or registry, a plugin/package list, a
+README table of contents, a monotonically-increasing version. Subject-matter
+parallelism is real; *shared-index* parallelism is not. Fan out the first,
+serialize the second, or every concurrent contribution turns into a rebase.
+
+The **productivity engineer** owns those writes for the duration of a run. That
+is the natural fit because this is a process bottleneck, and recording where
+agents stall is the same job as owning the thing they stall on.
+
+**Handoff for a contributing agent:**
+
+> Produce the content - the new file, its own directory, its own per-item
+> version. **Do not touch shared indexes.** Hand off what you added, and let the
+> responsible agent register it.
+
+The responsible agent batches what is pending, lands it in one coherent change,
+and runs the gates once.
+
+### Two rules that matter more than the role
+
+- **Edit shared lists in place. Never regenerate or re-sort them.** This is the
+  single highest-leverage habit here. An in-place insert three-way-merges
+  cleanly; a regenerated or re-sorted list produces hundreds of lines of churn
+  in exactly the file everyone else is also editing, and "keep both sides" then
+  yields something that is valid, reads fine, and is wrong - it resurrects
+  entries deliberately removed upstream.
+- **A monotonic counter guarded by a CI gate is a lock.** Two concurrent
+  contributions cannot both be correct: whoever merges second is stale by
+  construction. If the repo has one, either serialize behind the responsible
+  agent, or **remove it from the contested path** - e.g. an integration branch
+  where the counter is exempt and one real bump happens at merge-back. The
+  second scales better, because it makes the conflict impossible rather than
+  merely coordinated.
+
+Distinguish the two kinds of collision before designing around them: a shared
+*list* is a soft collision that auto-merges if edited in place, while a shared
+*counter* is a hard one that cannot. Only the hard one needs a lock.
+
+### Telling the agents apart matters here
+
+The responsible agent has to know what is in flight in order to batch it, which
+means the run needs agent-to-agent messaging, not just parallel spawns. See
+[[claude-code-cross-session-messaging]] for the transport and
+[[cmux-cross-session-visibility]] for making that traffic visible to the human
+supervising the wave.
 
 ## Idempotency pre-flight (before creating any issue or PR)
 **Mandatory.** Before the architect (or any squad) creates an issue or opens a

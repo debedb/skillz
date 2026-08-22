@@ -97,7 +97,32 @@ jobs:
           # and they still must advance - that is the check that keeps a
           # standalone install from freezing on a stale copy.
           if [ "$BASE" = "next" ]; then
-            echo "base is 'next': bundle counter exempt (see issue #188);"
+            # Exempt is not the same as optional. If the counter may still be
+            # bumped here it keeps advancing, and merge-back fights it again -
+            # which is the whole thing the branch exists to avoid. So on `next`
+            # the bundle version must be UNCHANGED, and that is enforced, not
+            # merely unchecked. (Observed: a PR authored before this policy was
+            # retargeted onto `next` carrying a bump, and nothing stopped it.)
+            # The invariant is "next's bundle equals master's bundle", NOT
+            # "unchanged since next". Comparing against next would freeze
+            # whatever drift already leaked in and make correcting it
+            # impossible; comparing against master is self-correcting, and it
+            # still forbids the thing that matters - advancing the counter on
+            # a branch that batches many PRs.
+            git fetch --no-tags origin master
+            old=$(git show "FETCH_HEAD:$VERSION_FILE" | jq -r .version)
+            new=$(jq -r .version "$VERSION_FILE")
+            if [ "$old" != "$new" ]; then
+              echo "::error::base is 'next', so $VERSION_FILE#version must match master's $old (found $new)."
+              echo "::error::The bundle counter is bumped once at merge-back to master, not per PR."
+              exit 1
+            fi
+            codex=$(jq -r .version "$CODEX_VERSION_FILE")
+            if [ "$codex" != "$new" ]; then
+              echo "::error::$CODEX_VERSION_FILE is $codex, expected $new - the two manifests must match."
+              exit 1
+            fi
+            echo "base is 'next': bundle pinned at $old (see issue #188);"
             echo "per-skill plugin versions still enforced below."
             echo "exempt_bundle=true" >> "$GITHUB_OUTPUT"
             exit 0
@@ -131,11 +156,17 @@ jobs:
       # plugin, so there is nothing to map.
       - name: Every touched plugin must bump too
         if: steps.gate.outputs.maintainer_only != 'true'
+        env:
+          BASE: ${{ github.base_ref }}
         run: |
           args=""
           if [ "${{ steps.gate.outputs.exempt_bundle }}" = "true" ]; then
             args="--exempt skillz"
           fi
+          # Diff against the PR's own base, not FETCH_HEAD: the next-branch
+          # path above re-fetches master, which would otherwise move FETCH_HEAD
+          # out from under this step and diff a next PR against master.
+          git fetch --no-tags origin "$BASE"
           python3 scripts/check-plugin-version-bumps.py $args FETCH_HEAD
 
   # master side. The version is new by the time we get here, so cut the tag
