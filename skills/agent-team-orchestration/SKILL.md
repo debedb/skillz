@@ -118,8 +118,28 @@ Do not try to introspect the permission mode. **Probe it.** Spawn exactly
 before anything else:
 
 > As your very first tool call, run `<trivial command> && echo PROBE_OK`, then
-> immediately `SendMessage` to `main` reporting `PROBE_OK` or
-> `PROBE_BLOCKED - <what happened>`. Do not batch this with other work.
+> immediately `SendMessage` to `<architect's addressable name>` reporting
+> `PROBE_OK` or `PROBE_BLOCKED - <what happened>`. Do not batch this with other
+> work.
+
+**Brief the probe with the architect's real address, and verify it before you
+spawn.** `main` is the documented address for a *background subagent* to reach
+the main conversation, but a **teammate-spawned agent is not in that
+relationship**: for it, `main` resolves to *itself*, and the send bounces with
+`You are the main conversation - "main" addresses you`. A probe that cannot
+report is indistinguishable from a probe that is wedged - the exact failure this
+step exists to rule out, reintroduced by the brief.
+
+Resolve the address once, before the first spawn: call `ListAgents` and use the
+name teammates see for you (commonly `team-lead`). The cheapest confirmation is
+the routing metadata on your own first outbound `SendMessage`, which echoes back
+the `sender` name your teammates must reply to. Do not guess, and do not assume
+`main` because the surrounding docs use it.
+
+Measured cost of getting this wrong: the probe ran fine, produced `PROBE_OK`,
+failed to deliver it, self-recovered via `ListAgents`, and sent its report to an
+**unrelated peer session** that happened to be named plausibly. The architect saw
+silence and came within seconds of `TaskStop`ping a perfectly healthy agent.
 
 **The probe's report channel must itself be un-gated**, or the probe wedges on
 its own liveness report and produces exactly the silence it was built to
@@ -441,6 +461,16 @@ posing it twice is friction.
   Zero across all of them, with the agent list ticking, means wedged - not busy.
   Check whose activity you're reading before drawing conclusions: an architect's
   own earlier validation run in one worktree can look like a live agent.
+
+  **Filesystem silence is not proof of a wedge in the opening minutes.** A brief
+  that (correctly) says *read the issue before you touch code* sends the agent to
+  `gh issue view`, `WebSearch`, and its own reasoning - none of which write
+  anything into the worktree. A healthy agent can therefore read zero on every
+  check above for several minutes. Measured: a probe agent showed no dirty files,
+  no commits and no `__pycache__` for 3.5 minutes while its transcript showed six
+  completed tool calls and zero dangling ones. Treat filesystem state as
+  *positive* evidence of life when it moves, never as *negative* evidence when it
+  does not - and never `TaskStop` on filesystem silence alone.
   To *confirm* - and to name the exact call that wedged - read the agent's
   transcript for a **`tool_use` with no matching `tool_result`**. That signature
   is unambiguous where mtimes are circumstantial, and it survives both the
@@ -460,7 +490,8 @@ posing it twice is friction.
 | Step-0 surface check (once) | `which tmux` + `echo $TMUX` + `which cmux` - all three results count |
 | Step-0b executability check | one probe agent, liveness first call, `SendMessage` back; fan out only on `PROBE_OK` |
 | Probe report channel | must be un-gated in the resolved mode - marker inside the worktree, never `/tmp` |
-| Liveness oracle (wedged vs busy) | `git status --porcelain` / commit count / `__pycache__` / worktree mtime - never the elapsed-time counter |
+| Probe report address | resolve via `ListAgents` before spawning - `main` bounces for teammates (it addresses themselves); usually `team-lead` |
+| Liveness oracle (wedged vs busy) | transcript first (dangling `tool_use`); filesystem is positive evidence only - silence in the first minutes is normal while an agent reads |
 | Confirm the wedge, name the call | agent transcript: a `tool_use` with no matching `tool_result` |
 | Wedged wave, recovery | `TaskStop` per agent by name; worktrees + branches + baseline survive |
 | Idempotency pre-flight | `gh issue list` / `gh pr list` / `git branch -a` before creating |
