@@ -97,7 +97,25 @@ jobs:
           # and they still must advance - that is the check that keeps a
           # standalone install from freezing on a stale copy.
           if [ "$BASE" = "next" ]; then
-            echo "base is 'next': bundle counter exempt (see issue #188);"
+            # Exempt is not the same as optional. If the counter may still be
+            # bumped here it keeps advancing, and merge-back fights it again -
+            # which is the whole thing the branch exists to avoid. So on `next`
+            # the bundle version must be UNCHANGED, and that is enforced, not
+            # merely unchecked. (Observed: a PR authored before this policy was
+            # retargeted onto `next` carrying a bump, and nothing stopped it.)
+            old=$(git show "FETCH_HEAD:$VERSION_FILE" | jq -r .version)
+            new=$(jq -r .version "$VERSION_FILE")
+            if [ "$old" != "$new" ]; then
+              echo "::error::base is 'next', so $VERSION_FILE#version must stay $old (found $new)."
+              echo "::error::The bundle counter is bumped once at merge-back to master, not per PR."
+              exit 1
+            fi
+            codex=$(jq -r .version "$CODEX_VERSION_FILE")
+            if [ "$codex" != "$new" ]; then
+              echo "::error::$CODEX_VERSION_FILE is $codex, expected $new - the two manifests must match."
+              exit 1
+            fi
+            echo "base is 'next': bundle pinned at $old (see issue #188);"
             echo "per-skill plugin versions still enforced below."
             echo "exempt_bundle=true" >> "$GITHUB_OUTPUT"
             exit 0
