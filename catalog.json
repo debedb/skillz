@@ -250,6 +250,15 @@
       "summary": "Diagnose OpenClaw model-cascade failures (gateway process up but every run FailoverErrors because all providers are down), build a free OpenRouter fallback basket to survive codex cooldowns, and verify with one-shot `openclaw agent`."
     },
     {
+      "name": "parallel-agent-session-collisions",
+      "path": "skills/parallel-agent-session-collisions/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Avoid duplicating, superseding, or clobbering work done by another agent session on the same repos: the three collision shapes, the pre-flight check for each, and how to reconcile."
+    },
+    {
       "name": "playwright-mcp-upload-hidden-file-input",
       "path": "skills/playwright-mcp-upload-hidden-file-input/SKILL.md",
       "hosts": [
@@ -492,6 +501,19 @@
   ],
   "plugins": [
     {
+      "name": "parallel-agent-session-collisions",
+      "claude_manifest": "plugins/parallel-agent-session-collisions/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/parallel-agent-session-collisions/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "parallel-agent-session-collisions"
+      ],
+      "summary": "Single-skill plugin: parallel-agent-session-collisions."
+    },
+    {
       "name": "skillz",
       "claude_manifest": "plugins/skillz/.claude-plugin/plugin.json",
       "codex_manifest": "plugins/skillz/.codex-plugin/plugin.json",
@@ -502,6 +524,7 @@
         "codex"
       ],
       "skills": [
+        "parallel-agent-session-collisions",
         "work-on-pr",
         "review-pr-loop",
         "codex-adversarial-pr-review",

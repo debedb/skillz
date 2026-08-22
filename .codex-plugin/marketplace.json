@@ -182,6 +182,11 @@
       "description": "Identify which Neon project backs a Vercel app and migrate/split it; pg_dump>=server; safe non-destructive cutover."
     },
     {
+      "name": "parallel-agent-session-collisions",
+      "source": "./plugins/parallel-agent-session-collisions",
+      "description": "Avoid duplicating, superseding, or clobbering work done by another agent session on the same repos: the three collision shapes, the pre-flight check for each, and how to reconcile."
+    },
+    {
       "name": "playwright-mcp-upload-hidden-file-input",
       "source": "./plugins/playwright-mcp-upload-hidden-file-input/",
       "description": "Playwright MCP: attach a file to a hidden <input type=file> (unhide+tag via evaluate, upload by id, verify via CDN/S3 URL)."
