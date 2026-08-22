@@ -486,6 +486,18 @@
         "codex"
       ],
       "summary": "Make agent-to-agent traffic visible to the human watching: a structured SendMessage envelope (kind + direction + topic in the summary field, plus a one-line header that survives raw transcripts) paired with a cmux sidebar status pill per workspace showing whether a session is waiting on a peer or owes one an answer. Covers why spawned teams are cross-workspace traffic by construction (tmux-compat maps a window to a workspace), why the pill key must not collide with cmux's own claude_code key, and the stale-pill failure mode plus every exit that must clear it."
+    },
+    {
+      "name": "agent-traffic-log",
+      "path": "skills/agent-traffic-log/SKILL.md",
+      "files": [
+        "scripts/xs"
+      ],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "An append-only JSONL event log of agent-to-agent traffic plus a live pane over it, giving a fleet an org-wide view instead of N private conversations. No daemon and no lock: concurrent appends are safe because a single write of under PIPE_BUF bytes to an O_APPEND descriptor cannot interleave, verified at 24 concurrent writers producing 960 lines with zero torn. Ships scripts/xs with log, tail, recent, status (who is waiting on whom, derived from events rather than tracked), and prune. Includes the acceptance test that only a real team run can satisfy."
     }
   ],
   "collections": [
@@ -575,7 +587,8 @@
         "litellm-custom-provider-dispatch-order",
         "secretsmanager-prove-no-consumer-before-destroy",
         "claude-code-cross-session-messaging",
-        "cmux-cross-session-visibility"
+        "cmux-cross-session-visibility",
+        "agent-traffic-log"
       ],
       "summary": "Full repo bundle: every skill in one plugin."
     },
@@ -1166,6 +1179,19 @@
         "cmux-cross-session-visibility"
       ],
       "summary": "Single-skill plugin: cmux-cross-session-visibility."
+    },
+    {
+      "name": "agent-traffic-log",
+      "claude_manifest": "plugins/agent-traffic-log/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/agent-traffic-log/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "agent-traffic-log"
+      ],
+      "summary": "Single-skill plugin: agent-traffic-log."
     }
   ],
   "defaults": {
