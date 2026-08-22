@@ -315,6 +315,11 @@
       "name": "claude-code-cross-session-messaging",
       "source": "./plugins/claude-code-cross-session-messaging/",
       "description": "Single-skill plugin: claude-code-cross-session-messaging."
+    },
+    {
+      "name": "cmux-cross-session-visibility",
+      "source": "./plugins/cmux-cross-session-visibility/",
+      "description": "Single-skill plugin: cmux-cross-session-visibility."
     }
   ]
 }

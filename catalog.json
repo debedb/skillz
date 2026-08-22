@@ -468,6 +468,15 @@
         "codex"
       ],
       "summary": "Talk to a Claude Code session that is already running via the native ListAgents + SendMessage pair instead of a headless `claude -p` call or a terminal-scraping bridge. Covers addressing (the name is the address; refs do not survive outside the listing that produced them), the idle-subscription primitive that replaces every polling loop, the no-TTY law that makes headless and in-process transports wedge silently rather than fail, multi-hop transport dependency failures, the per-session permission boundary that forbids delegating around your own denials, and the honest dividing line where a launch-a-callee tool is still the right answer."
+    },
+    {
+      "name": "cmux-cross-session-visibility",
+      "path": "skills/cmux-cross-session-visibility/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Make agent-to-agent traffic visible to the human watching: a structured SendMessage envelope (kind + direction + topic in the summary field, plus a one-line header that survives raw transcripts) paired with a cmux sidebar status pill per workspace showing whether a session is waiting on a peer or owes one an answer. Covers why spawned teams are cross-workspace traffic by construction (tmux-compat maps a window to a workspace), why the pill key must not collide with cmux's own claude_code key, and the stale-pill failure mode plus every exit that must clear it."
     }
   ],
   "collections": [
@@ -542,7 +551,8 @@
         "agent-host-skill-loading",
         "litellm-custom-provider-dispatch-order",
         "secretsmanager-prove-no-consumer-before-destroy",
-        "claude-code-cross-session-messaging"
+        "claude-code-cross-session-messaging",
+        "cmux-cross-session-visibility"
       ],
       "summary": "Full repo bundle: every skill in one plugin."
     },
@@ -1120,6 +1130,19 @@
         "claude-code-cross-session-messaging"
       ],
       "summary": "Single-skill plugin: claude-code-cross-session-messaging."
+    },
+    {
+      "name": "cmux-cross-session-visibility",
+      "claude_manifest": "plugins/cmux-cross-session-visibility/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/cmux-cross-session-visibility/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "cmux-cross-session-visibility"
+      ],
+      "summary": "Single-skill plugin: cmux-cross-session-visibility."
     }
   ],
   "defaults": {

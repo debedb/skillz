@@ -116,6 +116,7 @@ environments and older Codex versions.
 | [secretsmanager-prove-no-consumer-before-destroy](./skills/secretsmanager-prove-no-consumer-before-destroy/SKILL.md) | skill | Claude, Codex | Prove nothing consumes a Secrets Manager secret before a terraform destroy: per-resource CloudTrail lookup + `GetSecretValue`-vs-metadata classification, minus your own terraform refresh — because a populated `LastAccessedDate` is **not** evidence of use (a secret with zero `GetSecretValue` still reports one) |
 | [`secretsmanager-prove-no-consumer-before-destroy` plugin](./plugins/secretsmanager-prove-no-consumer-before-destroy/) | plugin | Claude, Codex | Single-skill plugin: secretsmanager-prove-no-consumer-before-destroy |
 | [claude-code-cross-session-messaging](./skills/claude-code-cross-session-messaging/SKILL.md) | skill | Claude, Codex | Message a Claude Code session that is already running via native `ListAgents` + `SendMessage`; idle-subscription instead of polling, and the no-TTY law that wedges headless/in-process transports |
+| [cmux-cross-session-visibility](./skills/cmux-cross-session-visibility/SKILL.md) | skill | Claude, Codex | Make agent-to-agent traffic visible: structured `SendMessage` summary envelope + a cmux sidebar status pill per workspace, and what must clear a stale pill |
 
 Machine-readable index: [`catalog.json`](./catalog.json). The
 installer and validation script both read from it, so new entries
