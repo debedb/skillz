@@ -11,10 +11,14 @@ description: |
   is otherwise lost when contexts end; (4) you need "who is blocked right now"
   derived from history rather than tracked separately; (5) you are about to add
   a lock or a daemon to make concurrent appends safe and want to know why
-  neither is needed. Ships `scripts/xs`: log, tail, recent, status, prune.
+  neither is needed; (6) agents keep forgetting to log and you want the
+  record to stop depending on their discipline - `scripts/xs-hook` wires the
+  log to Claude Code's `PostToolUse` hook on `SendMessage`, which fires for
+  subagents too. Ships `scripts/xs` (log, tail, recent, status, prune) and
+  `scripts/xs-hook`.
 author: Claude Code
-version: 1.0.0
-date: 2026-08-21
+version: 1.1.0
+date: 2026-08-22
 source: https://github.com/voitta-ai/skillz
 source_file: skills/agent-traffic-log/SKILL.md
 ---
@@ -121,6 +125,75 @@ cmux new-split right --command "xs tail"
 file only grows by appends a byte offset stays valid. It restarts cleanly if
 the file shrinks under it (a prune), rather than replaying everything.
 
+## Instrumentation, not discipline
+
+Everything above works if every agent remembers to call `xs log`. They do not.
+`scripts/xs-hook` removes the requirement.
+
+```jsonc
+// ~/.claude/settings.json
+"PostToolUse": [
+  {"matcher": "SendMessage",
+   "hooks": [{"type": "command", "command": "~/.local/bin/xs-hook"}]}
+]
+```
+
+**Why one hook covers a whole team.** Claude Code runs the session's configured
+tool hooks inside subagents as well, and the payload carries `agent_id` and
+`agent_type` naming the subagent that made the call. So a single entry in a
+single settings file instruments the main conversation *and* every teammate it
+spawns - including background agents that own no surface, which are exactly the
+ones the pill cannot see. There is nothing to install per teammate and nothing
+for a teammate to remember.
+
+`matcher` takes the bare tool name: `SendMessage` is matched as an exact
+string, not a regex.
+
+### What it maps
+
+The hook reads the [[cmux-cross-session-visibility]] envelope out of
+`SendMessage`'s `summary` field, so the same grammar that makes a message
+legible in the UI is what makes the log line accurate.
+
+| Message | Event | Why |
+|---|---|---|
+| `Q ->peer: topic` | `send` | an ask, outstanding until answered |
+| `WO ->peer: topic` | `send` | delegated work, same |
+| `RE <-peer: gist` | `answered` | **load-bearing.** `status` clears a wait only on `answered`/`expired` - a reverse `send` does not clear the forward ask, so a reply logged as `send` leaves every question outstanding forever |
+| `FYI ->peer: topic` | `note` | the envelope defines FYI as expecting no answer; a `send` would park a wait nothing will ever clear |
+| `notify_when_idle` with no message | `note` | a pure subscription asks nothing |
+| no envelope | `send` | see below |
+
+**Unlabelled traffic is logged as `send` on purpose.** The hook cannot tell an
+unlabelled question from an unlabelled aside, and guessing `note` would drop
+real waits - the failure this hook exists to remove. So unlabelled messages sit
+in `status` until answered, and that accumulating noise is the feedback that
+someone is skipping the envelope. Under-reporting is silent; over-reporting
+complains.
+
+### The one contract
+
+**The hook never fails the tool call.** Every error path exits 0 and prints
+nothing: unparseable payload, missing `xs`, `xs` itself erroring. A hook that
+blocked `SendMessage` to protect its own log would have the priorities
+backwards - a missing line is a gap, a blocked message is an outage.
+
+It also resolves `xs` as `$XS_BIN`, then the copy beside itself, then `PATH` -
+in that order, because a hook subprocess does not necessarily inherit the
+interactive shell's `PATH`, and "silently does nothing" is the most likely way
+for this to fail.
+
+### What it still does not catch
+
+- **Receipt.** `PostToolUse` fires on the sender. `recv` remains unhooked, so
+  the log records what was sent, not what landed.
+- **Expiry.** Nothing fires when an idle subscription expires, so a wait that
+  ended in *unknown* stays outstanding. Log `expired` by hand, or accept that
+  `status` over-reports.
+- **Failed sends.** `PostToolUse` is the success path (`PostToolUseFailure` is
+  a separate event this does not wire), so a send that errored is not logged as
+  having happened - which is correct, and worth knowing when a line is missing.
+
 ## How this fits with the other two halves
 
 Three layers, each useful alone:
@@ -167,16 +240,17 @@ and nothing after.
 empty when the run is idle; no torn lines; and reading the pane alone tells you
 what the run did without opening a transcript.
 
-**Fails informatively if** agents forget to log. That is the known weakness -
-there is no hook on message send, so this is discipline, not instrumentation.
-Gaps in the log during a real run are the signal to wire it to a host hook if
-one exists.
+**Fails informatively if** the log is short. With `xs-hook` installed, a gap
+is no longer an agent forgetting - it is the hook not firing, so check that
+`matcher` is `SendMessage` and that the command path resolves before blaming
+anyone's discipline. Without the hook, gaps mean what they always meant.
 
 ## Caveats
 
-- **No hook, so no guarantee.** Nothing observes `SendMessage`. An agent that
-  does not call `xs log` leaves no trace, and the log silently under-reports
-  rather than erroring.
+- **Unhooked, there is no guarantee.** Without `scripts/xs-hook`, nothing
+  observes `SendMessage`: an agent that does not call `xs log` leaves no trace
+  and the log silently under-reports rather than erroring. Installed, the send
+  side is instrumented; receipt and expiry still are not.
 - **Identity is best-effort.** Two sessions can pick the same name. `ws`
   disambiguates after the fact.
 - **Not a security boundary.** Mode 0600 keeps it to your user; topics are
