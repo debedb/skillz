@@ -152,13 +152,15 @@
       "name": "codex-adversarial-pr-review",
       "path": "skills/codex-adversarial-pr-review/SKILL.md",
       "files": [
-        "scripts/codex-adversarial-pr-review.mjs"
+        "scripts/codex-adversarial-pr-review.mjs",
+        "scripts/batch-review.sh",
+        "scripts/post-batch.sh"
       ],
       "hosts": [
         "claude",
         "codex"
       ],
-      "summary": "Post /codex:adversarial-review findings as a batched GitHub PR review (inline + out-of-diff rollup)."
+      "summary": "Post /codex:adversarial-review findings as a batched GitHub PR review (inline + out-of-diff rollup); sweep a whole PR backlog and post the saved payloads without a second Codex pass."
     },
     {
       "name": "continuous-learning",
