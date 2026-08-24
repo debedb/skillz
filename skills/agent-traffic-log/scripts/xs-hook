@@ -1,0 +1,186 @@
+#!/usr/bin/env python3
+"""xs-hook - turn Claude Code's PostToolUse hook into xs log lines.
+
+Reads one hook payload as JSON on stdin and appends the corresponding traffic
+event by shelling out to `xs log`. Wire it to `SendMessage` and the log stops
+depending on an agent remembering to write to it.
+
+Why this closes the gap rather than narrowing it: Claude Code fires the
+session's configured tool hooks for subagent tool calls too, and the payload
+carries `agent_id` / `agent_type` identifying which subagent made the call. So
+one hook in one settings file covers the main conversation and every teammate
+it spawns, including background agents that own no surface of their own.
+
+Contract this deliberately keeps:
+
+  Never fail the tool call. Every error path exits 0 and stays quiet. A hook
+  that breaks messaging to protect its own log has the priorities backwards -
+  a missing line is a gap, a blocked SendMessage is an outage.
+
+Install (settings.json):
+
+  "PostToolUse": [
+    {"matcher": "SendMessage",
+     "hooks": [{"type": "command", "command": "~/.local/bin/xs-hook"}]}
+  ]
+"""
+
+import json
+import os
+import re
+import subprocess
+import sys
+
+# The envelope grammar from cmux-cross-session-visibility:
+#   <kind> <arrow><peer>: <topic>
+# Parsed rather than required: a summary that does not match is still logged,
+# just without a kind. Refusing to log an unlabelled message would punish the
+# log for an agent's formatting, which is the failure this hook exists to fix.
+ENVELOPE = re.compile(r"^\s*(Q|WO|FYI|RE)\b\s*(?:->|<-)?\s*([^:]*?)\s*:\s*(.*)$")
+
+# `to` may carry the disambiguating suffix ListAgents prints. The log keys on
+# names, so strip it rather than fragmenting one peer across two identities.
+REF_SUFFIX = re.compile(r"\s*\[[0-9a-f]{4,}\]\s*$")
+
+TOPIC_DISPLAY_CAP = 200
+
+
+def find_xs():
+    """Prefer the copy shipped beside this hook over whatever PATH resolves.
+
+    A hook subprocess does not necessarily inherit the interactive shell's
+    PATH, so relying on `xs` being on it is the most likely way for this to
+    silently do nothing."""
+    override = os.environ.get("XS_BIN")
+    if override and os.path.exists(override):
+        return override
+    sibling = os.path.join(os.path.dirname(os.path.realpath(__file__)), "xs")
+    if os.path.exists(sibling):
+        return sibling
+    retval = "xs"
+    return retval
+
+
+def read_payload():
+    try:
+        raw = sys.stdin.read()
+    except Exception:
+        return None
+    if not raw.strip():
+        return None
+    try:
+        retval = json.loads(raw)
+    except ValueError:
+        return None
+    return retval
+
+
+def sender_name(payload):
+    """Identity, in decreasing confidence.
+
+    `agent_type` is present only inside a subagent, and it is the agent's type
+    (or custom agent name), not its per-instance name - so it groups a role
+    rather than pinpointing an instance. That is the right granularity for
+    reading a run: "the reviewer asked the developer" is the question, not
+    which reviewer object. Outside a subagent, fall through and let xs apply
+    its own $XS_NAME / $CMUX_TAB_TITLE resolution."""
+    explicit = os.environ.get("XS_NAME")
+    if explicit:
+        return explicit
+    retval = payload.get("agent_type") or ""
+    return retval
+
+
+def parse_summary(tool_input):
+    """Return (kind, topic) from the envelope, falling back to plain text."""
+    summary = (tool_input.get("summary") or "").strip()
+    if not summary:
+        message = tool_input.get("message")
+        if isinstance(message, str):
+            summary = message.strip().splitlines()[0] if message.strip() else ""
+    match = ENVELOPE.match(summary)
+    if match:
+        retval = (match.group(1), match.group(3).strip() or summary)
+        return retval
+    retval = ("", summary)
+    return retval
+
+
+def classify(tool_input, kind):
+    """Map one SendMessage onto an event type.
+
+    `xs status` is a fold that treats every `send` as outstanding until an
+    `answered` or `expired` clears it, so the mapping is really a decision
+    about what counts as a wait:
+
+      RE  -> `answered`. A reverse `send` does not clear the forward ask, so
+             logging a reply as a plain send would leave every question
+             outstanding forever and make status useless within one run.
+      FYI -> `note`. The envelope defines FYI as status with no answer
+             expected. Recording it as a send would park a wait that nobody
+             is having and that nothing will ever clear.
+      no message, notify_when_idle -> `note`. A pure idle subscription asks
+             nothing either.
+      otherwise -> `send`, including unlabelled traffic. The hook cannot tell
+             an unlabelled question from an unlabelled aside, and guessing
+             `note` would silently drop real waits - the exact failure this
+             hook exists to remove. So unlabelled messages sit in `status`
+             until answered, and that noise is the feedback that an agent is
+             skipping the envelope."""
+    message = tool_input.get("message")
+    empty = message is None or (isinstance(message, str) and not message.strip())
+    if empty and tool_input.get("notify_when_idle"):
+        retval = "note"
+        return retval
+    if kind == "RE":
+        retval = "answered"
+        return retval
+    if kind == "FYI":
+        retval = "note"
+        return retval
+    retval = "send"
+    return retval
+
+
+def main():
+    payload = read_payload()
+    if not payload:
+        return 0
+    if payload.get("hook_event_name") != "PostToolUse":
+        return 0
+    if payload.get("tool_name") != "SendMessage":
+        return 0
+
+    tool_input = payload.get("tool_input")
+    if not isinstance(tool_input, dict):
+        return 0
+
+    peer = REF_SUFFIX.sub("", (tool_input.get("to") or "").strip())
+    if not peer:
+        return 0
+
+    kind, topic = parse_summary(tool_input)
+    event = classify(tool_input, kind)
+    if event == "note" and not topic:
+        topic = "subscribed to %s going idle" % peer
+
+    argv = [find_xs(), "log", event, "--to", peer]
+    sender = sender_name(payload)
+    if sender:
+        argv += ["--from", sender]
+    if kind:
+        argv += ["--kind", kind]
+    if topic:
+        argv += ["--topic", topic[:TOPIC_DISPLAY_CAP]]
+
+    try:
+        subprocess.run(argv, stdout=subprocess.DEVNULL,
+                       stderr=subprocess.DEVNULL, timeout=5, check=False)
+    except Exception:
+        # Deliberately swallowed - see the contract in the module docstring.
+        pass
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

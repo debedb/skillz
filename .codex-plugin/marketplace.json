@@ -182,6 +182,11 @@
       "description": "Identify which Neon project backs a Vercel app and migrate/split it; pg_dump>=server; safe non-destructive cutover."
     },
     {
+      "name": "parallel-agent-session-collisions",
+      "source": "./plugins/parallel-agent-session-collisions",
+      "description": "Avoid duplicating, superseding, or clobbering work done by another agent session on the same repos: the three collision shapes, the pre-flight check for each, and how to reconcile."
+    },
+    {
       "name": "playwright-mcp-upload-hidden-file-input",
       "source": "./plugins/playwright-mcp-upload-hidden-file-input/",
       "description": "Playwright MCP: attach a file to a hidden <input type=file> (unhide+tag via evaluate, upload by id, verify via CDN/S3 URL)."
@@ -312,9 +317,35 @@
       "description": "Single-skill plugin: secretsmanager-prove-no-consumer-before-destroy."
     },
     {
+<<<<<<< HEAD
+      "name": "claude-code-cross-session-messaging",
+      "source": "./plugins/claude-code-cross-session-messaging/",
+      "description": "Single-skill plugin: claude-code-cross-session-messaging."
+    },
+    {
+      "name": "cmux-cross-session-visibility",
+      "source": "./plugins/cmux-cross-session-visibility/",
+      "description": "Single-skill plugin: cmux-cross-session-visibility."
+    },
+    {
+      "name": "agent-traffic-log",
+      "source": "./plugins/agent-traffic-log/",
+      "description": "Single-skill plugin: agent-traffic-log."
+    },
+    {
+      "name": "subagent-no-report-channel",
+      "source": "./plugins/subagent-no-report-channel/",
+      "description": "Single-skill plugin: subagent-no-report-channel."
+    },
+    {
+      "name": "cmux-session-self-identity",
+      "source": "./plugins/cmux-session-self-identity/",
+      "description": "Single-skill plugin: cmux-session-self-identity."
+=======
       "name": "github-oidc-immutable-subject-claim",
       "source": "./plugins/github-oidc-immutable-subject-claim/",
       "description": "Single-skill plugin: github-oidc-immutable-subject-claim."
+>>>>>>> origin/master
     }
   ]
 }

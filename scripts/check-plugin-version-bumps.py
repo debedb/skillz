@@ -16,7 +16,14 @@ advanced. Also require a plugin's Claude and Codex manifests to carry the
 same version, since the two runtimes pin independently and drifting them
 freezes one host silently.
 
-Usage: check-plugin-version-bumps.py [<base-ref>]   (default: FETCH_HEAD)
+On the long-lived `next` integration branch the bundle is exempted with
+`--exempt skillz`: it is a monotonic counter shared by every skill PR, so on a
+branch that batches many of them it acts as a lock rather than a safeguard (see
+issue #188). Per-skill plugins are never exempt - their versions are
+independent cache keys, not a shared counter.
+
+Usage: check-plugin-version-bumps.py [--exempt <plugin>]... [<base-ref>]
+       (base-ref default: FETCH_HEAD)
 """
 
 import json
@@ -68,8 +75,27 @@ def version_now(path):
     return retval
 
 
+def parse_argv(argv):
+    """Pull repeatable --exempt <plugin> flags out, leaving the base ref.
+    Hand-rolled rather than argparse so the script keeps working when invoked
+    with no arguments at all, which is how it is used locally."""
+    exempt = set()
+    rest = []
+    i = 0
+    while i < len(argv):
+        if argv[i] == "--exempt" and i + 1 < len(argv):
+            exempt.add(argv[i + 1])
+            i += 2
+            continue
+        rest.append(argv[i])
+        i += 1
+    base = rest[0] if rest else "FETCH_HEAD"
+    retval = (base, exempt)
+    return retval
+
+
 def main():
-    base = sys.argv[1] if len(sys.argv) > 1 else "FETCH_HEAD"
+    base, exempt = parse_argv(sys.argv[1:])
 
     diff = git("diff", "--name-only", base)
     if diff is None:
@@ -97,6 +123,12 @@ def main():
     for plugin in plugins:
         if set(plugin.get("skills", [])) & touched_skills:
             implicated.add(plugin["name"])
+
+    if exempt:
+        skipped = sorted(implicated & exempt)
+        implicated -= exempt
+        if skipped:
+            print(f"exempt from the bump check: {', '.join(skipped)}")
 
     if not implicated:
         print("no plugin content touched; nothing to check")

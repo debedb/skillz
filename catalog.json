@@ -152,13 +152,15 @@
       "name": "codex-adversarial-pr-review",
       "path": "skills/codex-adversarial-pr-review/SKILL.md",
       "files": [
-        "scripts/codex-adversarial-pr-review.mjs"
+        "scripts/codex-adversarial-pr-review.mjs",
+        "scripts/batch-review.sh",
+        "scripts/post-batch.sh"
       ],
       "hosts": [
         "claude",
         "codex"
       ],
-      "summary": "Post /codex:adversarial-review findings as a batched GitHub PR review (inline + out-of-diff rollup)."
+      "summary": "Post /codex:adversarial-review findings as a batched GitHub PR review (inline + out-of-diff rollup); sweep a whole PR backlog and post the saved payloads without a second Codex pass."
     },
     {
       "name": "continuous-learning",
@@ -468,6 +470,64 @@
         "codex"
       ],
       "summary": "Diagnose a GitHub Actions job that cannot assume an AWS role by OIDC (`Not authorized to perform sts:AssumeRoleWithWebIdentity`) while every sibling repo in the same org assumes the same role fine -- GitHub now issues an immutable `sub` (`repo:ORG@ORG_ID/REPO@REPO_ID`) that a `repo:ORG/*` trust policy cannot match, per repo and depending on when it was created"
+    },
+    {
+      "name": "parallel-agent-session-collisions",
+      "path": "skills/parallel-agent-session-collisions/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Avoid duplicating, superseding, or clobbering work done by another agent session on the same repos: the three collision shapes, the pre-flight check for each, and how to reconcile. Also covers the collision that no artifact check can catch -- two sessions both about to do the same work, with nothing pushed for `gh pr list` to find -- detected by enumerating live peer sessions and asking directly, then split into named lanes with an explicit gate and the decision routed through the shared human."
+    },
+    {
+      "name": "claude-code-cross-session-messaging",
+      "path": "skills/claude-code-cross-session-messaging/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Talk to a Claude Code session that is already running via the native ListAgents + SendMessage pair instead of a headless `claude -p` call or a terminal-scraping bridge. Covers addressing (the name is the address; refs do not survive outside the listing that produced them), the idle-subscription primitive that replaces every polling loop, the no-TTY law that makes headless and in-process transports wedge silently rather than fail, multi-hop transport dependency failures, the per-session permission boundary that forbids delegating around your own denials, and the honest dividing line where a launch-a-callee tool is still the right answer."
+    },
+    {
+      "name": "cmux-cross-session-visibility",
+      "path": "skills/cmux-cross-session-visibility/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Make agent-to-agent traffic visible to the human watching: a structured SendMessage envelope (kind + direction + topic in the summary field, plus a one-line header that survives raw transcripts) paired with a cmux sidebar status pill per workspace showing whether a session is waiting on a peer or owes one an answer. Covers why spawned teams are cross-workspace traffic by construction (tmux-compat maps a window to a workspace), why the pill key must not collide with cmux's own claude_code key, and the stale-pill failure mode plus every exit that must clear it."
+    },
+    {
+      "name": "agent-traffic-log",
+      "path": "skills/agent-traffic-log/SKILL.md",
+      "files": [
+        "scripts/xs",
+        "scripts/xs-hook"
+      ],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "An append-only JSONL event log of agent-to-agent traffic plus a live pane over it, giving a fleet an org-wide view instead of N private conversations. No daemon and no lock: concurrent appends are safe because a single write of under PIPE_BUF bytes to an O_APPEND descriptor cannot interleave, verified at 24 concurrent writers producing 960 lines with zero torn. Ships scripts/xs with log, tail, recent, status (who is waiting on whom, derived from events rather than tracked), and prune. Includes the acceptance test that only a real team run can satisfy."
+    },
+    {
+      "name": "subagent-no-report-channel",
+      "path": "skills/subagent-no-report-channel/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Recover the work of a spawned subagent that finished but never reported, and tell that case apart from a genuinely wedged one. Root cause: an agent type's declared toolset may omit a messaging tool, so a correct, completed agent has no channel to deliver through -- or it is a forward-only wrapper scoped not to poll the background job it dispatched. Idle notifications are runtime-generated and are NOT evidence the agent's own send worked; the reliable oracle is the transcript (tool_use with no tool_result). Covers recovering the result from the agent's final text, from the job runtime's state directory, and the one-sentence fallback brief that prevents the loss."
+    },
+    {
+      "name": "cmux-session-self-identity",
+      "path": "skills/cmux-session-self-identity/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Determine which cmux workspace, tab and surface a session is actually running in, and map other live sessions to theirs. Never answer from CMUX_* env vars: the tab and workspace variables can carry the same id (so tab identity is not in the environment at all), and on a resumed session they are a stale launch-time snapshot that can name a workspace the session has left. Uses the bundled CLI -- identify for the caller's own refs (read caller, not focused), tree --all --id-format both to resolve refs to names, top --all --processes to map pids to surfaces. Matters because a session that cannot name its own tab cannot tell a human which tab to address."
     }
   ],
   "collections": [
@@ -542,7 +602,13 @@
         "agent-host-skill-loading",
         "litellm-custom-provider-dispatch-order",
         "secretsmanager-prove-no-consumer-before-destroy",
-        "github-oidc-immutable-subject-claim"
+        "github-oidc-immutable-subject-claim",
+        "parallel-agent-session-collisions",
+        "claude-code-cross-session-messaging",
+        "cmux-cross-session-visibility",
+        "agent-traffic-log",
+        "subagent-no-report-channel",
+        "cmux-session-self-identity"
       ],
       "summary": "Full repo bundle: every skill in one plugin."
     },
@@ -1120,6 +1186,84 @@
         "github-oidc-immutable-subject-claim"
       ],
       "summary": "Single-skill plugin: github-oidc-immutable-subject-claim."
+    },
+    {
+      "name": "parallel-agent-session-collisions",
+      "claude_manifest": "plugins/parallel-agent-session-collisions/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/parallel-agent-session-collisions/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "parallel-agent-session-collisions"
+      ],
+      "summary": "Single-skill plugin: parallel-agent-session-collisions."
+    },
+    {
+      "name": "claude-code-cross-session-messaging",
+      "claude_manifest": "plugins/claude-code-cross-session-messaging/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/claude-code-cross-session-messaging/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "claude-code-cross-session-messaging"
+      ],
+      "summary": "Single-skill plugin: claude-code-cross-session-messaging."
+    },
+    {
+      "name": "cmux-cross-session-visibility",
+      "claude_manifest": "plugins/cmux-cross-session-visibility/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/cmux-cross-session-visibility/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "cmux-cross-session-visibility"
+      ],
+      "summary": "Single-skill plugin: cmux-cross-session-visibility."
+    },
+    {
+      "name": "agent-traffic-log",
+      "claude_manifest": "plugins/agent-traffic-log/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/agent-traffic-log/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "agent-traffic-log"
+      ],
+      "summary": "Single-skill plugin: agent-traffic-log."
+    },
+    {
+      "name": "subagent-no-report-channel",
+      "claude_manifest": "plugins/subagent-no-report-channel/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/subagent-no-report-channel/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "subagent-no-report-channel"
+      ],
+      "summary": "Single-skill plugin: subagent-no-report-channel."
+    },
+    {
+      "name": "cmux-session-self-identity",
+      "claude_manifest": "plugins/cmux-session-self-identity/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/cmux-session-self-identity/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "cmux-session-self-identity"
+      ],
+      "summary": "Single-skill plugin: cmux-session-self-identity."
     }
   ],
   "defaults": {
