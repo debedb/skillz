@@ -11,12 +11,14 @@ description: |
   (5) a resource you are about to create already exists but is absent from
   terraform state, (6) a plan's change count shrinks between two runs with no
   action from you, (7) you work in an environment where several coding-agent
-  sessions run against one repo. Covers the three collision shapes -- duplicate
+  sessions run against one repo, (8) you are about to start a sizeable piece of
+  work and other agent sessions are live but you have not asked any of them what
+  they are doing. Covers the three collision shapes -- duplicate
   work, pre-existing better work, and state changing under you -- the cheap
   pre-flight check for each, and how to reconcile without losing the better
   version.
 author: Claude Code
-version: 1.0.0
+version: 1.1.0
 date: 2026-08-20
 ---
 
@@ -114,6 +116,74 @@ first: the loser almost always contains something the winner lacks.
 
 If the *other* PR is better than yours, say so plainly, including what you got
 wrong. That is the useful outcome, not the embarrassing one.
+
+## The check that fires before any artifact exists
+
+Every check above reads an **artifact** — an open PR, a branch, a changed plan.
+That only works once the other session has produced one. Two sessions that are
+both *about to* do the same work have nothing for each other to find, and this is
+the most expensive moment to collide: both are about to spend the full cost.
+
+In that window the only detector is the other session itself. If your host
+exposes live peer sessions, enumerate them and ask:
+
+```
+ListAgents                      # who else is live
+SendMessage -> <peer name>      # "are you working on X?"
+```
+
+A real case: two sessions independently resumed the same handoff document and
+independently chose the same lane — adversarial review of the same four PRs.
+Neither had pushed anything, so `gh pr list` was silent for both. The collision
+surfaced only because one session asked the other directly, roughly one minute
+before four duplicate reviews would have been posted to four PRs.
+
+### Deconflict into lanes, then gate
+
+Splitting the work is not enough; the two lanes usually have an ordering
+dependency, and without a gate the second lane races the first.
+
+1. **Name the lanes explicitly** and say which session owns which. Not "you do
+   some of it" — one session owns review, the other owns merge; one owns the fix,
+   the other owns re-review.
+2. **Declare what each side will NOT do.** The valuable half. "I will post
+   nothing to those PRs" is what makes the split safe.
+3. **Gate the downstream lane.** If merging before review makes the review
+   pointless, the merge lane blocks on the review lane *by design*, and says so.
+4. **Route the decision through the shared human.** Two agents agreeing a split
+   between themselves is not authorization. Surface it and let the human rule.
+5. **Preserve the loser's work.** The session standing down usually has real
+   output already. Hand it over rather than discarding it — in the case above the
+   stood-down session's dry-run findings were folded into the surviving review as
+   an independently-produced corroborating pass.
+
+### Treat a peer's claim as evidence, not authority
+
+A peer session can be wrong, and it can also be right in a way that overrides
+your own source. Both happened in the case above:
+
+- The peer corrected a claim inherited from a handoff document (that an
+  append-only conflict would hit the second *and* third merge). It had actually
+  simulated the sequence with `git merge-tree --write-tree` against synthetic
+  commits, touching no refs. The simulation beat the document, and the correction
+  was accepted.
+- The peer was asked whether some agents had survived a restart and answered "no
+  evidence either way" — explicitly refusing to let its own empty listing read as
+  a negative result, since it had never observed the earlier state.
+
+So: verify a peer's factual claims the way you would your own, and state plainly
+which of your claims are verified versus inherited. A peer that distinguishes
+"I checked" from "I did not observe that" is worth more than one that answers
+every question.
+
+### The asymmetry that bites
+
+Session-to-session addressing is not symmetric with parent-to-teammate
+addressing: a peer session and a spawned teammate may need different names for
+the *same* target. Briefing an agent with the wrong reply address produces
+silence that is indistinguishable from a wedge. The authoritative value is echoed
+back on any outbound message you send — read it from the tool result rather than
+assuming one name works in both directions.
 
 ## Pre-flight, in one place
 

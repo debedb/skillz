@@ -1,7 +1,7 @@
 {
   "name": "parallel-agent-session-collisions",
-  "description": "Avoid duplicating, superseding, or clobbering work done by another agent session on the same repos: the three collision shapes, the pre-flight check for each, and how to reconcile without losing the better version.",
-  "version": "1.0.0",
+  "description": "Avoid duplicating, superseding, or clobbering work done by another agent session on the same repos: the three collision shapes, the pre-flight check for each, and how to reconcile without losing the better version. Also covers the collision that no artifact check can catch -- two sessions both about to do the same work, with nothing pushed for `gh pr list` to find -- detected by enumerating live peer sessions and asking directly, then split into named lanes with an explicit gate and the decision routed through the shared human.",
+  "version": "1.1.0",
   "author": {
     "name": "voitta-ai"
   },
