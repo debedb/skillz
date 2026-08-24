@@ -307,6 +307,7 @@
       "description": "Single-skill plugin: secretsmanager-prove-no-consumer-before-destroy."
     },
     {
+<<<<<<< HEAD
       "name": "claude-code-cross-session-messaging",
       "source": "./plugins/claude-code-cross-session-messaging/",
       "description": "Single-skill plugin: claude-code-cross-session-messaging."
@@ -330,6 +331,11 @@
       "name": "cmux-session-self-identity",
       "source": "./plugins/cmux-session-self-identity/",
       "description": "Single-skill plugin: cmux-session-self-identity."
+=======
+      "name": "github-oidc-immutable-subject-claim",
+      "source": "./plugins/github-oidc-immutable-subject-claim/",
+      "description": "Single-skill plugin: github-oidc-immutable-subject-claim."
+>>>>>>> origin/master
     }
   ]
 }

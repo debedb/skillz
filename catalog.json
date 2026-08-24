@@ -128,7 +128,7 @@
         "claude",
         "codex"
       ],
-      "summary": "Make AI coding agents show up as watchable cmux tabs/panes, and diagnose the six distinct reasons they do not: wrong launch path, Agent-tool spawn path (never tabs; they surface in the native agent list), a shim shadowed on PATH by a real tmux, the shim's own bare `cmux` being off PATH so tmux dies with exec: cmux: not found, a resumed pane with no $TMUX that starts an invisible real tmux server, and a teammate mode that resolved to in-process so every agent wedges with no pane, no TTY and no visible permission prompt. Includes the one-shot both-hops test, the ps check that separates a wedged transport from an agent that never launched, and reading the live process env rather than the shell's."
+      "summary": "Make AI agents show as watchable cmux tabs; Claude needs the claude-teams wrapper, Codex tabs via codex-teams/hooks."
     },
     {
       "name": "cmux-autoresume-after-reboot",
@@ -248,15 +248,6 @@
         "codex"
       ],
       "summary": "Diagnose OpenClaw model-cascade failures (gateway process up but every run FailoverErrors because all providers are down), build a free OpenRouter fallback basket to survive codex cooldowns, and verify with one-shot `openclaw agent`."
-    },
-    {
-      "name": "parallel-agent-session-collisions",
-      "path": "skills/parallel-agent-session-collisions/SKILL.md",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "summary": "Avoid duplicating, superseding, or clobbering work done by another agent session on the same repos: the three collision shapes, the pre-flight check for each, and how to reconcile. Also covers the collision that no artifact check can catch -- two sessions both about to do the same work, with nothing pushed for `gh pr list` to find -- detected by enumerating live peer sessions and asking directly, then split into named lanes with an explicit gate and the decision routed through the shared human."
     },
     {
       "name": "playwright-mcp-upload-hidden-file-input",
@@ -470,6 +461,24 @@
       "summary": "Prove nothing consumes a Secrets Manager secret before a terraform destroy: per-resource CloudTrail lookup + GetSecretValue-vs-metadata classification, minus your own terraform refresh -- because a populated LastAccessedDate is NOT evidence of use (a secret with zero GetSecretValue still reports one)"
     },
     {
+      "name": "github-oidc-immutable-subject-claim",
+      "path": "skills/github-oidc-immutable-subject-claim/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Diagnose a GitHub Actions job that cannot assume an AWS role by OIDC (`Not authorized to perform sts:AssumeRoleWithWebIdentity`) while every sibling repo in the same org assumes the same role fine -- GitHub now issues an immutable `sub` (`repo:ORG@ORG_ID/REPO@REPO_ID`) that a `repo:ORG/*` trust policy cannot match, per repo and depending on when it was created"
+    },
+    {
+      "name": "parallel-agent-session-collisions",
+      "path": "skills/parallel-agent-session-collisions/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Avoid duplicating, superseding, or clobbering work done by another agent session on the same repos: the three collision shapes, the pre-flight check for each, and how to reconcile. Also covers the collision that no artifact check can catch -- two sessions both about to do the same work, with nothing pushed for `gh pr list` to find -- detected by enumerating live peer sessions and asking directly, then split into named lanes with an explicit gate and the decision routed through the shared human."
+    },
+    {
       "name": "claude-code-cross-session-messaging",
       "path": "skills/claude-code-cross-session-messaging/SKILL.md",
       "hosts": [
@@ -532,19 +541,6 @@
   ],
   "plugins": [
     {
-      "name": "parallel-agent-session-collisions",
-      "claude_manifest": "plugins/parallel-agent-session-collisions/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/parallel-agent-session-collisions/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "parallel-agent-session-collisions"
-      ],
-      "summary": "Single-skill plugin: parallel-agent-session-collisions."
-    },
-    {
       "name": "skillz",
       "claude_manifest": "plugins/skillz/.claude-plugin/plugin.json",
       "codex_manifest": "plugins/skillz/.codex-plugin/plugin.json",
@@ -555,7 +551,6 @@
         "codex"
       ],
       "skills": [
-        "parallel-agent-session-collisions",
         "work-on-pr",
         "review-pr-loop",
         "codex-adversarial-pr-review",
@@ -605,6 +600,8 @@
         "agent-host-skill-loading",
         "litellm-custom-provider-dispatch-order",
         "secretsmanager-prove-no-consumer-before-destroy",
+        "github-oidc-immutable-subject-claim",
+        "parallel-agent-session-collisions",
         "claude-code-cross-session-messaging",
         "cmux-cross-session-visibility",
         "agent-traffic-log",
@@ -1174,6 +1171,32 @@
         "secretsmanager-prove-no-consumer-before-destroy"
       ],
       "summary": "Single-skill plugin: secretsmanager-prove-no-consumer-before-destroy."
+    },
+    {
+      "name": "github-oidc-immutable-subject-claim",
+      "claude_manifest": "plugins/github-oidc-immutable-subject-claim/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/github-oidc-immutable-subject-claim/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "github-oidc-immutable-subject-claim"
+      ],
+      "summary": "Single-skill plugin: github-oidc-immutable-subject-claim."
+    },
+    {
+      "name": "parallel-agent-session-collisions",
+      "claude_manifest": "plugins/parallel-agent-session-collisions/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/parallel-agent-session-collisions/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "parallel-agent-session-collisions"
+      ],
+      "summary": "Single-skill plugin: parallel-agent-session-collisions."
     },
     {
       "name": "claude-code-cross-session-messaging",

@@ -33,7 +33,6 @@ environments and older Codex versions.
 
 | Name | Type | Hosts | Purpose |
 |---|---|---|---|
-| [parallel-agent-session-collisions](./skills/parallel-agent-session-collisions/SKILL.md) | skill | Claude, Codex | Avoid duplicating, superseding, or clobbering work done by another agent session on the same repos: the three collision shapes, the pre-flight check for each, and how to reconcile |
 | [work-on-pr](./skills/work-on-pr/SKILL.md) | skill | Claude, Codex | Author-side PR iteration loop |
 | [review-pr-loop](./skills/review-pr-loop/SKILL.md) | skill | Claude, Codex | Reviewer-side PR iteration loop |
 | [codex-adversarial-pr-review](./skills/codex-adversarial-pr-review/SKILL.md) | skill | Claude, Codex | Post /codex:adversarial-review findings as a batched GitHub PR review (inline + out-of-diff rollup) |
@@ -116,6 +115,9 @@ environments and older Codex versions.
 | [litellm-custom-provider-dispatch-order](./skills/litellm-custom-provider-dispatch-order/SKILL.md) | skill | Claude, Codex | A LiteLLM `CustomLLM` that never runs: seven bare-model-name branches dispatch before the custom-provider one, so `myprovider/gpt-5.5` is silently billed to OpenAI |
 | [secretsmanager-prove-no-consumer-before-destroy](./skills/secretsmanager-prove-no-consumer-before-destroy/SKILL.md) | skill | Claude, Codex | Prove nothing consumes a Secrets Manager secret before a terraform destroy: per-resource CloudTrail lookup + `GetSecretValue`-vs-metadata classification, minus your own terraform refresh — because a populated `LastAccessedDate` is **not** evidence of use (a secret with zero `GetSecretValue` still reports one) |
 | [`secretsmanager-prove-no-consumer-before-destroy` plugin](./plugins/secretsmanager-prove-no-consumer-before-destroy/) | plugin | Claude, Codex | Single-skill plugin: secretsmanager-prove-no-consumer-before-destroy |
+| [github-oidc-immutable-subject-claim](./skills/github-oidc-immutable-subject-claim/SKILL.md) | skill | Claude, Codex | A GitHub Actions job cannot assume an AWS role by OIDC (`Not authorized to perform sts:AssumeRoleWithWebIdentity`) while every sibling repo in the same org assumes the same role fine — GitHub now issues an immutable `sub` (`repo:ORG@ORG_ID/REPO@REPO_ID`) that a `repo:ORG/*` trust policy cannot match, **per repo**, depending on when it was created |
+| [`github-oidc-immutable-subject-claim` plugin](./plugins/github-oidc-immutable-subject-claim/) | plugin | Claude, Codex | Single-skill plugin: github-oidc-immutable-subject-claim |
+| [parallel-agent-session-collisions](./skills/parallel-agent-session-collisions/SKILL.md) | skill | Claude, Codex | Avoid duplicating, superseding, or clobbering work done by another agent session on the same repos: the three collision shapes, the pre-flight check for each, and how to reconcile |
 | [claude-code-cross-session-messaging](./skills/claude-code-cross-session-messaging/SKILL.md) | skill | Claude, Codex | Message a Claude Code session that is already running via native `ListAgents` + `SendMessage`; idle-subscription instead of polling, and the no-TTY law that wedges headless/in-process transports |
 | [cmux-cross-session-visibility](./skills/cmux-cross-session-visibility/SKILL.md) | skill | Claude, Codex | Make agent-to-agent traffic visible: structured `SendMessage` summary envelope + a cmux sidebar status pill per workspace, and what must clear a stale pill |
 | [subagent-no-report-channel](./skills/subagent-no-report-channel/SKILL.md) | skill | Claude, Codex | Subagents idle with nothing delivered: recover the stranded result from the transcript or the job runtime's state dir, and use `tool_use` without `tool_result` as the real wedge oracle |
@@ -768,45 +770,6 @@ Install (when supported by the local Codex CLI):
 
 Or, from a clone, point Codex at `plugins/codex-continuous-learning/`
 as a local plugin folder.
-
-## The `next` integration branch
-
-`master` is what people install. `next` is a long-lived branch where
-experimental skills accumulate before a major release, so work in progress does
-not destabilise a catalog already in use.
-
-**The one rule that makes it work: nothing on `next` touches the bundle
-version** (`plugins/skillz/.claude-plugin/plugin.json` and its Codex twin).
-
-The bundle version is a monotonic counter shared by *every* skill PR. On a
-branch that batches many of them it stops being a safeguard and becomes a lock:
-each PR bumps the same integer, so every PR after the first is stale by
-construction no matter how disjoint its subject matter (issue #188). Leaving it
-alone on `next` removes the only file that all skill PRs must fight over. One
-real bump happens at merge-back to `master`, where the counter means something
-because that is what ships.
-
-Per-skill plugin versions are **not** exempt and still must advance. Those are
-independent per-plugin cache keys rather than a shared counter, so they never
-collide, and they are what stops a standalone install from freezing on a stale
-copy while `plugin update` reports "up to date".
-
-CI enforces exactly that split: when `github.base_ref` is `next`,
-`version-bumped` requires the bundle version to be **unchanged** - exempt is
-not optional, since a counter that may still move keeps advancing and
-merge-back fights it again - and passes `--exempt skillz` to
-`check-plugin-version-bumps.py` so the per-plugin half still runs.
-
-| Target | Bundle version | Per-skill plugin version |
-|---|---|---|
-| PR into `master` | must advance | must advance |
-| PR into `next` | **leave it alone** | must advance |
-| merge `next` -> `master` | one bump, major | already advanced |
-
-Contributor rule that applies on both branches: edit `catalog.json`, both
-`marketplace.json` files and the README table **in place**. Never regenerate or
-re-sort a shared list - that turns a clean three-way merge into hundreds of
-lines of churn in exactly the files everyone else is also touching.
 
 ## Validation
 
