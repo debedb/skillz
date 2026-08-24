@@ -491,7 +491,8 @@
       "name": "agent-traffic-log",
       "path": "skills/agent-traffic-log/SKILL.md",
       "files": [
-        "scripts/xs"
+        "scripts/xs",
+        "scripts/xs-hook"
       ],
       "hosts": [
         "claude",
