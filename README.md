@@ -117,6 +117,8 @@ environments and older Codex versions.
 | [`secretsmanager-prove-no-consumer-before-destroy` plugin](./plugins/secretsmanager-prove-no-consumer-before-destroy/) | plugin | Claude, Codex | Single-skill plugin: secretsmanager-prove-no-consumer-before-destroy |
 | [github-oidc-immutable-subject-claim](./skills/github-oidc-immutable-subject-claim/SKILL.md) | skill | Claude, Codex | A GitHub Actions job cannot assume an AWS role by OIDC (`Not authorized to perform sts:AssumeRoleWithWebIdentity`) while every sibling repo in the same org assumes the same role fine — GitHub now issues an immutable `sub` (`repo:ORG@ORG_ID/REPO@REPO_ID`) that a `repo:ORG/*` trust policy cannot match, **per repo**, depending on when it was created |
 | [`github-oidc-immutable-subject-claim` plugin](./plugins/github-oidc-immutable-subject-claim/) | plugin | Claude, Codex | Single-skill plugin: github-oidc-immutable-subject-claim |
+| [terraform-noninteractive-prod-apply](./skills/terraform-noninteractive-prod-apply/SKILL.md) | skill | Claude, Codex | Non-interactive terraform **prod** apply when `apply.sh` has no `-auto-approve`: use `plan -out` + `apply <file>`, not `echo yes \|`, because a prompt-piped apply approves a plan terraform **recomputes** rather than the one you reviewed |
+| [`terraform-noninteractive-prod-apply` plugin](./plugins/terraform-noninteractive-prod-apply/) | plugin | Claude, Codex | Single-skill plugin: terraform-noninteractive-prod-apply |
 
 Machine-readable index: [`catalog.json`](./catalog.json). The
 installer and validation script both read from it, so new entries

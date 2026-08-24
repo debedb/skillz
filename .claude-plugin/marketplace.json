@@ -305,6 +305,11 @@
       "name": "github-oidc-immutable-subject-claim",
       "source": "./plugins/github-oidc-immutable-subject-claim/",
       "description": "Single-skill plugin: github-oidc-immutable-subject-claim."
+    },
+    {
+      "name": "terraform-noninteractive-prod-apply",
+      "source": "./plugins/terraform-noninteractive-prod-apply/",
+      "description": "Single-skill plugin: terraform-noninteractive-prod-apply."
     }
   ]
 }
