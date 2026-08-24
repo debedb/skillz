@@ -332,6 +332,11 @@
       "description": "Single-skill plugin: agent-traffic-log."
     },
     {
+      "name": "subagent-no-report-channel",
+      "source": "./plugins/subagent-no-report-channel/",
+      "description": "Single-skill plugin: subagent-no-report-channel."
+    },
+    {
       "name": "cmux-session-self-identity",
       "source": "./plugins/cmux-session-self-identity/",
       "description": "Single-skill plugin: cmux-session-self-identity."
