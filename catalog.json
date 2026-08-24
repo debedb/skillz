@@ -498,6 +498,15 @@
         "codex"
       ],
       "summary": "An append-only JSONL event log of agent-to-agent traffic plus a live pane over it, giving a fleet an org-wide view instead of N private conversations. No daemon and no lock: concurrent appends are safe because a single write of under PIPE_BUF bytes to an O_APPEND descriptor cannot interleave, verified at 24 concurrent writers producing 960 lines with zero torn. Ships scripts/xs with log, tail, recent, status (who is waiting on whom, derived from events rather than tracked), and prune. Includes the acceptance test that only a real team run can satisfy."
+    },
+    {
+      "name": "subagent-no-report-channel",
+      "path": "skills/subagent-no-report-channel/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Recover the work of a spawned subagent that finished but never reported, and tell that case apart from a genuinely wedged one. Root cause: an agent type's declared toolset may omit a messaging tool, so a correct, completed agent has no channel to deliver through -- or it is a forward-only wrapper scoped not to poll the background job it dispatched. Idle notifications are runtime-generated and are NOT evidence the agent's own send worked; the reliable oracle is the transcript (tool_use with no tool_result). Covers recovering the result from the agent's final text, from the job runtime's state directory, and the one-sentence fallback brief that prevents the loss."
     }
   ],
   "collections": [
@@ -588,7 +597,8 @@
         "secretsmanager-prove-no-consumer-before-destroy",
         "claude-code-cross-session-messaging",
         "cmux-cross-session-visibility",
-        "agent-traffic-log"
+        "agent-traffic-log",
+        "subagent-no-report-channel"
       ],
       "summary": "Full repo bundle: every skill in one plugin."
     },
@@ -1192,6 +1202,19 @@
         "agent-traffic-log"
       ],
       "summary": "Single-skill plugin: agent-traffic-log."
+    },
+    {
+      "name": "subagent-no-report-channel",
+      "claude_manifest": "plugins/subagent-no-report-channel/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/subagent-no-report-channel/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "subagent-no-report-channel"
+      ],
+      "summary": "Single-skill plugin: subagent-no-report-channel."
     }
   ],
   "defaults": {
