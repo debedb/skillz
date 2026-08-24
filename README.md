@@ -117,6 +117,8 @@ environments and older Codex versions.
 | [`secretsmanager-prove-no-consumer-before-destroy` plugin](./plugins/secretsmanager-prove-no-consumer-before-destroy/) | plugin | Claude, Codex | Single-skill plugin: secretsmanager-prove-no-consumer-before-destroy |
 | [github-oidc-immutable-subject-claim](./skills/github-oidc-immutable-subject-claim/SKILL.md) | skill | Claude, Codex | A GitHub Actions job cannot assume an AWS role by OIDC (`Not authorized to perform sts:AssumeRoleWithWebIdentity`) while every sibling repo in the same org assumes the same role fine — GitHub now issues an immutable `sub` (`repo:ORG@ORG_ID/REPO@REPO_ID`) that a `repo:ORG/*` trust policy cannot match, **per repo**, depending on when it was created |
 | [`github-oidc-immutable-subject-claim` plugin](./plugins/github-oidc-immutable-subject-claim/) | plugin | Claude, Codex | Single-skill plugin: github-oidc-immutable-subject-claim |
+| [llm-vendor-waterfall](./skills/llm-vendor-waterfall/SKILL.md) | skill | Claude, Codex | Serve one LLM call from an ordered list of vendors so a 429, a dead key, or an unfunded account fails over instead of failing the request: the ordered-config to LiteLLM `Router` mapping, which knobs earn their keep (`cooldown_time`, `allowed_fails`, `context_window_fallbacks`, budgets) and which to leave alone, the **invisible dead fallback** that reads as random flakiness, and what must not be waterfalled |
+| [`llm-vendor-waterfall` plugin](./plugins/llm-vendor-waterfall/) | plugin | Claude, Codex | Single-skill plugin: llm-vendor-waterfall |
 
 Machine-readable index: [`catalog.json`](./catalog.json). The
 installer and validation script both read from it, so new entries

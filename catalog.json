@@ -468,6 +468,15 @@
         "codex"
       ],
       "summary": "Diagnose a GitHub Actions job that cannot assume an AWS role by OIDC (`Not authorized to perform sts:AssumeRoleWithWebIdentity`) while every sibling repo in the same org assumes the same role fine -- GitHub now issues an immutable `sub` (`repo:ORG@ORG_ID/REPO@REPO_ID`) that a `repo:ORG/*` trust policy cannot match, per repo and depending on when it was created"
+    },
+    {
+      "name": "llm-vendor-waterfall",
+      "path": "skills/llm-vendor-waterfall/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Serve one LLM call from an ordered list of vendors so a rate limit, a dead key, or an out-of-credits account fails over instead of failing the request. Covers the ordered-config to LiteLLM Router mapping, which Router knobs earn their keep (cooldown_time, allowed_fails, context_window_fallbacks, per-deployment budgets) and which to leave alone, the invisible dead fallback that reads as random flakiness, what must not be waterfalled, and how to prove failover actually happens."
     }
   ],
   "collections": [
@@ -542,7 +551,8 @@
         "agent-host-skill-loading",
         "litellm-custom-provider-dispatch-order",
         "secretsmanager-prove-no-consumer-before-destroy",
-        "github-oidc-immutable-subject-claim"
+        "github-oidc-immutable-subject-claim",
+        "llm-vendor-waterfall"
       ],
       "summary": "Full repo bundle: every skill in one plugin."
     },
@@ -1120,6 +1130,19 @@
         "github-oidc-immutable-subject-claim"
       ],
       "summary": "Single-skill plugin: github-oidc-immutable-subject-claim."
+    },
+    {
+      "name": "llm-vendor-waterfall",
+      "claude_manifest": "plugins/llm-vendor-waterfall/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/llm-vendor-waterfall/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "llm-vendor-waterfall"
+      ],
+      "summary": "Single-skill plugin: llm-vendor-waterfall."
     }
   ],
   "defaults": {
