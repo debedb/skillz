@@ -13,6 +13,15 @@
       "summary": "Find and clean the seven local surfaces where a coding agent accumulates copies of your secrets (git remote URLs, memory stores, file-history snapshots, tool config literals, permission allowlists, tool-output caches, and OS credential stores a filesystem sweep cannot see). Covers why prefix-grep gives false confidence, why a prefix-anchored pattern needs a left boundary, and why keyword-adjacency redaction loses to prose."
     },
     {
+      "name": "agent-host-skill-loading",
+      "path": "skills/agent-host-skill-loading/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Make a non-Claude, non-Codex agent host load skillz-format SKILL.md files: two-stage disclosure (menu line in the system prompt, body behind a load_skill tool) with the measured cost of each alternative, block-scalar-safe frontmatter parsing, ordered-path precedence with shadow reporting, refresh without restart and its turn-boundary gotcha, and why the reload belongs behind a privilege gate."
+    },
+    {
       "name": "agent-session-credential-audit",
       "path": "skills/agent-session-credential-audit/SKILL.md",
       "hosts": [
@@ -31,6 +40,15 @@
       "summary": "Run a team of agents over a repo's open issues: architect plans the parallel set, per-issue squads (dev + adversarial reviewer + SDET + productivity engineer), each individually watchable."
     },
     {
+      "name": "archive-today-fetcher-hierarchy",
+      "path": "skills/archive-today-fetcher-hierarchy/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Reach archive.today when automation is refused, cite it reproducibly, and send a truthful user agent."
+    },
+    {
       "name": "aws-http-server-on-lambda-web-adapter",
       "path": "skills/aws-http-server-on-lambda-web-adapter/SKILL.md",
       "hosts": [
@@ -38,6 +56,15 @@
         "codex"
       ],
       "summary": "Host an unmodified HTTP server (incl. LLM-proxy demos) as a scale-to-zero Lambda via the Web Adapter; Function-URL-403 fallback to API Gateway and its 30s-cap latency tradeoff; cost guardrails."
+    },
+    {
+      "name": "chrome-localhost-mic-autoblock",
+      "path": "skills/chrome-localhost-mic-autoblock/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Fix a web app's mic failing in Chrome with a not-allowed error on localhost even though the OS granted Chrome mic access: Chrome auto-blocks the mic per-site and the OS Privacy toggle / Chrome restart never clears it; set the site to Allow."
     },
     {
       "name": "claude-code-codex-plugin-parity",
@@ -76,15 +103,6 @@
       "summary": "Bootstrap Python deps from a Claude Code plugin hook so /plugin install is one-click on systems lacking them (PEP 668-safe)."
     },
     {
-      "name": "claude-code-plugin-update-flow",
-      "path": "skills/claude-code-plugin-update-flow/SKILL.md",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "summary": "Why `claude plugin update` reports \"up to date\" while the plugin still runs stale code: the install cache is keyed by plugin.json#version. Authors bump on every shipping merge; verify against the cache dir, never the marketplace clone."
-    },
-    {
       "name": "claude-code-plugin-release-automation",
       "path": "skills/claude-code-plugin-release-automation/SKILL.md",
       "hosts": [
@@ -92,6 +110,15 @@
         "codex"
       ],
       "summary": "Tag and publish release notes automatically from a plugin repo's manifest version, with CI enforcing the bump."
+    },
+    {
+      "name": "claude-code-plugin-update-flow",
+      "path": "skills/claude-code-plugin-update-flow/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Why `claude plugin update` reports \"up to date\" while the plugin still runs stale code: the install cache is keyed by plugin.json#version. Authors bump on every shipping merge; verify against the cache dir, never the marketplace clone."
     },
     {
       "name": "claude-json-mcp-migration-slice",
@@ -149,6 +176,15 @@
       "summary": "Search all open cmux workspaces/tabs/panes - live scrollback + agent transcripts."
     },
     {
+      "name": "cmux-session-restore-forensics",
+      "path": "skills/cmux-session-restore-forensics/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Diagnose what cmux actually restored after a relaunch and recover panes it silently dropped."
+    },
+    {
       "name": "codex-adversarial-pr-review",
       "path": "skills/codex-adversarial-pr-review/SKILL.md",
       "files": [
@@ -196,6 +232,15 @@
       "summary": "Graft a local worktree's commits onto a remote branch without re-cloning."
     },
     {
+      "name": "git-simulate-sequential-merges",
+      "path": "skills/git-simulate-sequential-merges/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Determine which merges in a queue of N branches actually conflict, and preview the fully-merged file content, using merge-tree --write-tree chained through commit-tree - no refs, worktrees, index or working tree touched."
+    },
+    {
       "name": "git-worktree-convention",
       "path": "skills/git-worktree-convention/SKILL.md",
       "hosts": [
@@ -203,6 +248,15 @@
         "codex"
       ],
       "summary": "Keep every repo on its default branch with branch work in a sibling <repo>.worktrees/ dir; detect drift, ask before reorganizing, and recover from a repo on a branch, an ad-hoc worktree path, or a worktree nested inside the repo."
+    },
+    {
+      "name": "github-oidc-immutable-subject-claim",
+      "path": "skills/github-oidc-immutable-subject-claim/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Diagnose a GitHub Actions job that cannot assume an AWS role by OIDC (`Not authorized to perform sts:AssumeRoleWithWebIdentity`) while every sibling repo in the same org assumes the same role fine -- GitHub now issues an immutable `sub` (`repo:ORG@ORG_ID/REPO@REPO_ID`) that a `repo:ORG/*` trust policy cannot match, per repo and depending on when it was created"
     },
     {
       "name": "istio-multicluster-endpointless-mesh-service",
@@ -214,6 +268,15 @@
       "summary": "Istio multi-cluster endpoint-less away-Service: use a decoy selector (not an omitted one) so an EndpointSlice anchor exists for the mesh to merge remote endpoints into; for cross-region write-routing / home-away Service topologies."
     },
     {
+      "name": "litellm-custom-provider-dispatch-order",
+      "path": "skills/litellm-custom-provider-dispatch-order/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "A LiteLLM CustomLLM provider that is registered correctly and still never runs: litellm.completion() dispatches through an if/elif chain in which seven branches match on the BARE MODEL NAME (open_ai_chat_completion_models and six more) before the custom-provider branch, so a custom row reusing a real upstream model id is captured earlier and silently billed to that vendor's API key. Covers the collision check, the namespaced-model fix, why custom_llm_setup() is a second required call that Router needs at construction time, and the assertion that proves the handler actually ran."
+    },
+    {
       "name": "macos-sparkle-update-quarantine-relaunch",
       "path": "skills/macos-sparkle-update-quarantine-relaunch/SKILL.md",
       "hosts": [
@@ -221,6 +284,15 @@
         "codex"
       ],
       "summary": "Fix macOS Sparkle updater error 4005 / 'Failed to create installation cache directory' that persists after stripping quarantine: relaunch the un-quarantined bundle."
+    },
+    {
+      "name": "metrics-zero-provenance-audit",
+      "path": "skills/metrics-zero-provenance-audit/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Audit a multi-source metrics client before believing its zeros."
     },
     {
       "name": "multi-phase-feature-pr-worktrees",
@@ -304,6 +376,15 @@
       "summary": "Handle credentials during a coding-agent session without writing them into the transcript, tool-output cache, permission allowlist or logs. Fingerprint comparison, ask-the-service identification, and env-to-file transfer that never passes through the model."
     },
     {
+      "name": "secretsmanager-prove-no-consumer-before-destroy",
+      "path": "skills/secretsmanager-prove-no-consumer-before-destroy/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Prove nothing consumes a Secrets Manager secret before a terraform destroy: per-resource CloudTrail lookup + GetSecretValue-vs-metadata classification, minus your own terraform refresh -- because a populated LastAccessedDate is NOT evidence of use (a secret with zero GetSecretValue still reports one)"
+    },
+    {
       "name": "slack-app-token-rotation",
       "path": "skills/slack-app-token-rotation/SKILL.md",
       "hosts": [
@@ -326,6 +407,24 @@
       "summary": "Drive the Slack web API as yourself via a live browser session (xoxc token + httpOnly d cookie) when you cannot install a Slack app; ships a runnable Python client that self-labels agent posts by default."
     },
     {
+      "name": "spa-request-capture-and-block",
+      "path": "skills/spa-request-capture-and-block/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Capture the exact outbound request body a single-page app sends and block it before it leaves the browser: patch window.fetch AND XMLHttpRequest together (the XHR half is the one usually missed, so a fetch-only wrapper lets the request through), read the parsed payload off window, and disarm with a reload — including why a hash-route change does not remove the patch. For actions whose side effect costs credits or creates an irreversible record."
+    },
+    {
+      "name": "spring-profile-config-overlay-dedupe",
+      "path": "skills/spring-profile-config-overlay-dedupe/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Strip an application-<profile>.yml down to real overrides and prove the effective config is unchanged, by flattening base+profile before and after and diffing the key sets. Covers confirming profiles are layered at all, and when keeping a duplicate is correct."
+    },
+    {
       "name": "terraform-ecs-capacity-provider-staged-teardown",
       "path": "skills/terraform-ecs-capacity-provider-staged-teardown/SKILL.md",
       "hosts": [
@@ -342,51 +441,6 @@
         "codex"
       ],
       "summary": "Prove a terraform change really was applied to an env: census versioned S3 tfstate objects (serial + resource-type counts) + cross-check CloudTrail; separates a real apply from a reverted one, identifies which variant of a stacked change ran, and tells untracked orphans from failed destroys"
-    },
-    {
-      "name": "wordpress-com-publish",
-      "path": "skills/wordpress-com-publish/SKILL.md",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "summary": "Acquire a WordPress.com OAuth2 token (authorization-code flow) and publish/update posts via public-api.wordpress.com."
-    },
-    {
-      "name": "work-on-pr",
-      "path": "skills/work-on-pr/SKILL.md",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "summary": "Author-side PR iteration loop."
-    },
-    {
-      "name": "cmux-session-restore-forensics",
-      "path": "skills/cmux-session-restore-forensics/SKILL.md",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "summary": "Diagnose what cmux actually restored after a relaunch and recover panes it silently dropped."
-    },
-    {
-      "name": "spring-profile-config-overlay-dedupe",
-      "path": "skills/spring-profile-config-overlay-dedupe/SKILL.md",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "summary": "Strip an application-<profile>.yml down to real overrides and prove the effective config is unchanged, by flattening base+profile before and after and diffing the key sets. Covers confirming profiles are layered at all, and when keeping a duplicate is correct."
-    },
-    {
-      "name": "spa-request-capture-and-block",
-      "path": "skills/spa-request-capture-and-block/SKILL.md",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "summary": "Capture the exact outbound request body a single-page app sends and block it before it leaves the browser: patch window.fetch AND XMLHttpRequest together (the XHR half is the one usually missed, so a fetch-only wrapper lets the request through), read the parsed payload off window, and disarm with a reload \u2014 including why a hash-route change does not remove the patch. For actions whose side effect costs credits or creates an irreversible record."
     },
     {
       "name": "us-federal-open-data-claim-verification",
@@ -407,67 +461,22 @@
       "summary": "Retrieve exact original text of Truth Social / X posts (incl. deleted ones) for fact-checking: api.fxtwitter.com JSON, trumpstruth.org archive with its query= param and deletion flags, date-bounded negatives, HTTP 451 syndication fallback."
     },
     {
-      "name": "chrome-localhost-mic-autoblock",
-      "path": "skills/chrome-localhost-mic-autoblock/SKILL.md",
+      "name": "wordpress-com-publish",
+      "path": "skills/wordpress-com-publish/SKILL.md",
       "hosts": [
         "claude",
         "codex"
       ],
-      "summary": "Fix a web app's mic failing in Chrome with a not-allowed error on localhost even though the OS granted Chrome mic access: Chrome auto-blocks the mic per-site and the OS Privacy toggle / Chrome restart never clears it; set the site to Allow."
+      "summary": "Acquire a WordPress.com OAuth2 token (authorization-code flow) and publish/update posts via public-api.wordpress.com."
     },
     {
-      "name": "metrics-zero-provenance-audit",
-      "path": "skills/metrics-zero-provenance-audit/SKILL.md",
+      "name": "work-on-pr",
+      "path": "skills/work-on-pr/SKILL.md",
       "hosts": [
         "claude",
         "codex"
       ],
-      "summary": "Audit a multi-source metrics client before believing its zeros."
-    },
-    {
-      "name": "archive-today-fetcher-hierarchy",
-      "path": "skills/archive-today-fetcher-hierarchy/SKILL.md",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "summary": "Reach archive.today when automation is refused, cite it reproducibly, and send a truthful user agent."
-    },
-    {
-      "name": "agent-host-skill-loading",
-      "path": "skills/agent-host-skill-loading/SKILL.md",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "summary": "Make a non-Claude, non-Codex agent host load skillz-format SKILL.md files: two-stage disclosure (menu line in the system prompt, body behind a load_skill tool) with the measured cost of each alternative, block-scalar-safe frontmatter parsing, ordered-path precedence with shadow reporting, refresh without restart and its turn-boundary gotcha, and why the reload belongs behind a privilege gate."
-    },
-    {
-      "name": "litellm-custom-provider-dispatch-order",
-      "path": "skills/litellm-custom-provider-dispatch-order/SKILL.md",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "summary": "A LiteLLM CustomLLM provider that is registered correctly and still never runs: litellm.completion() dispatches through an if/elif chain in which seven branches match on the BARE MODEL NAME (open_ai_chat_completion_models and six more) before the custom-provider branch, so a custom row reusing a real upstream model id is captured earlier and silently billed to that vendor's API key. Covers the collision check, the namespaced-model fix, why custom_llm_setup() is a second required call that Router needs at construction time, and the assertion that proves the handler actually ran."
-    },
-    {
-      "name": "secretsmanager-prove-no-consumer-before-destroy",
-      "path": "skills/secretsmanager-prove-no-consumer-before-destroy/SKILL.md",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "summary": "Prove nothing consumes a Secrets Manager secret before a terraform destroy: per-resource CloudTrail lookup + GetSecretValue-vs-metadata classification, minus your own terraform refresh -- because a populated LastAccessedDate is NOT evidence of use (a secret with zero GetSecretValue still reports one)"
-    },
-    {
-      "name": "github-oidc-immutable-subject-claim",
-      "path": "skills/github-oidc-immutable-subject-claim/SKILL.md",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "summary": "Diagnose a GitHub Actions job that cannot assume an AWS role by OIDC (`Not authorized to perform sts:AssumeRoleWithWebIdentity`) while every sibling repo in the same org assumes the same role fine -- GitHub now issues an immutable `sub` (`repo:ORG@ORG_ID/REPO@REPO_ID`) that a `repo:ORG/*` trust policy cannot match, per repo and depending on when it was created"
+      "summary": "Author-side PR iteration loop."
     }
   ],
   "collections": [
@@ -493,56 +502,57 @@
         "codex"
       ],
       "skills": [
-        "work-on-pr",
-        "review-pr-loop",
-        "codex-adversarial-pr-review",
-        "continuous-learning",
-        "cmux-search",
-        "cmux-agent-tabs",
-        "python-ast-static-analyzer-scoping",
-        "wordpress-com-publish",
-        "git-graft-worktree-onto-remote",
-        "multi-phase-feature-pr-worktrees",
-        "gist-to-repo-migration",
-        "neon-vercel-db-identify-and-migrate",
-        "claudeception",
+        "agent-credential-leak-surfaces",
+        "agent-host-skill-loading",
+        "agent-session-credential-audit",
+        "agent-team-orchestration",
+        "archive-today-fetcher-hierarchy",
+        "aws-http-server-on-lambda-web-adapter",
+        "chrome-localhost-mic-autoblock",
         "claude-code-codex-plugin-parity",
         "claude-code-plugin-from-existing-repo",
+        "claude-code-plugin-publish-anthropic-marketplace",
         "claude-code-plugin-python-bootstrap",
+        "claude-code-plugin-release-automation",
         "claude-code-plugin-update-flow",
         "claude-json-mcp-migration-slice",
-        "playwright-mcp-upload-hidden-file-input",
-        "agent-team-orchestration",
-        "slack-xoxc-session-client",
-        "istio-multicluster-endpointless-mesh-service",
-        "macos-sparkle-update-quarantine-relaunch",
-        "pre-open-source-credential-audit",
-        "git-worktree-convention",
-        "openclaw-model-cascade-debugging",
-        "claude-code-plugin-publish-anthropic-marketplace",
+        "claudeception",
+        "cmux-agent-tabs",
         "cmux-autoresume-after-reboot",
-        "terraform-state-version-apply-forensics",
-        "terraform-ecs-capacity-provider-staged-teardown",
-        "gh-pr-merge-delete-branch-closes-dependent-pr",
-        "aws-http-server-on-lambda-web-adapter",
-        "slack-app-token-rotation",
-        "agent-credential-leak-surfaces",
-        "secrets-in-agent-sessions",
-        "prevent-committing-secrets",
-        "agent-session-credential-audit",
-        "claude-code-plugin-release-automation",
+        "cmux-search",
         "cmux-session-restore-forensics",
-        "spring-profile-config-overlay-dedupe",
+        "codex-adversarial-pr-review",
+        "continuous-learning",
+        "gh-pr-merge-delete-branch-closes-dependent-pr",
+        "gist-to-repo-migration",
+        "git-graft-worktree-onto-remote",
+        "git-simulate-sequential-merges",
+        "git-worktree-convention",
+        "github-oidc-immutable-subject-claim",
+        "istio-multicluster-endpointless-mesh-service",
+        "litellm-custom-provider-dispatch-order",
+        "macos-sparkle-update-quarantine-relaunch",
+        "metrics-zero-provenance-audit",
+        "multi-phase-feature-pr-worktrees",
+        "neon-vercel-db-identify-and-migrate",
+        "openclaw-model-cascade-debugging",
+        "playwright-mcp-upload-hidden-file-input",
+        "pre-open-source-credential-audit",
+        "prevent-committing-secrets",
+        "python-ast-static-analyzer-scoping",
+        "review-pr-loop",
+        "secrets-in-agent-sessions",
+        "secretsmanager-prove-no-consumer-before-destroy",
+        "slack-app-token-rotation",
+        "slack-xoxc-session-client",
         "spa-request-capture-and-block",
+        "spring-profile-config-overlay-dedupe",
+        "terraform-ecs-capacity-provider-staged-teardown",
+        "terraform-state-version-apply-forensics",
         "us-federal-open-data-claim-verification",
         "verbatim-social-post-retrieval",
-        "chrome-localhost-mic-autoblock",
-        "metrics-zero-provenance-audit",
-        "archive-today-fetcher-hierarchy",
-        "agent-host-skill-loading",
-        "litellm-custom-provider-dispatch-order",
-        "secretsmanager-prove-no-consumer-before-destroy",
-        "github-oidc-immutable-subject-claim"
+        "wordpress-com-publish",
+        "work-on-pr"
       ],
       "summary": "Full repo bundle: every skill in one plugin."
     },
@@ -1037,7 +1047,7 @@
       "skills": [
         "spa-request-capture-and-block"
       ],
-      "summary": "Capture the exact outbound request body a single-page app sends and block it before it leaves the browser: patch window.fetch AND XMLHttpRequest together (the XHR half is the one usually missed, so a fetch-only wrapper lets the request through), read the parsed payload off window, and disarm with a reload \u2014 including why a hash-route change does not remove the patch. For actions whose side effect costs credits or creates an irreversible record."
+      "summary": "Capture the exact outbound request body a single-page app sends and block it before it leaves the browser: patch window.fetch AND XMLHttpRequest together (the XHR half is the one usually missed, so a fetch-only wrapper lets the request through), read the parsed payload off window, and disarm with a reload — including why a hash-route change does not remove the patch. For actions whose side effect costs credits or creates an irreversible record."
     },
     {
       "name": "us-federal-open-data-claim-verification",
