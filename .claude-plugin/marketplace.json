@@ -320,6 +320,11 @@
       "name": "agent-traffic-log",
       "source": "./plugins/agent-traffic-log/",
       "description": "Single-skill plugin: agent-traffic-log."
+    },
+    {
+      "name": "subagent-no-report-channel",
+      "source": "./plugins/subagent-no-report-channel/",
+      "description": "Single-skill plugin: subagent-no-report-channel."
     }
   ]
 }
