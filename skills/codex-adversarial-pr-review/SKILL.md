@@ -7,14 +7,17 @@ description: |
   land ON a pull request where the author can act on it, (2) you are the reviewer
   role in an agent-team loop (skillz#87) and need the review to close the loop
   with the developer agent, (3) you want a deterministic, scriptable reviewer
-  rather than an LLM hand-posting comments. Encodes the codex-companion `--json`
+  rather than an LLM hand-posting comments, (4) you need to sweep a whole PR
+  backlog and post one review per PR. Encodes the codex-companion `--json`
   call, the finding->diff-line mapping, and the GitHub gotchas: inline comments
   are rejected (422) on lines not in the PR diff (out-of-diff findings are rolled
   up into the body), self-review forbids APPROVE/REQUEST_CHANGES (default
-  COMMENT), and low-confidence findings are demoted to a collapsed section.
+  COMMENT), low-confidence findings are demoted to a collapsed section, and a
+  `--dry-run` payload is byte-for-byte the POST body so it can be saved,
+  edited, and posted later without a second Codex pass.
 author: Claude Code
-version: 1.0.0
-date: 2026-06-23
+version: 1.1.0
+date: 2026-08-24
 source: https://github.com/voitta-ai/skillz
 source_file: skills/codex-adversarial-pr-review/SKILL.md
 ---
@@ -79,6 +82,71 @@ node skills/codex-adversarial-pr-review/scripts/codex-adversarial-pr-review.mjs 
 
 Always `--dry-run` first to inspect what would be posted.
 
+**The `--dry-run` output is the POST body, verbatim.** It is the exact
+`{commit_id, event, body, comments}` object the script would send. So the
+inspect-then-post loop is *save the payload, then post the payload* — never
+re-run the script without `--dry-run`, which spends a second Codex pass and can
+come back with different findings than the ones you approved:
+
+```bash
+node .../codex-adversarial-pr-review.mjs --pr 123 --dry-run > pr-123.json
+# ... read it, optionally edit it ...
+gh api repos/OWNER/REPO/pulls/123/reviews --method POST --input pr-123.json
+```
+
+Editing before posting is plain `jq` — this is how you drop a finding you
+verified is wrong while keeping the rest of the review:
+
+```bash
+jq '.comments |= map(select((.body | test("return_data")) | not))' \
+  pr-123.json > tmp && mv tmp pr-123.json
+```
+
+## Batch mode
+
+`scripts/batch-review.sh` sweeps a whole PR backlog and `scripts/post-batch.sh`
+posts the results:
+
+```bash
+# 1. review everything (dry-run; writes OUT/payloads/pr-N.json)
+scripts/batch-review.sh --repo owner/name --repo-dir ~/src/name \
+  --out /tmp/review --author some-login --workers 3 --min-confidence 0.75
+
+# 2. see what would go out
+scripts/post-batch.sh --repo owner/name --out /tmp/review --dry-run
+
+# 3. post it
+scripts/post-batch.sh --repo owner/name --out /tmp/review
+```
+
+Budget roughly **90s per PR**, divided by `--workers`.
+
+How it stays out of its own way:
+
+- **Detached worktrees, one per worker.** Each worker checks out the PR head
+  *OID* detached, so it never fights "branch is already checked out", creates no
+  local branches, and leaves the operator's own checkout alone.
+- **One fetch up front** of every head ref, so per-PR checkouts are local.
+- **Resumable.** A PR with a non-empty payload is skipped, so a killed run is
+  fixed by re-running. An interrupted review leaves a *zero-byte* payload, which
+  is why the emptiness check is `-s` / `-size +0` and not mere existence.
+- **Round-robin chunking**, not a work queue — the PRs are known up front and
+  bash job control is the whole scheduler.
+
+### Judge the findings before you post them
+
+Adversarial framing produces confident, well-written, wrong findings, and
+confidence scores do not separate them. In one 41-PR sweep Codex asserted
+*twice*, at 0.92, severity `critical`, that a quoted boolean
+(`return_data = "true"`) "will fail Terraform plan/apply" — false, HCL coerces
+it, and that exact form was already shipping on `main`. A single `grep` of the
+tree refuted it. Type-strictness claims about dynamically-coerced config
+languages are a recurring false-positive shape.
+
+Spot-check at least every `critical` finding against the existing tree before
+posting; drop the bad ones with the `jq` filter above. Posting a wrong critical
+costs the author more time than the review saves.
+
 ## Why it works the way it does (the gotchas)
 
 1. **Out-of-diff findings.** GitHub returns **422** for an inline comment on a
@@ -102,9 +170,15 @@ Always `--dry-run` first to inspect what would be posted.
    sha=<headOid> -->` marker so prior runs are identifiable; dismissing/minimizing
    old reviews is intentionally out of scope for v1.
 
+6. **A saved payload does not expire, but its anchor does.** The payload pins
+   `commit_id` to the head SHA at review time. If the author pushes before you
+   post, GitHub rejects the stale commit — re-review that PR rather than forcing
+   the old payload through.
+
 ## Requirements
 
-- `node`, `git`, and an authenticated `gh`.
+- `node`, `git`, `jq`, and an authenticated `gh`. (`gh` has no `--no-pager`
+  flag; that convention is git-only.)
 - The OpenAI Codex CLI plugin installed (provides the companion runtime), and
   `codex` logged in (`/codex:setup`).
 
