@@ -498,6 +498,15 @@
         "codex"
       ],
       "summary": "An append-only JSONL event log of agent-to-agent traffic plus a live pane over it, giving a fleet an org-wide view instead of N private conversations. No daemon and no lock: concurrent appends are safe because a single write of under PIPE_BUF bytes to an O_APPEND descriptor cannot interleave, verified at 24 concurrent writers producing 960 lines with zero torn. Ships scripts/xs with log, tail, recent, status (who is waiting on whom, derived from events rather than tracked), and prune. Includes the acceptance test that only a real team run can satisfy."
+    },
+    {
+      "name": "cmux-session-self-identity",
+      "path": "skills/cmux-session-self-identity/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Determine which cmux workspace, tab and surface a session is actually running in, and map other live sessions to theirs. Never answer from CMUX_* env vars: the tab and workspace variables can carry the same id (so tab identity is not in the environment at all), and on a resumed session they are a stale launch-time snapshot that can name a workspace the session has left. Uses the bundled CLI -- identify for the caller's own refs (read caller, not focused), tree --all --id-format both to resolve refs to names, top --all --processes to map pids to surfaces. Matters because a session that cannot name its own tab cannot tell a human which tab to address."
     }
   ],
   "collections": [
@@ -588,7 +597,8 @@
         "secretsmanager-prove-no-consumer-before-destroy",
         "claude-code-cross-session-messaging",
         "cmux-cross-session-visibility",
-        "agent-traffic-log"
+        "agent-traffic-log",
+        "cmux-session-self-identity"
       ],
       "summary": "Full repo bundle: every skill in one plugin."
     },
@@ -1192,6 +1202,19 @@
         "agent-traffic-log"
       ],
       "summary": "Single-skill plugin: agent-traffic-log."
+    },
+    {
+      "name": "cmux-session-self-identity",
+      "claude_manifest": "plugins/cmux-session-self-identity/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/cmux-session-self-identity/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "cmux-session-self-identity"
+      ],
+      "summary": "Single-skill plugin: cmux-session-self-identity."
     }
   ],
   "defaults": {

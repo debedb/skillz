@@ -330,6 +330,11 @@
       "name": "agent-traffic-log",
       "source": "./plugins/agent-traffic-log/",
       "description": "Single-skill plugin: agent-traffic-log."
+    },
+    {
+      "name": "cmux-session-self-identity",
+      "source": "./plugins/cmux-session-self-identity/",
+      "description": "Single-skill plugin: cmux-session-self-identity."
     }
   ]
 }
