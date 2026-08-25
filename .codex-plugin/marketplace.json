@@ -7,6 +7,11 @@
   "description": "Skillz marketplace (Codex): full bundle plus per-skill and grouped plugin entries.",
   "plugins": [
     {
+      "name": "skillz",
+      "source": "./plugins/skillz/",
+      "description": "Full bundle: every skill in the catalog (see catalog.json)."
+    },
+    {
       "name": "agent-credential-leak-surfaces",
       "source": "./plugins/agent-credential-leak-surfaces/",
       "description": "Find and clean the six local surfaces where a coding agent accumulates copies of your secrets (git remote URLs, memory stores, file-history snapshots, tool config literals, permission allowlists, tool-output caches). Covers why prefix-grep gives false confidence and why keyword-adjacency redaction loses to prose."
@@ -17,19 +22,9 @@
       "description": "Run a team of agents over a repo's open issues: architect plans the parallel set, per-issue squads (dev + adversarial reviewer + SDET + productivity engineer), each individually watchable."
     },
     {
-      "name": "claude-code-claudemd-symlink-write-refused",
-      "source": "./plugins/claude-code-claudemd-symlink-write-refused/",
-      "description": "Fix Edit/Write 'Refusing to write through symlink' on ~/.claude/CLAUDE.md by resolving the symlink to its real target path."
-    },
-    {
       "name": "claude-code-codex-plugin-parity",
       "source": "./plugins/claude-code-codex-plugin-parity/",
       "description": "Port a Claude Code plugin to the Codex CLI (or back); where the two plugin systems match vs diverge, and the shared hooks.json caveats."
-    },
-    {
-      "name": "claude-code-piebald-lsp-binary-on-path",
-      "source": "./plugins/claude-code-piebald-lsp-binary-on-path/",
-      "description": "Piebald LSP plugins surface the LSP tool but the language-server binary isn't on PATH; install and expose the server binary."
     },
     {
       "name": "claude-code-plugin-from-existing-repo",
@@ -50,11 +45,6 @@
       "name": "claude-code-plugin-release-automation",
       "source": "./plugins/claude-code-plugin-release-automation/",
       "description": "Tag and publish release notes automatically from a plugin repo's manifest version, with CI enforcing the bump."
-    },
-    {
-      "name": "claude-code-static-allow-bypasses-hook",
-      "source": "./plugins/claude-code-static-allow-bypasses-hook/",
-      "description": "Why a Claude Code PreToolUse hook never fires for some commands: static permissions.allow Bash globs short-circuit it."
     },
     {
       "name": "claude-json-mcp-migration-slice",
@@ -87,44 +77,9 @@
       "description": "Codex-only: continuous-learning skill (no hooks). For the hook-driven bundle, install codex-continuous-learning."
     },
     {
-      "name": "emacs-batch-package-verify-pitfalls",
-      "source": "./plugins/emacs-batch-package-verify-pitfalls/",
-      "description": "Avoid false-negative failures when verifying an Emacs package install with emacs --batch (no ELPA auto-activation on load-path; use-package deferred loading skips :config)."
-    },
-    {
-      "name": "gh-api-f-vs-F-body-file",
-      "source": "./plugins/gh-api-f-vs-F-body-file/",
-      "description": "gh api -F (uppercase) reads @file into the field; -f sends the value as a literal string."
-    },
-    {
-      "name": "gh-api-jq-no-arg",
-      "source": "./plugins/gh-api-jq-no-arg/",
-      "description": "gh api --jq needs its filter as the argument; a misplaced/empty --jq silently drops the filter."
-    },
-    {
-      "name": "gh-fork-issues-disabled",
-      "source": "./plugins/gh-fork-issues-disabled/",
-      "description": "gh issue create fails on a fork because GitHub disables the Issues tab on forks by default."
-    },
-    {
-      "name": "gh-git-heredoc-body-file",
-      "source": "./plugins/gh-git-heredoc-body-file/",
-      "description": "Body-file pattern: stop gh CLI and git mangling multi-line bodies with backticks, code blocks, or $(...)."
-    },
-    {
-      "name": "gh-pr-graphql-401-rest-fallback",
-      "source": "./plugins/gh-pr-graphql-401-rest-fallback/",
-      "description": "When gh PR GraphQL calls return 401, fall back to the REST PR endpoints."
-    },
-    {
       "name": "gh-pr-merge-delete-branch-closes-dependent-pr",
       "source": "./plugins/gh-pr-merge-delete-branch-closes-dependent-pr/",
       "description": "Deleting the branch on gh pr merge can auto-close a dependent PR stacked on it."
-    },
-    {
-      "name": "gh-workflow-run-matching",
-      "source": "./plugins/gh-workflow-run-matching/",
-      "description": "Match a gh workflow run to its trigger when multiple runs share one workflow name."
     },
     {
       "name": "gist-to-repo-migration",
@@ -132,44 +87,14 @@
       "description": "Migrate a gist's full revision history into a real git repo, preserving commits."
     },
     {
-      "name": "git-add-u-rename-pitfall",
-      "source": "./plugins/git-add-u-rename-pitfall/",
-      "description": "git add -u can miss a rename, leaving the old path staged as deleted; stage the new path explicitly."
-    },
-    {
-      "name": "git-branch-cleanup-script-races",
-      "source": "./plugins/git-branch-cleanup-script-races/",
-      "description": "Branch-cleanup scripts race against concurrent ref updates; snapshot refs before deleting."
-    },
-    {
       "name": "git-graft-worktree-onto-remote",
       "source": "./plugins/git-graft-worktree-onto-remote/",
       "description": "Graft a local worktree's commits onto a remote branch without re-cloning."
     },
     {
-      "name": "github-api-list-endpoint-staleness-fresh-pr",
-      "source": "./plugins/github-api-list-endpoint-staleness-fresh-pr/",
-      "description": "GitHub list endpoints serve stale empty results on a fresh PR; use the timeline / single-resource fetch."
-    },
-    {
-      "name": "github-closing-keywords-default-branch-only",
-      "source": "./plugins/github-closing-keywords-default-branch-only/",
-      "description": "GitHub closing keywords (Closes #N) only auto-close when the PR merges into the default branch."
-    },
-    {
-      "name": "github-private-repo-readme-image-rendering",
-      "source": "./plugins/github-private-repo-readme-image-rendering/",
-      "description": "Images in a private-repo README need authenticated or relative paths to render."
-    },
-    {
       "name": "istio-multicluster-endpointless-mesh-service",
       "source": "./plugins/istio-multicluster-endpointless-mesh-service/",
       "description": "Istio multi-cluster endpoint-less away-Service: use a decoy selector (not an omitted one) so an EndpointSlice anchor exists for the mesh to merge remote endpoints into; for cross-region write-routing / home-away Service topologies."
-    },
-    {
-      "name": "macos-bash-3.2-compat",
-      "source": "./plugins/macos-bash-3.2-compat/",
-      "description": "Fix bash scripts that fail on macOS's stock bash 3.2 (declare -A, mapfile, and other bash-4-only constructs)."
     },
     {
       "name": "multi-phase-feature-pr-worktrees",
@@ -180,6 +105,11 @@
       "name": "neon-vercel-db-identify-and-migrate",
       "source": "./plugins/neon-vercel-db-identify-and-migrate/",
       "description": "Identify which Neon project backs a Vercel app and migrate/split it; pg_dump>=server; safe non-destructive cutover."
+    },
+    {
+      "name": "openclaw-model-cascade-debugging",
+      "source": "./plugins/openclaw-model-cascade-debugging/",
+      "description": "Single-skill plugin: openclaw-model-cascade-debugging."
     },
     {
       "name": "playwright-mcp-upload-hidden-file-input",
@@ -202,19 +132,9 @@
       "description": "Block a credential at commit time with a gitleaks pre-commit hook, and cover new repos automatically via init.templateDir. The six paths that skip the hook, where the default ruleset is blind, why a staged-diff scan is not a history scan, and GitHub push protection plus CI as the halves that cannot be bypassed locally."
     },
     {
-      "name": "agent-session-credential-audit",
-      "source": "./plugins/agent-session-credential-audit/",
-      "description": "Triage, rotate and scrub credentials that leaked into an agent session transcript. The surfaces a naive scan misses, the false-positive taxonomy, the key-id-vs-secret severity test, non-destructive liveness probes validated with a known-bad control, how to verify a rotation actually rotated, and a kill-list scrub that cannot erase a live secret."
-    },
-    {
       "name": "python-ast-static-analyzer-scoping",
       "source": "./plugins/python-ast-static-analyzer-scoping/",
       "description": "Build a Python ast analyzer: import-alias resolution plus module-load vs deferred execution scoping."
-    },
-    {
-      "name": "python-symtable-no-col-offset-pairing",
-      "source": "./plugins/python-symtable-no-col-offset-pairing/",
-      "description": "Pair Python symtable scope entries with AST nodes when symtable exposes no col_offset, via (lineno, name) grouping."
     },
     {
       "name": "review-pr-loop",
@@ -222,19 +142,9 @@
       "description": "Reviewer-side PR iteration loop only."
     },
     {
-      "name": "s3-presigned-upload-fails-nonexistent-bucket",
-      "source": "./plugins/s3-presigned-upload-fails-nonexistent-bucket/",
-      "description": "Presigned S3 upload fails because the bucket is wrong/missing; HeadBucket 404-vs-403; CloudFront origin reveals real bucket."
-    },
-    {
       "name": "secrets-in-agent-sessions",
       "source": "./plugins/secrets-in-agent-sessions/",
       "description": "Handle credentials during a coding-agent session without writing them into the transcript, tool-output cache, permission allowlist or logs. Fingerprint comparison, ask-the-service identification, and env-to-file transfer that never passes through the model."
-    },
-    {
-      "name": "skillz",
-      "source": "./plugins/skillz/",
-      "description": "Full bundle: every skill in the catalog (see catalog.json)."
     },
     {
       "name": "slack-app-token-rotation",
@@ -257,19 +167,24 @@
       "description": "Single-skill plugin: terraform-state-version-apply-forensics."
     },
     {
-      "name": "vercel-token-deploy-branch-domains",
-      "source": "./plugins/vercel-token-deploy-branch-domains/",
-      "description": "Token-only per-branch Vercel deploys to fixed custom domains; gitBranch domain pin; preview custom-domain SSO 401."
-    },
-    {
       "name": "wordpress-com-publish",
       "source": "./plugins/wordpress-com-publish/",
       "description": "Acquire a WordPress.com OAuth2 token (authorization-code flow) and publish/update posts via public-api.wordpress.com."
     },
     {
+      "name": "git-worktree-convention",
+      "source": "./plugins/git-worktree-convention/",
+      "description": "Single-skill plugin: git-worktree-convention."
+    },
+    {
       "name": "work-on-pr",
       "source": "./plugins/work-on-pr/",
       "description": "Author-side PR iteration loop only."
+    },
+    {
+      "name": "agent-session-credential-audit",
+      "source": "./plugins/agent-session-credential-audit/",
+      "description": "Triage, rotate and scrub credentials that leaked into an agent session transcript. The surfaces a naive scan misses, the false-positive taxonomy, the key-id-vs-secret severity test, non-destructive liveness probes validated with a known-bad control, how to verify a rotation actually rotated, and a kill-list scrub that cannot erase a live secret."
     },
     {
       "name": "cmux-session-restore-forensics",
@@ -317,9 +232,129 @@
       "description": "Single-skill plugin: github-oidc-immutable-subject-claim."
     },
     {
-      "name": "llm-vendor-waterfall",
-      "source": "./plugins/llm-vendor-waterfall/",
-      "description": "Serve one LLM call from an ordered list of vendors so a rate limit, a dead key, or an out-of-credits account fails over instead of failing the request. Covers the ordered-config to LiteLLM Router mapping, which Router knobs earn their keep (cooldown_time, allowed_fails, context_window_fallbacks, per-deployment budgets) and which to leave alone, the invisible dead fallback that reads as random flakiness, what must not be waterfalled, and how to prove failover actually happens."
+      "name": "parallel-agent-session-collisions",
+      "source": "./plugins/parallel-agent-session-collisions/",
+      "description": "Single-skill plugin: parallel-agent-session-collisions."
+    },
+    {
+      "name": "claude-code-cross-session-messaging",
+      "source": "./plugins/claude-code-cross-session-messaging/",
+      "description": "Single-skill plugin: claude-code-cross-session-messaging."
+    },
+    {
+      "name": "cmux-cross-session-visibility",
+      "source": "./plugins/cmux-cross-session-visibility/",
+      "description": "Single-skill plugin: cmux-cross-session-visibility."
+    },
+    {
+      "name": "agent-traffic-log",
+      "source": "./plugins/agent-traffic-log/",
+      "description": "Single-skill plugin: agent-traffic-log."
+    },
+    {
+      "name": "subagent-no-report-channel",
+      "source": "./plugins/subagent-no-report-channel/",
+      "description": "Single-skill plugin: subagent-no-report-channel."
+    },
+    {
+      "name": "cmux-session-self-identity",
+      "source": "./plugins/cmux-session-self-identity/",
+      "description": "Single-skill plugin: cmux-session-self-identity."
+    },
+    {
+      "name": "claude-code-claudemd-symlink-write-refused",
+      "source": "./plugins/claude-code-claudemd-symlink-write-refused/",
+      "description": "Fix Edit/Write 'Refusing to write through symlink' on ~/.claude/CLAUDE.md by resolving the symlink to its real target path."
+    },
+    {
+      "name": "claude-code-piebald-lsp-binary-on-path",
+      "source": "./plugins/claude-code-piebald-lsp-binary-on-path/",
+      "description": "Piebald LSP plugins surface the LSP tool but the language-server binary isn't on PATH; install and expose the server binary."
+    },
+    {
+      "name": "claude-code-static-allow-bypasses-hook",
+      "source": "./plugins/claude-code-static-allow-bypasses-hook/",
+      "description": "Why a Claude Code PreToolUse hook never fires for some commands: static permissions.allow Bash globs short-circuit it."
+    },
+    {
+      "name": "emacs-batch-package-verify-pitfalls",
+      "source": "./plugins/emacs-batch-package-verify-pitfalls/",
+      "description": "Avoid false-negative failures when verifying an Emacs package install with emacs --batch (no ELPA auto-activation on load-path; use-package deferred loading skips :config)."
+    },
+    {
+      "name": "gh-api-f-vs-F-body-file",
+      "source": "./plugins/gh-api-f-vs-F-body-file/",
+      "description": "gh api -F (uppercase) reads @file into the field; -f sends the value as a literal string."
+    },
+    {
+      "name": "gh-api-jq-no-arg",
+      "source": "./plugins/gh-api-jq-no-arg/",
+      "description": "gh api --jq needs its filter as the argument; a misplaced/empty --jq silently drops the filter."
+    },
+    {
+      "name": "gh-fork-issues-disabled",
+      "source": "./plugins/gh-fork-issues-disabled/",
+      "description": "gh issue create fails on a fork because GitHub disables the Issues tab on forks by default."
+    },
+    {
+      "name": "gh-git-heredoc-body-file",
+      "source": "./plugins/gh-git-heredoc-body-file/",
+      "description": "Body-file pattern: stop gh CLI and git mangling multi-line bodies with backticks, code blocks, or $(...)."
+    },
+    {
+      "name": "gh-pr-graphql-401-rest-fallback",
+      "source": "./plugins/gh-pr-graphql-401-rest-fallback/",
+      "description": "When gh PR GraphQL calls return 401, fall back to the REST PR endpoints."
+    },
+    {
+      "name": "gh-workflow-run-matching",
+      "source": "./plugins/gh-workflow-run-matching/",
+      "description": "Match a gh workflow run to its trigger when multiple runs share one workflow name."
+    },
+    {
+      "name": "git-add-u-rename-pitfall",
+      "source": "./plugins/git-add-u-rename-pitfall/",
+      "description": "git add -u can miss a rename, leaving the old path staged as deleted; stage the new path explicitly."
+    },
+    {
+      "name": "git-branch-cleanup-script-races",
+      "source": "./plugins/git-branch-cleanup-script-races/",
+      "description": "Branch-cleanup scripts race against concurrent ref updates; snapshot refs before deleting."
+    },
+    {
+      "name": "github-api-list-endpoint-staleness-fresh-pr",
+      "source": "./plugins/github-api-list-endpoint-staleness-fresh-pr/",
+      "description": "GitHub list endpoints serve stale empty results on a fresh PR; use the timeline / single-resource fetch."
+    },
+    {
+      "name": "github-closing-keywords-default-branch-only",
+      "source": "./plugins/github-closing-keywords-default-branch-only/",
+      "description": "GitHub closing keywords (Closes #N) only auto-close when the PR merges into the default branch."
+    },
+    {
+      "name": "github-private-repo-readme-image-rendering",
+      "source": "./plugins/github-private-repo-readme-image-rendering/",
+      "description": "Images in a private-repo README need authenticated or relative paths to render."
+    },
+    {
+      "name": "macos-bash-3.2-compat",
+      "source": "./plugins/macos-bash-3.2-compat/",
+      "description": "Fix bash scripts that fail on macOS's stock bash 3.2 (declare -A, mapfile, and other bash-4-only constructs)."
+    },
+    {
+      "name": "python-symtable-no-col-offset-pairing",
+      "source": "./plugins/python-symtable-no-col-offset-pairing/",
+      "description": "Pair Python symtable scope entries with AST nodes when symtable exposes no col_offset, via (lineno, name) grouping."
+    },
+    {
+      "name": "s3-presigned-upload-fails-nonexistent-bucket",
+      "source": "./plugins/s3-presigned-upload-fails-nonexistent-bucket/",
+      "description": "Presigned S3 upload fails because the bucket is wrong/missing; HeadBucket 404-vs-403; CloudFront origin reveals real bucket."
+    },
+    {
+      "name": "vercel-token-deploy-branch-domains",
+      "source": "./plugins/vercel-token-deploy-branch-domains/",
+      "description": "Token-only per-branch Vercel deploys to fixed custom domains; gitBranch domain pin; preview custom-domain SSO 401."
     }
   ]
 }

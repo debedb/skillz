@@ -117,8 +117,17 @@ environments and older Codex versions.
 | [`secretsmanager-prove-no-consumer-before-destroy` plugin](./plugins/secretsmanager-prove-no-consumer-before-destroy/) | plugin | Claude, Codex | Single-skill plugin: secretsmanager-prove-no-consumer-before-destroy |
 | [github-oidc-immutable-subject-claim](./skills/github-oidc-immutable-subject-claim/SKILL.md) | skill | Claude, Codex | A GitHub Actions job cannot assume an AWS role by OIDC (`Not authorized to perform sts:AssumeRoleWithWebIdentity`) while every sibling repo in the same org assumes the same role fine — GitHub now issues an immutable `sub` (`repo:ORG@ORG_ID/REPO@REPO_ID`) that a `repo:ORG/*` trust policy cannot match, **per repo**, depending on when it was created |
 | [`github-oidc-immutable-subject-claim` plugin](./plugins/github-oidc-immutable-subject-claim/) | plugin | Claude, Codex | Single-skill plugin: github-oidc-immutable-subject-claim |
+<<<<<<< HEAD
 | [llm-vendor-waterfall](./skills/llm-vendor-waterfall/SKILL.md) | skill | Claude, Codex | Serve one LLM call from an ordered list of vendors so a 429, a dead key, or an unfunded account fails over instead of failing the request: the ordered-config to LiteLLM `Router` mapping, which knobs earn their keep (`cooldown_time`, `allowed_fails`, `context_window_fallbacks`, budgets) and which to leave alone, the **invisible dead fallback** that reads as random flakiness, and what must not be waterfalled |
 | [`llm-vendor-waterfall` plugin](./plugins/llm-vendor-waterfall/) | plugin | Claude, Codex | Single-skill plugin: llm-vendor-waterfall |
+=======
+| [parallel-agent-session-collisions](./skills/parallel-agent-session-collisions/SKILL.md) | skill | Claude, Codex | Avoid duplicating, superseding, or clobbering work done by another agent session on the same repos: the three collision shapes, the pre-flight check for each, and how to reconcile |
+| [claude-code-cross-session-messaging](./skills/claude-code-cross-session-messaging/SKILL.md) | skill | Claude, Codex | Message a Claude Code session that is already running via native `ListAgents` + `SendMessage`; idle-subscription instead of polling, and the no-TTY law that wedges headless/in-process transports |
+| [cmux-cross-session-visibility](./skills/cmux-cross-session-visibility/SKILL.md) | skill | Claude, Codex | Make agent-to-agent traffic visible: structured `SendMessage` summary envelope + a cmux sidebar status pill per workspace, and what must clear a stale pill |
+| [subagent-no-report-channel](./skills/subagent-no-report-channel/SKILL.md) | skill | Claude, Codex | Subagents idle with nothing delivered: recover the stranded result from the transcript or the job runtime's state dir, and use `tool_use` without `tool_result` as the real wedge oracle |
+| [cmux-session-self-identity](./skills/cmux-session-self-identity/SKILL.md) | skill | Claude, Codex | Which workspace/tab am I in? `cmux identify` + `tree`, because the env vars conflate tab with workspace and go stale on resume |
+| [agent-traffic-log](./skills/agent-traffic-log/SKILL.md) | skill | Claude, Codex | Append-only JSONL log of agent-to-agent traffic + a live pane; lock-free concurrent appends, and `xs status` derives who is blocked from the events |
+>>>>>>> origin/next
 
 Machine-readable index: [`catalog.json`](./catalog.json). The
 installer and validation script both read from it, so new entries
