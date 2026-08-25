@@ -546,6 +546,15 @@
         "codex"
       ],
       "summary": "Apply terraform to prod from a non-interactive context when the repo's apply.sh wrapper has no `-auto-approve` and blocks on the approval prompt -- use a saved plan file, not `echo yes |`, because a prompt-piped apply approves a plan terraform RECOMPUTES at that moment rather than the one you reviewed"
+    },
+    {
+      "name": "llm-vendor-waterfall",
+      "path": "skills/llm-vendor-waterfall/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Serve one LLM call from an ordered list of vendors so a rate limit, a dead key, or an out-of-credits account fails over instead of failing the request. Covers the ordered-config to LiteLLM Router mapping, which Router knobs earn their keep (cooldown_time, allowed_fails, context_window_fallbacks, per-deployment budgets) and which to leave alone, the invisible dead fallback that reads as random flakiness, what must not be waterfalled, and how to prove failover actually happens."
     }
   ],
   "collections": [
@@ -628,7 +637,8 @@
         "subagent-no-report-channel",
         "cmux-session-self-identity",
         "git-simulate-sequential-merges",
-        "terraform-noninteractive-prod-apply"
+        "terraform-noninteractive-prod-apply",
+        "llm-vendor-waterfall"
       ],
       "summary": "Full repo bundle: every skill in one plugin."
     },
@@ -1297,6 +1307,19 @@
         "terraform-noninteractive-prod-apply"
       ],
       "summary": "Single-skill plugin: terraform-noninteractive-prod-apply."
+    },
+    {
+      "name": "llm-vendor-waterfall",
+      "claude_manifest": "plugins/llm-vendor-waterfall/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/llm-vendor-waterfall/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "llm-vendor-waterfall"
+      ],
+      "summary": "Single-skill plugin: llm-vendor-waterfall."
     }
   ],
   "defaults": {
