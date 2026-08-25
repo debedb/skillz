@@ -537,6 +537,15 @@
         "codex"
       ],
       "summary": "Determine which merges in a queue of N branches actually conflict, and preview the fully-merged file content, using merge-tree --write-tree chained through commit-tree - no refs, worktrees, index or working tree touched."
+    },
+    {
+      "name": "llm-vendor-waterfall",
+      "path": "skills/llm-vendor-waterfall/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Serve one LLM call from an ordered list of vendors so a rate limit, a dead key, or an out-of-credits account fails over instead of failing the request. Covers the ordered-config to LiteLLM Router mapping, which Router knobs earn their keep (cooldown_time, allowed_fails, context_window_fallbacks, per-deployment budgets) and which to leave alone, the invisible dead fallback that reads as random flakiness, what must not be waterfalled, and how to prove failover actually happens."
     }
   ],
   "collections": [
@@ -1275,6 +1284,19 @@
         "cmux-session-self-identity"
       ],
       "summary": "Single-skill plugin: cmux-session-self-identity."
+    },
+    {
+      "name": "llm-vendor-waterfall",
+      "claude_manifest": "plugins/llm-vendor-waterfall/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/llm-vendor-waterfall/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "llm-vendor-waterfall"
+      ],
+      "summary": "Single-skill plugin: llm-vendor-waterfall."
     }
   ],
   "defaults": {
