@@ -357,6 +357,11 @@
       "description": "Token-only per-branch Vercel deploys to fixed custom domains; gitBranch domain pin; preview custom-domain SSO 401."
     },
     {
+      "name": "terraform-noninteractive-prod-apply",
+      "source": "./plugins/terraform-noninteractive-prod-apply/",
+      "description": "Single-skill plugin: terraform-noninteractive-prod-apply."
+    },
+    {
       "name": "llm-vendor-waterfall",
       "source": "./plugins/llm-vendor-waterfall/",
       "description": "Single-skill plugin: llm-vendor-waterfall."
