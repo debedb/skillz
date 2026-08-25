@@ -12,8 +12,8 @@ description: |
   (workspaceId is NOT stable across restarts), and replaying a pane's stored
   resumeBinding through `cmux new-workspace`.
 author: Claude Code
-version: 1.0.0
-date: 2026-07-31
+version: 1.1.0
+date: 2026-08-20
 source: https://github.com/voitta-ai/skillz
 source_file: skills/cmux-session-restore-forensics/SKILL.md
 ---
@@ -153,12 +153,18 @@ all. Replaying those 5 commands brought every one back.
 
 ## Notes
 
-- **Panes spawned by `cmux claude-teams` never get a `resumeBinding`** — neither
-  the launcher pane nor the teammates. They fall in the "unrecoverable" bucket
-  by construction, which is why an agent-teams session characteristically fails
-  to reopen while ordinary agent tabs survive. Do not plan work that assumes a
-  teams session will still be there after a relaunch; treat teams runs as
-  ephemeral and keep durable state in git, issues, or notes.
+- **Teams panes and `resumeBinding`: check, do not assume.** Older cmux gave
+  panes spawned by `cmux claude-teams` no `resumeBinding` at all — neither the
+  launcher nor the teammates — so a teams session was unrecoverable by
+  construction. **That no longer holds as of cmux 0.64.16.** Measured across a
+  real reboot on 2026-08-07: 7/7 panels restored, zero dropped, and the
+  agent-teams launcher pane came back carrying a `resumeBinding` with
+  `source: "agent-hook"`. Teammate panes spawned through the tmux-compat path
+  remain untested — none existed before that reboot. So read the pane's actual
+  binding out of `-previous.json` before writing a teams session off. Restore
+  still recreates the workspace rather than preserving it (gotcha 2 above), so
+  a rescued teams pane returns with a new workspace id and its folder trust
+  reset; keep durable state in git, issues, or notes regardless.
 - Do not diff the two session files by hand. The interesting difference is
   almost never visible at the workspace level; it lives in per-panel bindings.
 - `-previous.json` is overwritten by the *next* relaunch. If a restore looks
