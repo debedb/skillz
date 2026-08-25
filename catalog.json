@@ -472,20 +472,12 @@
       "summary": "Diagnose a GitHub Actions job that cannot assume an AWS role by OIDC (`Not authorized to perform sts:AssumeRoleWithWebIdentity`) while every sibling repo in the same org assumes the same role fine -- GitHub now issues an immutable `sub` (`repo:ORG@ORG_ID/REPO@REPO_ID`) that a `repo:ORG/*` trust policy cannot match, per repo and depending on when it was created"
     },
     {
-<<<<<<< HEAD
-      "name": "terraform-noninteractive-prod-apply",
-      "path": "skills/terraform-noninteractive-prod-apply/SKILL.md",
-=======
       "name": "parallel-agent-session-collisions",
       "path": "skills/parallel-agent-session-collisions/SKILL.md",
->>>>>>> origin/next
       "hosts": [
         "claude",
         "codex"
       ],
-<<<<<<< HEAD
-      "summary": "Apply terraform to prod from a non-interactive context when the repo's apply.sh wrapper has no `-auto-approve` and blocks on the approval prompt -- use a saved plan file, not `echo yes |`, because a prompt-piped apply approves a plan terraform RECOMPUTES at that moment rather than the one you reviewed"
-=======
       "summary": "Avoid duplicating, superseding, or clobbering work done by another agent session on the same repos: the three collision shapes, the pre-flight check for each, and how to reconcile. Also covers the collision that no artifact check can catch -- two sessions both about to do the same work, with nothing pushed for `gh pr list` to find -- detected by enumerating live peer sessions and asking directly, then split into named lanes with an explicit gate and the decision routed through the shared human."
     },
     {
@@ -545,7 +537,6 @@
         "codex"
       ],
       "summary": "Determine which merges in a queue of N branches actually conflict, and preview the fully-merged file content, using merge-tree --write-tree chained through commit-tree - no refs, worktrees, index or working tree touched."
->>>>>>> origin/next
     }
   ],
   "collections": [
@@ -621,17 +612,14 @@
         "litellm-custom-provider-dispatch-order",
         "secretsmanager-prove-no-consumer-before-destroy",
         "github-oidc-immutable-subject-claim",
-<<<<<<< HEAD
-        "terraform-noninteractive-prod-apply"
-=======
         "parallel-agent-session-collisions",
         "claude-code-cross-session-messaging",
         "cmux-cross-session-visibility",
         "agent-traffic-log",
         "subagent-no-report-channel",
         "cmux-session-self-identity",
-        "git-simulate-sequential-merges"
->>>>>>> origin/next
+        "git-simulate-sequential-merges",
+        "terraform-noninteractive-prod-apply"
       ],
       "summary": "Full repo bundle: every skill in one plugin."
     },
@@ -1211,25 +1199,14 @@
       "summary": "Single-skill plugin: github-oidc-immutable-subject-claim."
     },
     {
-<<<<<<< HEAD
-      "name": "terraform-noninteractive-prod-apply",
-      "claude_manifest": "plugins/terraform-noninteractive-prod-apply/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/terraform-noninteractive-prod-apply/.codex-plugin/plugin.json",
-=======
       "name": "parallel-agent-session-collisions",
       "claude_manifest": "plugins/parallel-agent-session-collisions/.claude-plugin/plugin.json",
       "codex_manifest": "plugins/parallel-agent-session-collisions/.codex-plugin/plugin.json",
->>>>>>> origin/next
       "hosts": [
         "claude",
         "codex"
       ],
       "skills": [
-<<<<<<< HEAD
-        "terraform-noninteractive-prod-apply"
-      ],
-      "summary": "Single-skill plugin: terraform-noninteractive-prod-apply."
-=======
         "parallel-agent-session-collisions"
       ],
       "summary": "Single-skill plugin: parallel-agent-session-collisions."
@@ -1298,7 +1275,6 @@
         "cmux-session-self-identity"
       ],
       "summary": "Single-skill plugin: cmux-session-self-identity."
->>>>>>> origin/next
     }
   ],
   "defaults": {
