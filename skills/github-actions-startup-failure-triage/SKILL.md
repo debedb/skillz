@@ -127,6 +127,22 @@ apart, which is the whole diagnosis.
 can be in `major_outage` while the rollup still reads healthy-ish, so fetch
 `summary.json` and look at the component.
 
+### The status page lags recovery — measure, don't wait on it
+
+The API is good evidence that an outage *started*. It is poor evidence that
+one is still going. In the incident this was written from, a retriggered run
+went `completed/success` in under a minute while `summary.json` still reported
+`Actions -> major_outage` with the incident open and `investigating`.
+
+So the two directions are not symmetric:
+
+- **Red status + your runs dying** → believe it, stop debugging your YAML.
+- **Red status alone** → not a reason to keep waiting. Retrigger once and read
+  the run. One close/reopen costs nothing and answers the question that the
+  status page is, at that moment, still guessing at.
+
+A human saying "it's back" is worth exactly one retrigger, whatever the API says.
+
 ## Getting the run to happen again
 
 Once the incident clears, the PR still needs runs. Three options, in order of
