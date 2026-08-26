@@ -165,7 +165,28 @@ costs the author more time than the review saves.
 4. **Noise control.** Adversarial framing is deliberately aggressive; without a
    confidence floor the diff gets spammed. Sub-threshold findings go to a
    collapsed section instead of inline.
-5. **Re-run idempotency.** Re-running on an updated PR posts a fresh review
+5. **The companion's own parse of the model output is flaky, and it fails
+   *quietly*.** Codex intermittently emits its JSON object followed by trailing
+   prose. The companion then reports
+
+   ```
+   Codex review returned no findings:
+     Unexpected non-whitespace character after JSON at position 183 (line 1 column 184)
+   ```
+
+   and leaves `result` empty. Read that message carefully: it is **not** the
+   wrapper failing to parse the companion, and it is **not** "Codex found
+   nothing" — a complete review was produced and discarded. Observed twice in a
+   row on one PR and not at all on the next run of the same diff, so re-running
+   is a coin flip rather than a fix.
+
+   The companion does keep the model's untouched output in `rawOutput`, so the
+   script now salvages it: decode the first complete JSON value and ignore the
+   trailing text (`salvageResult()`). It prints a `note: recovered N finding(s)`
+   line to stderr when it does, and still returns null — so the caller still
+   fails loudly — when nothing usable is there.
+
+6. **Re-run idempotency.** Re-running on an updated PR posts a fresh review
    (GitHub threads them). The body carries a `<!-- codex-adversarial-review
    sha=<headOid> -->` marker so prior runs are identifiable; dismissing/minimizing
    old reviews is intentionally out of scope for v1.
