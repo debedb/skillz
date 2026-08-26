@@ -207,6 +207,15 @@
       "summary": "Graft a local worktree's commits onto a remote branch without re-cloning."
     },
     {
+      "name": "git-pr-merge-unblock",
+      "path": "skills/git-pr-merge-unblock/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Work out why a pull request will not merge and who can actually unblock it, on github.com or self-hosted GitHub Enterprise. Covers the states with no error message: bot approvals satisfy nothing CODEOWNERS checks so a PR reads approved and green while reviewDecision stays REVIEW_REQUIRED, a teams-only reviewer request notifies no individual, CODEOWNERS is matched per-path so a repo-wide owner answer is usually wrong, and the highest-yield reviewer is the changed file's recent author."
+    },
+    {
       "name": "git-worktree-convention",
       "path": "skills/git-worktree-convention/SKILL.md",
       "hosts": [
@@ -646,6 +655,7 @@
         "subagent-no-report-channel",
         "cmux-session-self-identity",
         "git-simulate-sequential-merges",
+        "git-pr-merge-unblock",
         "terraform-noninteractive-prod-apply",
         "llm-vendor-waterfall",
         "confluence-rovo-mcp-readonly-rest-fallback"
