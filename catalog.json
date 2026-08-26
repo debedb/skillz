@@ -117,9 +117,10 @@
         "scripts/claudeception-activator.sh"
       ],
       "hosts": [
-        "claude"
+        "claude",
+        "codex"
       ],
-      "summary": "Continuous-learning meta-skill: extract verified, reusable knowledge. Repeatable procedures become catalog skills via PR; specific recollections go to memory (local or a shared git-backed vault)."
+      "summary": "Continuous-learning meta-skill for both hosts: extract verified, reusable knowledge. Repeatable procedures become catalog skills via PR; specific recollections go to memory (local or a shared git-backed vault). Owns the catalog Wiring procedure - catalog.json, per-host bundle symlinks, the optional single-skill plugin, and the version bumps CI requires. Invoked explicitly; the Codex hook-driven entry point is `continuous-learning`."
     },
     {
       "name": "cmux-agent-tabs",
@@ -177,7 +178,7 @@
       "hosts": [
         "codex"
       ],
-      "summary": "End-of-task retrospective: extract reusable, verified learnings as Codex skills."
+      "summary": "Run the end-of-task retrospective that Codex's `Stop` and `UserPromptSubmit` hooks demand, and decide what the session actually produced. Most turns end with `No reusable learning.` Of the rest, most are **memory** — a single cause->fix, an API gotcha, a config detail — and must NOT become a `SKILL.md`; only a repeatable procedure does. Use when a `Stop` hook fires at end-of-task, when a debugging-heavy session ends, or when the user asks \"what did we learn?\". Covers the four gates (discovery cost, recurrence, verifiable trigger, verified result), the skill-vs-memory classification, the install-location choice, and the `No reusable learning.` escape hatch. For an explicitly invoked retrospective, and for the wiring that promotes a skill into the `voitta-ai/skillz` catalog, see `claudeception` — this skill defers to it rather than restating it."
     },
     {
       "name": "gh-pr-merge-delete-branch-closes-dependent-pr",
