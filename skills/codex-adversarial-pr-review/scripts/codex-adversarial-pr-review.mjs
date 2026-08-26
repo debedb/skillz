@@ -159,12 +159,50 @@ function runReview(companion, repoDir, base, model, focus) {
   }
   const raw = run(process.execPath, args, { cwd: repoDir });
   const payload = JSON.parse(raw);
-  const result = payload.result;
+  const result = payload.result || salvageResult(payload);
   if (!result) {
     const detail = payload.parseError || payload.codex?.stderr || "no structured result";
     throw new Error(`Codex review returned no findings: ${detail}`);
   }
   return result;
+}
+
+// The companion parses the model's output into `result`. That parse is flaky: the model
+// intermittently emits its JSON object followed by trailing prose, and the companion then
+// reports e.g. `parseError: "Unexpected non-whitespace character after JSON at position
+// 183"`, leaves `result` empty, and a complete review is thrown away. Observed twice in a
+// row on one PR and not at all on the next run of the same diff, so re-running is a coin
+// flip rather than a fix.
+//
+// The companion does preserve the model's untouched output in `rawOutput`, so the findings
+// are still there to be recovered: decode the FIRST complete JSON value and ignore whatever
+// follows it. JSON.parse cannot do this (it rejects trailing content), so this walks
+// candidate end positions from the first `{`. Returns null when nothing usable is found, so
+// the caller still fails loudly rather than silently reviewing nothing.
+function salvageResult(payload) {
+  const raw = typeof payload.rawOutput === "string" ? payload.rawOutput : "";
+  const start = raw.indexOf("{");
+  if (start < 0) {
+    return null;
+  }
+  for (let end = raw.length; end > start; end--) {
+    if (raw[end - 1] !== "}") {
+      continue;
+    }
+    let candidate;
+    try {
+      candidate = JSON.parse(raw.slice(start, end));
+    } catch {
+      continue;
+    }
+    if (candidate && Array.isArray(candidate.findings)) {
+      process.stderr.write(
+        `note: recovered ${candidate.findings.length} finding(s) from rawOutput after a companion parse error\n`
+      );
+      return candidate;
+    }
+  }
+  return null;
 }
 
 // Build a map of file -> Set(new-file line numbers) that are commentable on the
