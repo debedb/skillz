@@ -163,6 +163,15 @@
       "summary": "Post /codex:adversarial-review findings as a batched GitHub PR review (inline + out-of-diff rollup); sweep a whole PR backlog and post the saved payloads without a second Codex pass."
     },
     {
+      "name": "confluence-rovo-mcp-readonly-rest-fallback",
+      "path": "skills/confluence-rovo-mcp-readonly-rest-fallback/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Create or update a Confluence Cloud page when the Atlassian Rovo connector is read-only: the REST v2 fallback, probing which API-token env var actually works, resolving a numeric spaceId from a personal-space key, and the HTML+ to storage-format conversion table (including the named-entity parse trap). Also covers editing an existing macro-bearing page without destroying it - rewriting such a body through the MCP returns 200 and silently drops the macros, so the safe path is a surgical string replacement on the storage-format body."
+    },
+    {
       "name": "continuous-learning",
       "path": "skills/continuous-learning/SKILL.md",
       "hosts": [
@@ -388,7 +397,7 @@
         "claude",
         "codex"
       ],
-      "summary": "Capture the exact outbound request body a single-page app sends and block it before it leaves the browser: patch window.fetch AND XMLHttpRequest together (the XHR half is the one usually missed, so a fetch-only wrapper lets the request through), read the parsed payload off window, and disarm with a reload \u2014 including why a hash-route change does not remove the patch. For actions whose side effect costs credits or creates an irreversible record."
+      "summary": "Capture the exact outbound request body a single-page app sends and block it before it leaves the browser: patch window.fetch AND XMLHttpRequest together (the XHR half is the one usually missed, so a fetch-only wrapper lets the request through), read the parsed payload off window, and disarm with a reload — including why a hash-route change does not remove the patch. For actions whose side effect costs credits or creates an irreversible record."
     },
     {
       "name": "us-federal-open-data-claim-verification",
@@ -638,7 +647,8 @@
         "cmux-session-self-identity",
         "git-simulate-sequential-merges",
         "terraform-noninteractive-prod-apply",
-        "llm-vendor-waterfall"
+        "llm-vendor-waterfall",
+        "confluence-rovo-mcp-readonly-rest-fallback"
       ],
       "summary": "Full repo bundle: every skill in one plugin."
     },
@@ -1133,7 +1143,7 @@
       "skills": [
         "spa-request-capture-and-block"
       ],
-      "summary": "Capture the exact outbound request body a single-page app sends and block it before it leaves the browser: patch window.fetch AND XMLHttpRequest together (the XHR half is the one usually missed, so a fetch-only wrapper lets the request through), read the parsed payload off window, and disarm with a reload \u2014 including why a hash-route change does not remove the patch. For actions whose side effect costs credits or creates an irreversible record."
+      "summary": "Capture the exact outbound request body a single-page app sends and block it before it leaves the browser: patch window.fetch AND XMLHttpRequest together (the XHR half is the one usually missed, so a fetch-only wrapper lets the request through), read the parsed payload off window, and disarm with a reload — including why a hash-route change does not remove the patch. For actions whose side effect costs credits or creates an irreversible record."
     },
     {
       "name": "us-federal-open-data-claim-verification",
