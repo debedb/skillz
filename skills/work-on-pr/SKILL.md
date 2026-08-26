@@ -3,7 +3,7 @@ name: work-on-pr
 description: |
   Iteratively work on a GitHub pull request as the author. Watch for new review comments, issue comments, and inline threads; if nothing new exists yet, wait and re-check instead of exiting. For each actionable item, implement the fix in the PR worktree, run relevant tests, commit and push, then reply with a summary and commit SHA. Continue until the PR is approved, merged or closed, or the user stops the loop. Also accepts an issue reference instead of a PR: in that case the skill creates the PR (if absent), guarantees the PR body contains `Closes #<issue>`, and then enters the watch loop. A bare problem statement works too — the skill opens the issue first, then takes the issue path. Optionally drives its own reviewer by running `codex-adversarial-pr-review` on the PR each round, so the loop closes without a second human. Use when you want the agent to own the start-PR or address-test-push-reply-wait cycle across multiple review rounds rather than handling a single review comment.
 author: Claude Code
-version: 1.10.0
+version: 1.11.0
 date: 2026-06-22
 source: https://github.com/voitta-ai/skillz
 source_file: skills/work-on-pr/SKILL.md
@@ -188,10 +188,14 @@ command (see "Hosts that cannot self-schedule").
      its own diff is not independent review (see Notes).
 
 3. **Reuse or create the worktree.**
-   - Naming convention: `<repo-root>-wt-<N>` (matches the
-     `feedback-worktree-pr-workflow` convention).
+   - Location: `<repo>.worktrees/<branch-name>/`, the sibling
+     directory the `git-worktree-convention` skill defines. Pass
+     it as an **absolute** path — `git worktree add` resolves a
+     relative one against the cwd, which nests the worktree inside
+     the repo when you run it from there.
    - `git worktree list` to check; if absent, create one at
-     `feature/<branch-name>` tracking `origin/<headRefName>`.
+     `<repo>.worktrees/<headRefName>/` tracking
+     `origin/<headRefName>`.
    - Run subsequent git operations in single-shot form via
      `git -C <worktree-path> <subcommand> ...`. Do NOT chain a
      `cd <worktree>` with `&&` in front of `git`. The compound
@@ -569,7 +573,7 @@ risk of overwriting persistent data.
 without a path scope allows edits to ANY file from ANY cwd, not
 just the worktree. This is the simplest way to silence per-edit
 prompts because CC's allow matcher does not accept a path glob for
-`Edit` / `Write` (e.g. `Edit(/path/to/repo-wt-*/**)` is not
+`Edit` / `Write` (e.g. `Edit(/path/to/repo.worktrees/**)` is not
 honored). If you'd rather keep `Edit` prompting outside the loop
 and only auto-allow inside the worktree, omit those three entries
 and accept one prompt per file edit per iteration.
@@ -915,7 +919,7 @@ User: "/work-on-pr 20"
 Iteration 1:
 - `gh pr view 20` → state=OPEN, headRefName=`feature/foo`,
   reviewDecision=`CHANGES_REQUESTED`.
-- Worktree at `<repo>-wt-20` doesn't exist → create.
+- Worktree at `<repo>.worktrees/feature/foo` doesn't exist → create.
 - Anchor = head commit committed_at = `2026-05-12T18:00:00Z`.
 - No review activity yet. Wait 270s via `ScheduleWakeup` (or sleep
   270s and re-poll if no scheduler exists).

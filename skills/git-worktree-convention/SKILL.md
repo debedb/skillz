@@ -14,7 +14,7 @@ description: |
   before starting work, the ask-before-reorganizing rule, and the recovery
   procedures for each drift shape.
 author: Claude Code
-version: 1.0.0
+version: 1.1.0
 date: 2026-08-07
 source: Consolidation of the local git-worktree-convention note with skills/git-worktree-add-relative-path-nests-inside-repo (absorbed here).
 source_file: skills/git-worktree-convention/SKILL.md
@@ -210,9 +210,12 @@ git -C /path/to/repo worktree remove /path/to/repo.worktrees/<branch>
 git -C /path/to/repo worktree prune
 ```
 
-## Related skills
+## Related
 
 - `multi-phase-feature-pr-worktrees` — stacking one worktree per phase under
   an umbrella feature branch when a feature ships as several PRs.
 - `git-graft-worktree-onto-remote` — wiring an existing on-disk directory up
   as a clone of a remote without losing local files.
+- `work-on-pr` and `review-pr-loop` — the two PR loops that create worktrees
+  per round. Both follow this layout; if you find either describing a
+  `<repo>-wt-<N>` path, it predates this skill and the layout here wins.
