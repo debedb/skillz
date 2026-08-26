@@ -655,6 +655,20 @@ The two skills:
   Leaves structured feedback (REQUEST_CHANGES, COMMENT, APPROVE)
   and continues until approved, merged, or closed.
 
+**Which reviewer to pair with `work-on-pr`.** When the author and the
+reviewer are two identities — a human reviewer, or a second operator —
+`review-pr-loop` is the reviewer side. When one operator drives both
+sides under a single GitHub login, prefer
+[`codex-adversarial-pr-review`](./skills/codex-adversarial-pr-review/SKILL.md),
+invoked from `work-on-pr` step 7: one deterministic script call per
+round, no second watch loop to pace, and the findings post as ordinary
+PR review comments that the author loop already knows how to read. Two
+consequences of that path are worth knowing before you pick it: the
+author identity cannot `APPROVE` its own PR, so the review exit is
+*zero blocking findings*, not a review state; and a zero-finding result
+is treated as suspicious rather than as a pass, because an empty result
+looks exactly like a clean one on the wire (see #212).
+
 Each skill owns the watch loop. Every pass should surface which watch
 mode is active:
 
@@ -672,8 +686,9 @@ ending, not on an ordinary idle pass.
 Usage:
 
 ```text
-/work-on-pr <N>        # author side (or pass an issue ref to start a PR)
-/review-pr-loop <N>    # reviewer side
+/work-on-pr <N>        # author side (also takes an issue ref, or a bare
+                       #   problem statement — it opens the issue first)
+/review-pr-loop <N>    # reviewer side, when the reviewer is a separate identity
 ```
 
 #### Reducing permission prompts (Claude Code)

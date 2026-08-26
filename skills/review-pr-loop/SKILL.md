@@ -3,7 +3,7 @@ name: review-pr-loop
 description: |
   Iteratively review a GitHub pull request across multiple rounds. Each round, read the linked issue(s), prior review comments, issue comments, and inline threads before reviewing only the new diff or the author's latest response. If no author response exists yet, wait and re-check instead of exiting. Leave structured feedback (REQUEST_CHANGES, COMMENT, or APPROVE) and continue until you approve, the PR is merged or closed, or the user stops the loop. Use when you are the reviewer on a non-trivial PR and want the agent to own the back-and-forth review cycle rather than doing a one-shot review.
 author: Claude Code
-version: 1.5.0
+version: 1.6.0
 date: 2026-06-22
 source: https://github.com/voitta-ai/skillz
 source_file: skills/review-pr-loop/SKILL.md
@@ -50,6 +50,17 @@ Invoke when:
 Do NOT use when:
 
 - You are the PR author — use `work-on-pr` instead.
+- You and the "reviewer" are the same operator posting under one
+  GitHub identity, and what you actually want is an adversarial pass
+  per round — use `codex-adversarial-pr-review`, driven from
+  `work-on-pr` step 7. One deterministic script call per round beats a
+  second agent roleplaying a reviewer: no pacing or self-scheduling
+  machinery to get wrong, no drift between rounds, and it carries the
+  salvage path for the companion's flaky parse (skillz#212). Note the
+  ceiling: that identity cannot `APPROVE` its own PR, so the loop exits
+  on zero findings rather than on a review state. Keep **this** skill
+  for a genuinely separate reviewer identity, or when the multi-round
+  conversation with a human author is itself the point.
 - A one-shot review is enough — use `pr-review-toolkit:review-pr`.
 - The PR is already approved or merged.
 
@@ -682,5 +693,7 @@ Iteration 7:
 - [GitHub REST: issues/comments (top-level)](https://docs.github.com/en/rest/issues/comments)
 - [gh pr review](https://cli.github.com/manual/gh_pr_review)
 - Related skills: [[work-on-pr]] (author side of the same loop),
+  [[codex-adversarial-pr-review]] (preferred over this skill when one
+  operator drives both sides under one GitHub identity),
   [[pr-review-toolkit:review-pr]] (one-shot review),
   [[gh-git-heredoc-body-file]] (body-file pattern).

@@ -1,9 +1,9 @@
 ---
 name: work-on-pr
 description: |
-  Iteratively work on a GitHub pull request as the author. Watch for new review comments, issue comments, and inline threads; if nothing new exists yet, wait and re-check instead of exiting. For each actionable item, implement the fix in the PR worktree, run relevant tests, commit and push, then reply with a summary and commit SHA. Continue until the PR is approved, merged or closed, or the user stops the loop. Also accepts an issue reference instead of a PR: in that case the skill creates the PR (if absent), guarantees the PR body contains `Closes #<issue>`, and then enters the watch loop. Use when you want the agent to own the start-PR or address-test-push-reply-wait cycle across multiple review rounds rather than handling a single review comment.
+  Iteratively work on a GitHub pull request as the author. Watch for new review comments, issue comments, and inline threads; if nothing new exists yet, wait and re-check instead of exiting. For each actionable item, implement the fix in the PR worktree, run relevant tests, commit and push, then reply with a summary and commit SHA. Continue until the PR is approved, merged or closed, or the user stops the loop. Also accepts an issue reference instead of a PR: in that case the skill creates the PR (if absent), guarantees the PR body contains `Closes #<issue>`, and then enters the watch loop. A bare problem statement works too — the skill opens the issue first, then takes the issue path. Optionally drives its own reviewer by running `codex-adversarial-pr-review` on the PR each round, so the loop closes without a second human. Use when you want the agent to own the start-PR or address-test-push-reply-wait cycle across multiple review rounds rather than handling a single review comment.
 author: Claude Code
-version: 1.9.0
+version: 1.10.0
 date: 2026-06-22
 source: https://github.com/voitta-ai/skillz
 source_file: skills/work-on-pr/SKILL.md
@@ -53,6 +53,10 @@ Invoke when:
   open) and then enters the watch loop. The created PR body MUST
   contain `Closes #<issue>` so merging the PR auto-closes the
   issue.
+- The user supplies a **short problem statement** with no issue and
+  no PR ("work on X"). The skill opens the issue first, then takes
+  the issue path above, so the work stays anchored to a tracked
+  issue rather than a bare branch.
 
 Do NOT use when:
 
@@ -110,6 +114,8 @@ command (see "Hosts that cannot self-schedule").
      - **PR ref**: number, PR URL, or branch name. Skip to 1a.
      - **Issue ref**: issue URL (`https://github.com/<owner>/<repo>/issues/<N>`)
        or `#<N>` plus repo context. Go through 1b first.
+     - **Problem statement**: free text carrying neither `#<N>` nor a
+       URL. Go through 1d first.
    - **1a. Existing PR:** `gh pr view <N> --json
      number,state,headRefName,headRefOid,baseRefName,mergeable,reviewDecision,url,body`.
      If `state != OPEN` → report and stop (no reschedule). Then run
@@ -144,13 +150,42 @@ command (see "Hosts that cannot self-schedule").
      Use `--body-file` so multiline bodies and backticks survive.
      This step is idempotent; running it on a PR that already has
      `Closes #<N>` is a no-op.
+   - **1d. Problem statement → issue:** when the arg is free text
+     with no issue and no PR reference, open the issue first:
+     ```
+     gh issue create --title "<one line>" --body-file /tmp/issue-body.md
+     ```
+     then re-enter at 1b with the new issue number. Do not branch
+     straight off a problem statement: the issue is what `Closes #<N>`
+     binds to, and without one the PR has nothing to close and the
+     work has no tracked home. If the statement is too vague to title,
+     that is a step-8 escalation, not a guess.
 
-2. **Check exit condition: approved.**
-   - `reviewDecision == "APPROVED"` → stop, report success.
-   - Or fetch latest review: `gh api repos/:owner/:repo/pulls/<N>/reviews`,
-     last entry `state == "APPROVED"` → stop.
-   - Or an issue comment whose body matches `/\b(lgtm|ship it|approved|approve)\b/i`
-     from a maintainer → stop.
+2. **Check exit conditions.** There are two, they are reached
+   differently, and they are not interchangeable.
+
+   - **Human exit — an external approval.**
+     - `reviewDecision == "APPROVED"` → stop, report success.
+     - Or fetch latest review: `gh api repos/:owner/:repo/pulls/<N>/reviews`,
+       last entry `state == "APPROVED"` → stop.
+     - Or an issue comment whose body matches
+       `/\b(lgtm|ship it|approved|approve)\b/i` from a maintainer →
+       stop.
+   - **Codex exit — a clean adversarial review.** When this loop
+     drives its own review via step 7, the codex side can never
+     produce a GitHub approval: if the posting identity is the PR
+     author — the norm when the agent opened the PR — GitHub rejects
+     `APPROVE` and `REQUEST_CHANGES`, which is why
+     `codex-adversarial-pr-review` posts `event: COMMENT`. So the
+     codex-side exit is **zero blocking findings returned by the
+     script against the current head**, never a review state. A round
+     that addressed findings and then re-reviewed clean satisfies it.
+     A round that never ran the review does not, and neither does a
+     single zero-finding result — see step 7d.
+   - **The codex exit does not merge the PR.** It says the
+     self-review is out of objections. Merging still needs the human
+     exit or an explicit user instruction, because an agent reviewing
+     its own diff is not independent review (see Notes).
 
 3. **Reuse or create the worktree.**
    - Naming convention: `<repo-root>-wt-<N>` (matches the
@@ -297,7 +332,7 @@ command (see "Hosts that cannot self-schedule").
 
    c. **Run the project's test suite.** No commits / pushes if tests
       fail. Diagnose, fix, re-run. If a test failure surfaces an
-      ambiguity in the reviewer's ask, fall back to step 7 (escalate).
+      ambiguity in the reviewer's ask, fall back to step 8 (escalate).
 
    d. **Commit** in the worktree with a real message describing the
       fix and which review/comment ID it addresses. Use HEREDOC via a
@@ -344,7 +379,58 @@ command (see "Hosts that cannot self-schedule").
       rule in `review-pr-loop` so the reader can tell who/what
       generated each post in a multi-round thread.
 
-7. **Escalate to the user** when:
+7. **Adversarial self-review (codex side).** Optional. Run it once
+   per round *after* the round's fixes are pushed — once per round,
+   not once per addressed item.
+
+   a. **Dry-run first.** Against the current head:
+      ```
+      node <skills-dir>/codex-adversarial-pr-review/scripts/codex-adversarial-pr-review.mjs \
+        --pr <N> --repo-dir <worktree> --fetch --dry-run \
+        > /tmp/pr-<N>-review.json
+      ```
+      The dry-run output **is** the POST body, verbatim. Never re-run
+      without `--dry-run` in order to post: that spends a second Codex
+      pass and can come back with different findings than the ones you
+      just judged.
+
+   b. **Judge the findings before posting.** Adversarial framing
+      produces confident, well-written, wrong findings, and the
+      confidence score does not separate them. Drop the ones you
+      verified are wrong by editing the saved payload with `jq`, keep
+      the rest. See [[codex-adversarial-pr-review]] for the pattern.
+
+   c. **Post the judged payload:**
+      ```
+      gh api repos/:owner/:repo/pulls/<N>/reviews --method POST \
+        --input /tmp/pr-<N>-review.json
+      ```
+      The findings land as ordinary PR review comments, so step 4
+      picks them up on the next round with no extra machinery. Tag the
+      body `[codex]` per "Reply convention" below — under a shared
+      GitHub identity that tag, not the login, is what step 4's filter
+      discriminates on.
+
+   d. **Zero findings is suspicious, not a pass.** An empty result is
+      indistinguishable on the wire from a clean review, and this has
+      already fired: a flaky parse of the companion's output discarded
+      four real findings, two of them `high`, while the wrapper
+      reported `Codex review returned no findings` (skillz#212, fixed
+      by `salvageResult()`). So on a zero-finding result:
+      - check stderr for a `note: recovered N finding(s)` line, which
+        marks a salvaged run rather than a clean one;
+      - re-run once. Only when a second run also comes back empty does
+        the result satisfy the codex-side exit in step 2.
+      - If the script errors, or returns no result at all, that is a
+        **failed round, not a clean one**. Escalate per step 8; do not
+        let it stand in for the codex exit.
+
+   e. **Skip this step when an external human reviewer is already
+      driving the PR.** Running both produces two rounds of feedback
+      on the same diff and the author side cannot tell which one it is
+      waiting on.
+
+8. **Escalate to the user** when:
    - A reviewer asked for a scope change you cannot interpret without
      guidance.
    - Tests fail in a way that suggests the fix would have to touch
@@ -353,11 +439,11 @@ command (see "Hosts that cannot self-schedule").
    - Merge conflicts with base branch.
    - Stop the loop, summarize, ask the user how to proceed.
 
-8. **Re-check exit condition** (step 2) after each address cycle. A
+9. **Re-check exit conditions** (step 2) after each address cycle. A
    reviewer that approved AND left a final comment is still
    approved.
 
-9. **After each addressed cycle, return to waiting.** Adaptive delay:
+10. **After each addressed cycle, return to waiting.** Adaptive delay:
    - Just pushed a fix → 270s (cache-warm, expect quick reviewer
      turn).
    - Quiet period → 1800s.
@@ -642,7 +728,7 @@ What NOT to prefix-remember at session scope:
 
 ### Merge-conflict resolution path
 
-If the watch loop hits a merge conflict against base (step 7
+If the watch loop hits a merge conflict against base (step 8
 escalation), and the user delegates conflict resolution back to
 the loop instead of taking over, the resolution will additionally
 need approvals or allow patterns for:
@@ -789,6 +875,9 @@ After invoking, expect to see (per iteration):
 - One commit pushed per round (only when there were actionable
   comments).
 - One reply posted per addressed comment.
+- When the optional step-7 self-review is enabled: one review posted
+  per round, tagged `[codex]`, with a saved `/tmp/pr-<N>-review.json`
+  payload that matches what was posted.
 - Either a `ScheduleWakeup` call or an in-process sleep / poll loop
   unless the loop exited.
 - No `final` / terminal handoff while the watch loop is still active.
@@ -806,6 +895,18 @@ Exit signals:
 - `reviewDecision == APPROVED` → summary + stop.
 - PR merged/closed → summary + stop.
 - User says "stop" / interrupts → summary + stop.
+- Step-7 self-review returns zero blocking findings on two
+  consecutive runs against the same head → the codex-side exit is
+  satisfied. Report it and stop *reviewing*; do not merge on it alone.
+
+Not exit signals:
+
+- A single zero-finding self-review (step 7d).
+- A self-review that errored or returned no result — that is a failed
+  round, and reading it as clean is the exact shape of skillz#212.
+- Any `event: COMMENT` review posted by the author identity. GitHub
+  will not let that identity `APPROVE`, so its absence carries no
+  information.
 
 ## Example
 
@@ -904,6 +1005,14 @@ User: "/work-on-pr Issue https://github.com/foo/bar/issues/42"
   of the recognized keywords match `#N` in the existing body. The
   same holds for PR-create when an issue ref is supplied — never
   emit a second `Closes #N`.
+- **Self-review is not independent review.** One agent acting as both
+  author and adversarial reviewer of its own diff shares the author's
+  blind spots, and the author side still chooses which findings to
+  accept. A separate model and process (step 7) narrows that, it does
+  not remove it. This is why the codex exit in step 2 stops the review
+  loop but never merges, and why a zero-finding round is treated as
+  suspicious rather than as a pass: a loop that grades its own
+  homework fails silently and reads as success.
 - **Bumping the version**: when editing this skill, increment
   `version:` in the frontmatter so installed copies can be compared
   against the canonical source.
@@ -957,7 +1066,11 @@ User: "/work-on-pr Issue https://github.com/foo/bar/issues/42"
 - [GitHub REST: list issue comments](https://docs.github.com/en/rest/issues/comments)
 - [GitHub REST: list review comments on a PR](https://docs.github.com/en/rest/pulls/comments)
 - [gh pr view / gh pr comment](https://cli.github.com/manual/gh_pr)
-- Related skills: [[review-pr-loop]] (reviewer side),
+- Related skills: [[codex-adversarial-pr-review]] (the step-7
+  reviewer; preferred over [[review-pr-loop]] when both sides run
+  under one operator and one GitHub identity),
+  [[review-pr-loop]] (reviewer side, for a genuinely separate
+  reviewer or a conversational multi-round review),
   [[gh-git-heredoc-body-file]] (body-file pattern),
   [[python-ast-static-analyzer-scoping]] (worked example of an
   iterative review cycle this skill drove).
