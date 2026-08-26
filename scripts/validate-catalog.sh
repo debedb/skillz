@@ -235,6 +235,76 @@ for p in catalog.get("plugins", []):
                     f"{sorted(extra)}"
                 )
 
+# The two root marketplace.json files are what a host actually reads for
+# `/plugin install <name>@skillz`, and nothing above has looked at them. Two
+# failures have already shipped green past this script: both files sat on a
+# branch as invalid JSON full of unresolved conflict markers, and both went on
+# advertising 19 plugins whose directories had been deleted in #91 when those
+# skills moved to skillz-memory - a quarter of the marketplace resolving to
+# nothing, with no error anywhere.
+#
+# Parsing them is the check. `source` must resolve to a real directory, and
+# every plugin dir on disk must be advertised (an unadvertised one is
+# uninstallable by name, the silent inverse of the same drift).
+plugin_dirs = set()
+plugins_root = os.path.join(root, "plugins")
+if os.path.isdir(plugins_root):
+    plugin_dirs = {
+        d for d in os.listdir(plugins_root)
+        if os.path.isdir(os.path.join(plugins_root, d))
+    }
+
+for rel, host_dir in (
+    (".claude-plugin/marketplace.json", ".claude-plugin"),
+    (".codex-plugin/marketplace.json", ".codex-plugin"),
+):
+    abs_path = os.path.join(root, rel)
+    if not os.path.isfile(abs_path):
+        errors.append(f"marketplace file missing: {rel}")
+        continue
+    try:
+        with open(abs_path) as mf:
+            market = json.load(mf)
+    except ValueError as e:
+        errors.append(f"'{rel}' is not valid JSON: {e}")
+        continue
+
+    # A marketplace is per host, so what belongs in it is exactly the plugins
+    # that carry THAT host's manifest. Not every plugin is dual-host:
+    # continuous-learning and codex-continuous-learning are Codex-only and have
+    # no .claude-plugin/plugin.json, yet the Claude marketplace advertised both.
+    installable_here = {
+        d for d in plugin_dirs
+        if os.path.isfile(os.path.join(plugins_root, d, host_dir, "plugin.json"))
+    }
+
+    advertised = set()
+    for entry in market.get("plugins", []):
+        ename = entry.get("name")
+        source = entry.get("source")
+        if not ename or not source:
+            errors.append(f"'{rel}' entry missing name/source: {entry}")
+            continue
+        advertised.add(ename)
+        src_dir = os.path.normpath(os.path.join(root, source.lstrip("./")))
+        if not os.path.isdir(src_dir):
+            errors.append(
+                f"'{rel}' advertises '{ename}' but its source "
+                f"{source} is not a directory - the install would 404"
+            )
+        elif not os.path.isfile(os.path.join(src_dir, host_dir, "plugin.json")):
+            errors.append(
+                f"'{rel}' advertises '{ename}' but {source}{host_dir}/"
+                f"plugin.json does not exist - it is not installable on this "
+                f"host"
+            )
+    for unadvertised in sorted(installable_here - advertised):
+        errors.append(
+            f"plugins/{unadvertised}/ has a {host_dir}/plugin.json but "
+            f"'{rel}' does not advertise it - it cannot be installed by name"
+        )
+
+
 if errors:
     for e in errors:
         print(f"ERROR: {e}", file=sys.stderr)
