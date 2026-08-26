@@ -225,6 +225,15 @@
       "summary": "Keep every repo on its default branch with branch work in a sibling <repo>.worktrees/ dir; detect drift, ask before reorganizing, and recover from a repo on a branch, an ad-hoc worktree path, or a worktree nested inside the repo."
     },
     {
+      "name": "github-actions-startup-failure-triage",
+      "path": "skills/github-actions-startup-failure-triage/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Tell a GitHub Actions outage apart from a workflow file you broke, and get the PR unstuck without bypassing branch protection. Covers the three-signal test (actions/runs says completed/startup_failure while check-runs still says queued; zero jobs and zero annotations; .github/workflows untouched by the diff), the githubstatus summary.json one-liner that confirms it, close/reopen as the retrigger that adds no commit, and why a required check that never ran is a reason to wait rather than to force-merge."
+    },
+    {
       "name": "istio-multicluster-endpointless-mesh-service",
       "path": "skills/istio-multicluster-endpointless-mesh-service/SKILL.md",
       "hosts": [
@@ -658,7 +667,8 @@
         "git-pr-merge-unblock",
         "terraform-noninteractive-prod-apply",
         "llm-vendor-waterfall",
-        "confluence-rovo-mcp-readonly-rest-fallback"
+        "confluence-rovo-mcp-readonly-rest-fallback",
+        "github-actions-startup-failure-triage"
       ],
       "summary": "Full repo bundle: every skill in one plugin."
     },
