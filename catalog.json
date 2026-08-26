@@ -647,7 +647,8 @@
         "cmux-session-self-identity",
         "git-simulate-sequential-merges",
         "terraform-noninteractive-prod-apply",
-        "llm-vendor-waterfall"
+        "llm-vendor-waterfall",
+        "confluence-rovo-mcp-readonly-rest-fallback"
       ],
       "summary": "Full repo bundle: every skill in one plugin."
     },
