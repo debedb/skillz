@@ -10,7 +10,7 @@ description: |
   cross-region queries against them draw nothing, (5) you want to validate Grafana
   CloudWatch SEARCH / metric-math expressions before shipping dashboards-as-code.
 author: Claude Code
-version: 1.0.0
+version: 1.1.0
 date: 2026-08-27
 ---
 
@@ -91,6 +91,32 @@ right" match zero series — with no error anywhere.
    - Dropwizard CloudWatch reporters may publish only ACTIVE metrics (zero counters
      and idle timers vanish) and gauges can stop while counters continue — compare
      last-datapoint timestamps per metric family before declaring a query broken.
+
+## Porting whole console dashboards mechanically
+
+For estates of large console dashboards (100+ widgets), write a converter over the
+`get-dashboard` body instead of hand-porting; the widget model is fully mappable:
+
+- **Metric-row continuation:** in a `metrics` array, `"."` repeats the SAME POSITION of
+  the previous row; a row starting `"..."` repeats the ENTIRE previous row (only the
+  trailing options dict differs — the p50/p90/p99 pattern). Resolve both before reading
+  `[namespace, metric, dimName, dimVal, ..., {options}]`.
+- **Hidden math chains survive:** emit hidden intermediates as `hide: true` targets and
+  KEEP their CloudWatch `id`s — Grafana resolves `SUM(e1)`-style references by target id,
+  not refId. Generate refIds separately and unbounded (A..Z, A1..).
+- **Auto-flow layout:** widgets without x/y flow left-to-right, wrap at 24 columns, each
+  row as tall as its tallest widget. Full-width 1–2-unit-high markdown headings are
+  section separators — convert them to Grafana `row` panels.
+- **Dual y-axes:** a metric row's `"yAxis": "right"` maps to a `byFrameRefID` override
+  with `custom.axisPlacement: "right"` (plus the widget's right-axis min/max). Grafana
+  is NOT limited to one scale.
+- **Widget types:** `text`→text panel, `view: singleValue`→stat, `alarm` status widgets
+  have no Grafana equivalent — emit a text note listing the alarm names.
+- **Templatefile escaping order:** dump JSON with a sentinel for the datasource uid,
+  escape every `${` to `$${` (protects `${PROP(...)}` labels), THEN replace the sentinel
+  with the real `${datasource_uid}` placeholder.
+- Commit the converter next to the generated files and mark them generated — regenerate,
+  never hand-edit.
 
 ## Verification
 
