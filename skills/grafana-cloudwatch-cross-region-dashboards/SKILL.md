@@ -10,7 +10,7 @@ description: |
   cross-region queries against them draw nothing, (5) you want to validate Grafana
   CloudWatch SEARCH / metric-math expressions before shipping dashboards-as-code.
 author: Claude Code
-version: 1.1.0
+version: 1.3.0
 date: 2026-08-27
 ---
 
@@ -110,6 +110,17 @@ For estates of large console dashboards (100+ widgets), write a converter over t
 - **Dual y-axes:** a metric row's `"yAxis": "right"` maps to a `byFrameRefID` override
   with `custom.axisPlacement: "right"` (plus the widget's right-axis min/max). Grafana
   is NOT limited to one scale.
+- **Cross-region metric math WILL break.** The CloudWatch console evaluates math across
+  regions client-side; Grafana batches GetMetricData per region, so `e = m_east + m_west`
+  fails at render time with `ID not found`. Two repairs, in order:
+  (a) an expression whose referenced ids all share ONE region belongs to that region —
+  infer it from the refs (the expression entry's own region is meaningless);
+  (b) genuine cross-region arithmetic becomes a Grafana **server-side math expression**
+  (`{"datasource":{"type":"__expr__","uid":"__expr__"},"type":"math","expression":"$a + $b"}`)
+  — region-agnostic because it combines query RESULTS; map CloudWatch ids to refIds
+  (make refId = the CloudWatch id) and `SUM([a,b])` to `(a+b)`. Hidden referenced
+  queries still execute — `hide` is display-only. Non-arithmetic mixes: un-hide the
+  per-region components with region-suffixed labels instead.
 - **Widget types:** `text`→text panel, `view: singleValue`→stat, `alarm` status widgets
   have no Grafana equivalent — emit a text note listing the alarm names.
 - **Templatefile escaping order:** dump JSON with a sentinel for the datasource uid,
@@ -157,3 +168,14 @@ the units differ (rpm / ms) from the Prometheus row.
   https://grafana.com/docs/grafana/latest/datasources/aws-cloudwatch/
 - CloudWatch metric-math + SEARCH syntax:
   https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/search-expression-syntax.html
+
+## Related
+
+- `dashboard-query-preflight` — the step that catches what this skill's ports
+  get wrong. A SEARCH expression that silently returns nothing renders exactly
+  like an idle workload, so a ported panel proves nothing until its query has
+  been executed against the datasource.
+- `cloudwatch-per-host-stat-single-host-vs-fleet` — reading the series once
+  they draw: which statistic the panel should use, and whether the shape means
+  the fleet or one host.
+
