@@ -325,6 +325,21 @@
       "name": "cloudwatch-metric-filter-dimensions-default-value-exclusive",
       "source": "./plugins/cloudwatch-metric-filter-dimensions-default-value-exclusive/",
       "description": "Metric filter with dimensions AND default_value passes validate and plan, fails only at apply - and which of the two to drop."
+    },
+    {
+      "name": "dashboard-query-preflight",
+      "source": "./plugins/dashboard-query-preflight/",
+      "description": "Run every dashboard query against its live datasource before shipping: a wrong query and an idle workload render identically."
+    },
+    {
+      "name": "dropwizard-prometheus-scrape-endpoint",
+      "source": "./plugins/dropwizard-prometheus-scrape-endpoint/",
+      "description": "Bridge Dropwizard Metrics to a Prometheus /metrics endpoint: the wrong bridge binds a different registry package, compiles, and exports nothing."
+    },
+    {
+      "name": "jira-transition-and-sprint-mechanics",
+      "source": "./plugins/jira-transition-and-sprint-mechanics/",
+      "description": "Drive a customised Jira workflow over REST: transition ids are per-SOURCE-status, and sprint is a field independent of status."
     }
   ]
 }

@@ -1,0 +1,21 @@
+{
+  "name": "dropwizard-prometheus-scrape-endpoint",
+  "version": "1.0.0",
+  "description": "Bridge Dropwizard Metrics to a Prometheus /metrics endpoint: the wrong bridge binds a different registry package, compiles, and exports nothing.",
+  "author": "voitta-ai",
+  "homepage": "https://github.com/voitta-ai/skillz",
+  "repository": "https://github.com/voitta-ai/skillz",
+  "license": "MIT",
+  "keywords": [
+    "claude",
+    "codex",
+    "skills",
+    "prometheus",
+    "dropwizard",
+    "jvm",
+    "metrics",
+    "micrometer",
+    "scrape"
+  ],
+  "skills": "./skills/"
+}
