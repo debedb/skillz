@@ -14,11 +14,12 @@ description: |
   neither is needed; (6) agents keep forgetting to log and you want the
   record to stop depending on their discipline - `scripts/xs-hook` wires the
   log to Claude Code's `PostToolUse` hook on `SendMessage`, which fires for
-  subagents too. Ships `scripts/xs` (log, tail, recent, status, prune) and
-  `scripts/xs-hook`.
+  subagents too; verified on a real team run, where it caught every message
+  of a ten-message exchange with no agent calling `xs log`. Ships `scripts/xs`
+  (log, tail, recent, status, prune) and `scripts/xs-hook`.
 author: Claude Code
-version: 1.1.0
-date: 2026-08-22
+version: 1.2.0
+date: 2026-08-26
 source: https://github.com/voitta-ai/skillz
 source_file: skills/agent-traffic-log/SKILL.md
 ---
@@ -149,6 +150,12 @@ for a teammate to remember.
 `matcher` takes the bare tool name: `SendMessage` is matched as an exact
 string, not a regex.
 
+**Sender identity inside a teammate** comes from the payload's `agent_id`
+(`<name>@<team>`, so `pinger`), falling back to `agent_type`. The first real
+run logged both teammates as `general-purpose` because the hook read only the
+type; two agents of one type are indistinguishable that way, so the name wins
+when it exists. `$XS_NAME` still overrides both.
+
 ### What it maps
 
 The hook reads the [[cmux-cross-session-visibility]] envelope out of
@@ -239,6 +246,15 @@ and nothing after.
 **Passes if:** every message that happened appears exactly once; `xs status` is
 empty when the run is idle; no torn lines; and reading the pane alone tells you
 what the run did without opening a transcript.
+
+**First real run (2026-08-26, Claude Code 2.1.247, cmux 0.64.22).** A lead
+spawned two teammates and had them play five rounds of ping-pong over
+`SendMessage`. With only the hook installed - no agent called `xs log` - the
+log holds the kickoff, all ten messages in order, and the final report to the
+lead, each exactly once, no torn lines. Two things it exposed, both now
+addressed or documented: senders were logged by type, not name (fixed above);
+and `xs status` kept every message as an outstanding wait because nobody used
+the `Q`/`RE` envelope - the predicted over-reporting, working as designed.
 
 **Fails informatively if** the log is short. With `xs-hook` installed, a gap
 is no longer an agent forgetting - it is the hook not firing, so check that
