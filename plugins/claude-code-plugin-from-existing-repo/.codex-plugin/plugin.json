@@ -1,6 +1,6 @@
 {
   "name": "claude-code-plugin-from-existing-repo",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Convert a repo that ships Claude Code commands/hooks (manual copy-in) into an installable plugin without breaking manual install.",
   "author": "voitta-ai",
   "homepage": "https://github.com/voitta-ai/skillz",

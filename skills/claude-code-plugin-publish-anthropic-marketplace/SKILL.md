@@ -15,7 +15,7 @@ description: |
   can't call it. Covers self-hosted marketplace vs Anthropic listing
   coexistence and how each pins versions.
 author: Claude Code
-version: 1.0.0
+version: 1.1.0
 date: 2026-06-11
 source: https://github.com/voitta-ai/skillz
 source_file: skills/claude-code-plugin-publish-anthropic-marketplace/SKILL.md
@@ -193,3 +193,14 @@ CLAUDE="$(npm config get prefix)/bin/claude"
 - Canonical submission link: https://clau.de/plugin-directory-submission
 - Plugin docs: https://code.claude.com/docs/en/plugins.md
 - Marketplace docs: https://code.claude.com/docs/en/plugin-marketplaces.md
+
+## Related
+
+- `claude-code-plugin-from-existing-repo` — producing the plugin this skill
+  submits.
+- `claude-code-plugin-release-automation` — tags and releases in your own repo.
+  Independent of directory listing: automating one does nothing for the other.
+- `claude-code-plugin-update-flow` — how an installed copy picks up what you
+  publish, and why a listing does not help if the version never moved.
+- `claude-code-codex-plugin-parity` — Codex has no self-serve marketplace
+  submission, so a dual-host plugin is distributed asymmetrically.

@@ -18,7 +18,7 @@ description: |
   NOT valid verification, and the release-tagging order for squash-merge
   repos.
 author: Claude Code
-version: 1.2.0
+version: 1.3.0
 date: 2026-08-17
 ---
 
@@ -202,3 +202,15 @@ the old one, containing the merged code.
 ## References
 
 - [Claude Code plugins](https://code.claude.com/docs/en/plugins)
+
+## Related
+
+- `claude-code-plugin-release-automation` — the author-side fix for what this
+  skill diagnoses: make the version bump non-optional in CI so a merge cannot
+  ship without one.
+- `claude-code-codex-plugin-parity` — the same cache-key-is-the-version rule on
+  Codex, which pins on its own manifest. Bump one and not the other and exactly
+  one host freezes, silently.
+- `claude-code-plugin-from-existing-repo` — the layout the cache mirrors.
+- `claude-json-mcp-migration-slice` — the neighbouring "which file actually
+  holds this state" question, for MCP config rather than plugin installs.
