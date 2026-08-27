@@ -13,7 +13,7 @@ description: |
   parity, the version-pin release discipline shared by both, the plugin-root
   env-var compatibility aliases, and the runtime-protocol caveat.
 author: Claude Code
-version: 1.1.0
+version: 1.2.0
 date: 2026-06-11
 ---
 
@@ -150,3 +150,17 @@ repo distributes to both ecosystems.
 - Codex changelog (plugin feature history): https://developers.openai.com/codex/changelog
 - Community plugin list + "no self-serve marketplace submission" note: https://github.com/hashgraph-online/awesome-codex-plugins
 - Claude Code plugin marketplaces (version resolution / SHA pinning): https://code.claude.com/docs/en/plugin-marketplaces
+
+## Related
+
+- `claude-code-plugin-from-existing-repo` — producing the Claude Code plugin
+  this skill ports.
+- `claude-code-plugin-python-bootstrap` — the hook-side concern that carries
+  across both hosts unchanged, unlike the manifests.
+- `claude-code-plugin-update-flow` — the Claude Code half of "why does the
+  install still run old code". Codex pins on its own manifest's version
+  independently, which is why the two must be bumped together.
+- `claude-code-plugin-release-automation` — automating that paired bump so the
+  two manifests cannot drift.
+- `agent-host-skill-loading` — the third case: a host with neither plugin
+  system, reading `SKILL.md` files directly.

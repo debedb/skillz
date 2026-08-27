@@ -12,7 +12,7 @@ description: |
   the plugin's hooks should reference. Covers coexistence of manual and
   plugin install via a shared source directory.
 author: Claude Code
-version: 1.0.0
+version: 1.1.0
 date: 2026-05-10
 ---
 
@@ -167,11 +167,29 @@ Total diff: 4 files, 76 insertions.
 - If a single repo ships ONE plugin and you don't already have a
   `dotclaude/` directory, set `source: "./"` and put everything at repo
   root — this is the common single-plugin-at-repo-root layout.
-- To enable issues on a fork before filing PR-related issues, see the
-  `gh-fork-issues-disabled` skill.
+- To enable issues on a fork before filing PR-related issues, see
+  `gh-fork-issues-disabled` in [voitta-ai/skillz-memory](https://github.com/voitta-ai/skillz-memory). It moved
+  there in skillz#91 as a memory-tier specific and is no longer a skill in
+  this catalog.
 
 ## References
 
 - [Claude Code plugins documentation](https://code.claude.com/docs/en/plugins)
 - Reference pattern: a single-plugin repo using `source: "./"` (everything at repo root)
 - Reference pattern: a repo using `source: "./dotclaude"` with manual-install coexistence
+
+## Related
+
+The plugin lifecycle, in the order you hit it. This skill is step one.
+
+- `claude-code-plugin-python-bootstrap` — next, if any hook you just packaged
+  imports a third-party module. `/plugin install` succeeds and the hook silently
+  no-ops on a machine without it.
+- `claude-code-codex-plugin-parity` — porting the result to Codex CLI, and what
+  the two plugin systems share versus what has to be written twice.
+- `claude-code-plugin-release-automation` — making the repo tag and publish
+  itself once it is a plugin, and making the version bump non-optional.
+- `claude-code-plugin-update-flow` — why an unbumped version means your merges
+  never reach anyone, which is the failure the step above exists to prevent.
+- `claude-code-plugin-publish-anthropic-marketplace` — getting listed in
+  Anthropic's directory, which is a submission, not a PR.

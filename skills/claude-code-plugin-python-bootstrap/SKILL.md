@@ -13,7 +13,7 @@ description: |
   `--user` then `--break-system-packages` fallback chain, and the
   never-break-session invariant.
 author: Claude Code
-version: 1.0.0
+version: 1.1.0
 date: 2026-05-11
 ---
 
@@ -167,3 +167,13 @@ the first Bash invocation after install.
 
 - [Claude Code plugin docs](https://code.claude.com/docs/en/plugins)
 - [PEP 668: externally-managed-environment](https://peps.python.org/pep-0668/)
+
+## Related
+
+- `claude-code-plugin-from-existing-repo` — turning the repo into a plugin in
+  the first place. This skill is the fix for the hook that comes with it.
+- `claude-code-codex-plugin-parity` — Codex runs the same `hooks.json`, so a
+  hook that bootstraps its own deps ports without change; the manifest around
+  it does not.
+- `claude-code-plugin-update-flow` — where an installed plugin's hook actually
+  runs from, which is the path your bootstrap has to be correct relative to.

@@ -20,7 +20,7 @@ description: |
   gate cannot see. Pairs with claude-code-plugin-update-flow, which
   explains why the version is load-bearing in the first place.
 author: Claude Code
-version: 1.0.0
+version: 1.1.0
 date: 2026-08-17
 ---
 
@@ -257,7 +257,9 @@ v1.0.1 is already tagged; nothing to release.
   while the REST API is fine. Fall back to
   `gh api repos/{owner}/{repo}/pulls -X POST -f title=... -F body=@body.md -f head=... -f base=...`
   and `gh api repos/{owner}/{repo}/pulls/{n}/merge -X PUT -f merge_method=squash`.
-  See `gh-pr-graphql-401-rest-fallback` for the same fallback under a 401.
+  See `gh-pr-graphql-401-rest-fallback` in
+  [voitta-ai/skillz-memory](https://github.com/voitta-ai/skillz-memory) for the same fallback under a 401. It
+  moved there in skillz#91 and is no longer a skill in this catalog.
 - This skill assumes the version field matters. If you have not read
   `claude-code-plugin-update-flow`, read it first — it explains why an
   unbumped version is a silent, permanent failure rather than untidy
@@ -269,3 +271,17 @@ v1.0.1 is already tagged; nothing to release.
 - [Events that trigger workflows — `paths-ignore`](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows)
 - [`gh release create`](https://cli.github.com/manual/gh_release_create)
 - [About protected branches — required status checks](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches)
+
+## Related
+
+- `claude-code-plugin-update-flow` — **read this first.** It is why an unbumped
+  version is a silent permanent failure rather than untidy bookkeeping, and
+  therefore why the gate this skill builds is worth building.
+- `claude-code-codex-plugin-parity` — the paired-manifest rule the release gate
+  has to enforce: Codex pins on its own version, so a bump that moves only the
+  Claude manifest freezes one host with no error.
+- `claude-code-plugin-from-existing-repo` — the repo shape this automation
+  assumes.
+- `claude-code-plugin-publish-anthropic-marketplace` — the separate,
+  human-reviewed step for directory listing. Automating your own tags does not
+  automate that.
