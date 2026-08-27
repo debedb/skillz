@@ -170,7 +170,7 @@
         "claude",
         "codex"
       ],
-      "summary": "Create or update a Confluence Cloud page when the Atlassian Rovo connector is read-only: the REST v2 fallback, probing which API-token env var actually works, resolving a numeric spaceId from a personal-space key, and the HTML+ to storage-format conversion table (including the named-entity parse trap). Also covers editing an existing macro-bearing page without destroying it - rewriting such a body through the MCP returns 200 and silently drops the macros, so the safe path is a surgical string replacement on the storage-format body."
+      "summary": "Create or update a Confluence Cloud page when the Atlassian Rovo connector is read-only - but check first that it still is, since the connector gets re-authorized and a writable site needs none of the fallback. Covers trying the MCP write first, the REST v2 fallback, probing which API-token env var actually works (and what to do when an agent-harness permission classifier blocks that probe for reading tokens from the environment), resolving a numeric spaceId from a personal-space key, and the HTML+ to storage-format conversion table (including the named-entity parse trap). Also covers editing an existing macro-bearing page without destroying it - rewriting such a body through the MCP returns 200 and silently drops the macros, so the safe path is a surgical string replacement on the storage-format body."
     },
     {
       "name": "continuous-learning",
