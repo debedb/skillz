@@ -12,7 +12,7 @@ description: |
   (workspaceId is NOT stable across restarts), and replaying a pane's stored
   resumeBinding through `cmux new-workspace`.
 author: Claude Code
-version: 1.1.0
+version: 1.2.0
 date: 2026-08-20
 source: https://github.com/voitta-ai/skillz
 source_file: skills/cmux-session-restore-forensics/SKILL.md
@@ -172,10 +172,18 @@ all. Replaying those 5 commands brought every one back.
   relaunching again to "see if it fixes itself".
 - The `cmux` CLI is often not on `PATH`; resolve it via
   `${CMUX_BUNDLED_CLI_PATH:-/Applications/cmux.app/Contents/Resources/bin/cmux}`.
-- Related: `cmux-autoresume-after-reboot` diagnoses the adjacent question of *why*
-  restore under-performed — cmux not relaunching at login, or the
-  `wasAgentRunning == false` gate making panes come back as fresh agents. Reach
-  for that one when panes return but have lost their conversation; reach for this
-  one when panes do not return at all and you want them back.
-- Related: `cmux-agent-tabs` (getting agents to appear as tabs in the first
-  place), `cmux-search` (searching across live panes and transcripts).
+
+## Related
+
+- `cmux-autoresume-after-reboot` — the adjacent question of *why* restore
+  under-performed: cmux not relaunching at login, or the
+  `wasAgentRunning == false` gate bringing panes back as fresh agents. Reach for
+  that one when panes return but have lost their conversation; reach for this one
+  when panes do not return at all and you want them back. It parses the same
+  session file as this skill and defers here for its layout.
+- `cmux-agent-tabs` — getting agents to appear as tabs in the first place, which
+  is what gives them a `resumeBinding` to recover.
+- `cmux-search` — searching across live panes and transcripts, including the
+  transcripts of a session whose pane did not come back.
+- `cmux-session-self-identity` — mapping a restored pane back to the session
+  running in it, after restore re-mints every `workspaceId`.

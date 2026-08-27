@@ -16,7 +16,7 @@ description: |
   `workspaceCommand` action hidden by `"restart": "restart"` (valid values are
   `ignore`/`confirm`/`recreate`, or omit).
 author: Claude Code
-version: 1.0.0
+version: 1.1.0
 date: 2026-08-26
 source: https://github.com/voitta-ai/skillz
 source_file: skills/cmux-config-silent-drop-triage/SKILL.md
@@ -162,3 +162,16 @@ intent behind the edit (omit `restart` = always create a new workspace).
 - cmux configuration docs: https://cmux.com/docs/configuration
 - cmux schema (tracks `main`):
   https://raw.githubusercontent.com/manaflow-ai/cmux/main/web/data/cmux.schema.json
+
+## Related
+
+- `cmux-agent-tabs` — what the actions and surface buttons in this config are
+  *for*: getting an agent onto a tab. A palette entry that silently drops is
+  one reason the tab never appears, and doctor will call the file fine.
+- `cmux-autoresume-after-reboot` — the other place `restart` reads as a process
+  word and is not one. Here it governs workspace-name collisions
+  (`ignore`/`confirm`/`recreate`); there the question is which panes come back
+  as live agents.
+- `cmux-session-restore-forensics` — when the config is right and the workspace
+  still is not what you expect, the next question is what happened to the
+  session rather than what the file says.
