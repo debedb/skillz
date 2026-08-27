@@ -14,7 +14,7 @@ description: |
   a workspace the session is no longer in. The bundled cmux CLI answers all of it
   authoritatively.
 author: Claude Code
-version: 1.0.0
+version: 1.1.0
 date: 2026-08-24
 source: https://github.com/voitta-ai/skillz
 source_file: skills/cmux-session-self-identity/SKILL.md
@@ -148,3 +148,17 @@ case, not an unusual one.
   sees the tab and the peer sees the session name.
 - Do not publish a real workspace/tab layout: names, UUIDs and pids together are
   infra topology. The examples here are invented.
+
+## Related
+
+- `cmux-agent-tabs` — why a session may have no cmux surface at all, in which
+  case the identity question has no answer rather than a wrong one.
+- `claude-code-cross-session-messaging` — the peer-addressing namespace this
+  skill's Notes warn is *different* from workspace and tab names. Resolve the
+  address there; resolve the surface here.
+- `cmux-cross-session-visibility` — the status pill a session maintains for its
+  own workspace, which needs the workspace id this skill resolves.
+- `cmux-search` — the inverse lookup: find the surface that holds a string,
+  rather than the surface you are in.
+- `cmux-session-restore-forensics` — why the ids you resolved stop matching
+  after a relaunch.

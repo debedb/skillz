@@ -11,7 +11,7 @@ description: |
   --scrollback` (tmux alias `capture-pane`), and grepping Claude/Codex agent
   transcripts on disk for full, clean conversation history.
 author: Claude Code
-version: 1.0.0
+version: 1.1.0
 date: 2026-06-10
 source: https://github.com/voitta-ai/skillz
 source_file: skills/cmux-search/SKILL.md
@@ -105,3 +105,13 @@ clean, full record is the transcript on disk:
 | Shallow built-in find | `cmux find-window --content <q>` |
 | Deep grep all panes | Recipe 1 |
 | Full agent history | Recipe 2 (transcripts on disk) |
+
+## Related
+
+- `cmux-session-self-identity` — this skill finds *which* surface holds a match;
+  that one answers the inverse, which surface you are currently in.
+- `cmux-agent-tabs` — why some agents have a searchable surface and some do not.
+  A search that finds nothing may be searching a set that never included the
+  agent.
+- `cmux-session-restore-forensics` — recovering the transcript of a session
+  whose pane is gone, which Recipe 2 can still search on disk.

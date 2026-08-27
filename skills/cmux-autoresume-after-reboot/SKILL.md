@@ -14,7 +14,7 @@ description: |
   login-time-vs-boottime trap, the decisive snapshot/argv checks, restore gating
   rules, and the manual-resume-script workaround.
 author: Claude Code
-version: 1.4.0
+version: 1.5.0
 date: 2026-06-19
 source: https://github.com/voitta-ai/skillz
 source_file: skills/cmux-autoresume-after-reboot/SKILL.md
@@ -217,5 +217,20 @@ the stale bindings self-repair on restore. Until then, use the reinstall + relau
 - The `--session-id` of a freshly launched agent will NOT match the saved
   `checkpointId`; that mismatch is the fingerprint of a fresh (non-resumed) launch.
 - Related upstream: #5802 (this gate), #4269 (gate origin), #4187 (focus-gating),
-  #2923 (reopen-after-laptop-off feature). Related skills: `cmux-diagnostics`,
-  `cmux-settings`.
+  #2923 (reopen-after-laptop-off feature).
+
+## Related
+
+- `cmux-session-restore-forensics` — **the reference for the state files this
+  skill parses.** Both read `session-com.cmuxterm.app.json` with the same
+  `windows[] -> tabManager.workspaces[] -> panels[]` shape; that skill owns the
+  description, plus three traps not covered here: `-previous.json` as the
+  recovery source, `closed-item-history-com.cmuxterm.app.json`'s Core Data epoch (seconds from
+  2001-01-01, so a close from last night reads as 1995), and `workspaceId` being
+  re-minted on restore, which makes any set-difference on it useless. The
+  shell-quoting trap in `resumeBinding.command` is the one thing both cover, and
+  they agree — match the UUID after `--resume`, never on plain spacing.
+- The two skills answer adjacent questions: reach for this one when panes come
+  back **fresh** or not at all after a reboot; reach for that one when panes came
+  back but you need to know **what the relaunch dropped** and get it back.
+- `cmux-agent-tabs` — why an agent has a pane to resume in the first place.

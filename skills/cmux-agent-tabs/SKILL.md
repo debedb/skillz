@@ -27,7 +27,7 @@ description: |
   resolves to `.../cmux-cli-shims/<uuid>/tmux` and you are not sure that is
   the shim.
 author: Claude Code
-version: 1.3.0
+version: 1.4.0
 date: 2026-08-26
 source: https://github.com/voitta-ai/skillz
 source_file: skills/cmux-agent-tabs/SKILL.md
@@ -390,3 +390,20 @@ cmux tab-action --action clear-name --tab surface:16        # revert to auto tit
 | Teammates wedge with no prompt | set `"teammateMode": "tmux"` in `~/.claude/settings.json` |
 | List surfaces + refs | `cmux tree --all` |
 | Rename a tab | `cmux tab-action --action rename --tab surface:N --title "..."` |
+
+## Related
+
+- `cmux-session-self-identity` — once an agent *has* a tab, working out which
+  one it is from inside the session. The environment lies in the same ways this
+  skill's `PATH` trap describes.
+- `cmux-session-restore-forensics` — what happens to those tabs across a
+  quit/relaunch, and how to recover the ones that do not come back. The
+  "resumed panes are a different, weaker case" section above is the short form.
+- `cmux-autoresume-after-reboot` — the reboot-specific version of the same
+  question, including the gate that returns panes as fresh agents.
+- `cmux-search` — grepping across every tab this skill helped you create.
+- `claude-code-cross-session-messaging` and `cmux-cross-session-visibility` —
+  addressing and watching the agents once they are on surfaces.
+- `cmux-config-silent-drop-triage` — when the palette action or surface button
+  that would create one of these tabs is defined, validates clean, and simply
+  is not there.
