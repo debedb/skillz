@@ -124,6 +124,7 @@ environments and older Codex versions.
 | [cmux-session-self-identity](./skills/cmux-session-self-identity/SKILL.md) | skill | Claude, Codex | Which workspace/tab am I in? `cmux identify` + `tree`, because the env vars conflate tab with workspace and go stale on resume |
 | [agent-traffic-log](./skills/agent-traffic-log/SKILL.md) | skill | Claude, Codex | Append-only JSONL log of agent-to-agent traffic + a live pane; lock-free concurrent appends, and `xs status` derives who is blocked from the events |
 | [terraform-noninteractive-prod-apply](./skills/terraform-noninteractive-prod-apply/SKILL.md) | skill | Claude, Codex | Non-interactive terraform **prod** apply when `apply.sh` has no `-auto-approve`: use `plan -out` + `apply <file>`, not `echo yes \|`, because a prompt-piped apply approves a plan terraform **recomputes** rather than the one you reviewed |
+| [cmux-config-silent-drop-triage](./skills/cmux-config-silent-drop-triage/SKILL.md) | skill | Claude, Codex | A cmux.json entry passes `config doctor` but never appears: doctor is syntax-only, so bisect the backups and read the `[CmuxConfig]` diagnostics and enum values off the binary's `strings` |
 
 Machine-readable index: [`catalog.json`](./catalog.json). The
 installer and validation script both read from it, so new entries

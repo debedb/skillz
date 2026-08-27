@@ -365,6 +365,11 @@
       "name": "llm-vendor-waterfall",
       "source": "./plugins/llm-vendor-waterfall/",
       "description": "Single-skill plugin: llm-vendor-waterfall."
+    },
+    {
+      "name": "cmux-config-silent-drop-triage",
+      "source": "./plugins/cmux-config-silent-drop-triage/",
+      "description": "Single-skill plugin: cmux-config-silent-drop-triage."
     }
   ]
 }
