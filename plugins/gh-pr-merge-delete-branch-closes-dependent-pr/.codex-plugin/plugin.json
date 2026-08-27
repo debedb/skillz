@@ -1,6 +1,6 @@
 {
   "name": "gh-pr-merge-delete-branch-closes-dependent-pr",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Deleting the branch on gh pr merge can auto-close a dependent PR stacked on it.",
   "author": "voitta-ai",
   "homepage": "https://github.com/voitta-ai/skillz",

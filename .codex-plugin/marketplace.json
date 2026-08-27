@@ -275,6 +275,11 @@
       "name": "cmux-config-silent-drop-triage",
       "source": "./plugins/cmux-config-silent-drop-triage/",
       "description": "Single-skill plugin: cmux-config-silent-drop-triage."
+    },
+    {
+      "name": "alb-per-rule-traffic-attribution",
+      "source": "./plugins/alb-per-rule-traffic-attribution/",
+      "description": "ALB publishes no per-listener-rule metric; access logs answer it, but matched_rule_priority is a position that renumbers."
     }
   ]
 }

@@ -18,15 +18,10 @@ description: |
   reopen the PR, retarget its base to your real target (usually main),
   optionally delete the recreated ref again. Hit twice in one session
   on a 3-PR stack (#82 → #71 → #84) because the gh-merge of each PR's
-  predecessor cascaded the close to the next. Also covers (4) the
-  fallback where you abandon the closed PR and open a replacement from
-  the same head branch — that path needs
-  `git rebase --onto origin/master <old-base-head> <branch>` first, or
-  the new PR's diff re-includes the whole already-merged base PR and
-  reads as a revert-and-reapply of someone else's work.
+  predecessor cascaded the close to the next.
 author: Claude Code
-version: 1.1.0
-date: 2026-08-14
+version: 1.2.0
+date: 2026-08-26
 ---
 
 # `gh pr merge --delete-branch` closes (not retargets) dependent PRs
@@ -120,6 +115,39 @@ After step 4:
 - The PR's review history, comments, and approvals are unchanged from
   before the close.
 
+## Alternative recovery: rebase and reopen as a new PR
+
+The ref-recreation recovery above preserves the PR number, its review
+history, comments and approvals. That is the right choice when any of
+those exist.
+
+When the closed PR has **no** review state worth keeping — nobody had
+reviewed or commented yet — it is simpler to rebase onto the real base
+and open a fresh PR:
+
+```bash
+cd <worktree-on-the-dependent-branch>
+git fetch origin
+git rebase origin/main        # parent's commits are recognised as
+                              # already applied and skipped, because the
+                              # parent was squash-merged into main
+git diff origin/main --stat   # verify only YOUR change remains
+git push --force-with-lease
+gh pr create --base main --head <branch> --title ... --body ...
+```
+
+The rebase prints `warning: skipped previously applied commit <sha>` for
+the parent's commits. That is expected and correct — squash-merging the
+parent put an equivalent change in `main`, and git recognises it.
+
+**Verify the diff before opening the PR.** If the rebase did *not* skip
+the parent's commits, the new PR will re-propose changes already in
+`main`.
+
+Trade-off: you lose the original PR number, so any Jira ticket, commit
+message or comment referencing it now points at a closed PR. Update those
+references, or use the ref-recreation path instead.
+
 ## Prevention
 
 Pre-emptively retarget downstream PRs **before** merging the upstream
@@ -169,54 +197,21 @@ which is usually expected on a stacked workflow anyway.
   approvals, no inline comments worth preserving), it's cleaner to
   let it stay closed and open a fresh PR from the same head branch
   against the correct base. The recovery procedure above is for when
-  you *do* want the history. **That fallback needs a rebase first —
-  see the next section.**
-
-## The fresh-PR fallback needs a rebase the recovery path doesn't
-
-If you take the "let it stay closed, open a fresh PR" route, do **not**
-push the head branch at the new base as-is. It still carries the base
-branch's original commits, while the target branch holds that same
-content as a *single squash commit*. Git sees two histories with no
-commits in common, so the replacement PR's diff re-includes the whole
-upstream PR — it reads as though you reverted and reapplied someone
-else's already-merged work.
-
-Drop the already-absorbed commits first:
-
-```bash
-# <old-base-head> = last commit of the branch that was merged and
-# deleted. Get it from the merged PR, or locally before it ages out:
-#   git rev-parse <deleted-branch>@{1}
-git rebase --onto origin/master <old-base-head> <feature-branch>
-
-# Confirm only your own change remains:
-git --no-pager diff origin/master --stat
-git --no-pager log --oneline origin/master..HEAD
-
-git push -f origin <feature-branch>
-gh pr create --base master --head <feature-branch> ...
-```
-
-Then comment on the auto-closed PR pointing at the replacement, so the
-old review history stays discoverable from it:
-
-```bash
-gh pr comment <closed-pr> --repo OWNER/REPO \
-  --body "Superseded by #<new>. Auto-closed when its base branch was
-deleted on merging #<base>; a closed PR whose base ref no longer exists
-cannot be reopened or retargeted."
-```
-
-**Why only this path needs it:** the recreate-the-ref recovery leaves the
-PR's own commits untouched and lets GitHub compare against the real base,
-where it resolves the duplicated content to an empty diff (see
-*Verification*). The fresh-PR path asks git to diff two histories that
-share content but no commits, which git cannot resolve on its own. That
-asymmetry is exactly why the rebase is easy to forget — the recovery path
-trains you to expect GitHub to sort it out.
+  you *do* want the history.
 
 ## Related skills
 
 - `multi-phase-feature-pr-worktrees` — stacked-PR worktree
   conventions where this trap is most likely to appear.
+
+## Related
+
+- `multi-phase-feature-pr-worktrees` — the stack this failure happens to: each
+  phase is a PR based on the previous one's branch, which is what makes a
+  `--delete-branch` merge cascade.
+- `git-simulate-sequential-merges` — deciding the merge order of a queue before
+  merging any of it, which is how you find out a stack exists in the first
+  place.
+- `git-pr-merge-unblock` — the other half of "the PR will not merge": states
+  with no error message, as opposed to this skill's state where the merge
+  succeeded and closed something else.
