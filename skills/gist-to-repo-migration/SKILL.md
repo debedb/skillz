@@ -16,7 +16,7 @@ description: |
   file pruning, frontmatter `source:` field rewrite, and the
   redirect-README pattern that points users at the new repo.
 author: Claude Code
-version: 1.0.0
+version: 1.1.0
 date: 2026-05-14
 ---
 
@@ -116,8 +116,11 @@ gist conventions, but the destination repo wants per-folder layout
 PR, not on master, so the migration commit graph stays clean.
 
 ```bash
-git worktree add -b feature/reorg-per-folder ../repo-wt-reorg origin/master
-cd ../repo-wt-reorg
+# Absolute path: a relative one resolves against the cwd and would nest
+# the worktree inside the repo. See `git-worktree-convention`.
+git worktree add -b feature/reorg-per-folder \
+  /path/to/repo.worktrees/feature/reorg-per-folder origin/master
+cd /path/to/repo.worktrees/feature/reorg-per-folder
 git mv SKILL_work-on-pr.md skills/work-on-pr/SKILL.md
 git mv SKILL_review-pr-loop.md skills/review-pr-loop/SKILL.md
 # update install.sh paths, README, frontmatter `source:` fields

@@ -3,7 +3,7 @@ name: review-pr-loop
 description: |
   Iteratively review a GitHub pull request across multiple rounds. Each round, read the linked issue(s), prior review comments, issue comments, and inline threads before reviewing only the new diff or the author's latest response. If no author response exists yet, wait and re-check instead of exiting. Leave structured feedback (REQUEST_CHANGES, COMMENT, or APPROVE) and continue until you approve, the PR is merged or closed, or the user stops the loop. Use when you are the reviewer on a non-trivial PR and want the agent to own the back-and-forth review cycle rather than doing a one-shot review.
 author: Claude Code
-version: 1.6.0
+version: 1.7.0
 date: 2026-06-22
 source: https://github.com/voitta-ai/skillz
 source_file: skills/review-pr-loop/SKILL.md
@@ -512,17 +512,21 @@ Use a fresh worktree on the PR's branch instead:
 ```
 git -C <main-repo> fetch origin \
   <pr-branch>:refs/remotes/origin/<pr-branch>
-git -C <main-repo> worktree add <main-repo>-mergetest-<N> \
-  origin/<pr-branch>
-git -C <main-repo>-mergetest-<N> merge --no-edit origin/master
+git -C <main-repo> worktree add \
+  <main-repo>.worktrees/mergetest-<N> origin/<pr-branch>
+git -C <main-repo>.worktrees/mergetest-<N> merge --no-edit origin/master
 # verify, then:
-git -C <main-repo> worktree remove <main-repo>-mergetest-<N>
+git -C <main-repo> worktree remove <main-repo>.worktrees/mergetest-<N>
 ```
 
 One git operation per Bash tool call, no `rm -rf`, no clone, and
-the worktree path is local to the original repo so cleanup is
-`git worktree remove`. The same `git -C * <subcommand>` allow
-patterns from `work-on-pr` cover most of this; `git -C * merge`
+the worktree is registered against the original repo so cleanup is
+`git worktree remove`. The path is the sibling
+`<repo>.worktrees/` directory from `git-worktree-convention`, and
+it must be **absolute** — a relative path resolves against the cwd
+and nests the worktree inside the repo. The same
+`git -C * <subcommand>` allow patterns from `work-on-pr` cover
+most of this; `git -C * merge`
 and `git -C * worktree add/remove` are the remaining shapes that
 may prompt.
 
