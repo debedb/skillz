@@ -20,10 +20,15 @@ description: |
   an invisible real tmux server; (8) every teammate wedges with no output, no
   error and no permission dialog because teammate mode resolved to
   `in-process`; (9) you need to tell a wedged transport apart from an agent
-  that was never launched at all.
+  that was never launched at all; (10) teammates DID tab but every tab is
+  titled by agent type (`general-purpose`, `general-purpose`, ...) instead of
+  the name you gave it; (11) teammates stack vertically in one column and you
+  want to know whether cmux or Claude Code chose that; (12) `which tmux`
+  resolves to `.../cmux-cli-shims/<uuid>/tmux` and you are not sure that is
+  the shim.
 author: Claude Code
-version: 1.2.0
-date: 2026-08-20
+version: 1.3.0
+date: 2026-08-26
 source: https://github.com/voitta-ai/skillz
 source_file: skills/cmux-agent-tabs/SKILL.md
 ---
@@ -85,6 +90,13 @@ addressable by name via `SendMessage`:
 ```
 So: **teammate spawning + `cmux claude-teams` => cmux tabs; Agent tool => native
 agent list.** Diagnose the spawn path before re-launching the session.
+
+**Version note (Claude Code 2.1.24x):** with agent teams enabled, an Agent-tool
+call that carries a `name` (`Agent(name: "pinger", subagent_type:
+"general-purpose", ...)`) is a *teammate* spawn and **does** tab - the lead
+reports "2 background agents launched" and two panes open through the shim.
+The never-tabs case above is the unnamed subagent. Look at the `Agent` input
+in the transcript before concluding which path was taken.
 
 ## Diagnose in 5 seconds
 Run inside the session's shell:
@@ -149,6 +161,22 @@ export PATH="$HOME/.cmuxterm/claude-teams-bin:$PATH"
 `PATH` position 1 itself. The prepend is belt-and-braces on current builds, not
 the load-bearing fix - which matters, because assuming it is the fix sends you
 looking in the wrong place.
+
+**Version note (cmux 0.64.22): the shim moved.** `cmux claude-teams` now writes
+`tmux` into the launching surface's private shim directory,
+`$TMPDIR/cmux-cli-shims/<surface-uuid>/` (next to the `claude` and `codex`
+wrappers it already keeps there), and puts that directory first on `PATH`. In a
+real team lead, `which tmux` resolves there, not to
+`~/.cmuxterm/claude-teams-bin/tmux`. Consequences:
+
+- A `which tmux` pre-flight must accept **either** location as "shim present".
+- Anything you hang on the legacy path - a logging wrapper, an
+  `CMUX_CLAUDE_TEAMS_CMUX_BIN` export in the workspace command - never runs.
+  A wrapper installed there logged zero bytes through a real spawn. The
+  per-surface shim honours `CMUX_CLAUDE_TEAMS_CMUX_BIN` only if it is set in
+  the *teammate's* environment, and `cmux claude-teams` sets it itself.
+- The old directory still exists and still works when reached; it is simply
+  no longer what gets called.
 
 A same-session `export PATH=` does **not** help: the parent `claude` already
 resolved its environment, and each teammate spawn does a fresh `execvp("tmux")`
@@ -268,6 +296,52 @@ costs real safety.
   cmux hooks setup codex        # also: grok, gemini, opencode, amp, cursor, ...
   ```
 
+## Tabs titled by agent type, not by name
+
+Symptom: teammates tab, but every tab reads `general-purpose` (or whatever
+`subagent_type` was), and only the pane's own footer shows `@pinger`.
+
+Claude Code's tmux backend names each teammate pane right after creating it:
+
+```
+split-window -d -t <leader> -h -l 70% -P -F '#{pane_id}' -- <cmd>
+select-pane -t <pane> -T <name>
+set-option -p -t <pane> pane-border-format '#[fg=<color>,bold] #{pane_title} #[default]'
+```
+
+cmux's compat layer (through 0.64.22) accepts `select-pane -T` with exit 0 and
+does nothing. Check it yourself, on your own tab, and it is harmless:
+
+```bash
+P=$(cmux __tmux-compat display-message -p '#{pane_id}')
+cmux __tmux-compat select-pane -t "$P" -T probe; echo rc=$?   # rc=0
+cmux list-panels                                             # title unchanged
+```
+
+So the name is dropped and the tab falls back to the auto-title, which is the
+teammate TUI's identity line `@<agent_type>`. Five agents of one type give five
+identical tabs.
+
+- **Workaround that sticks:** `cmux tab-action --action rename --tab surface:N
+  --title <name>` after each spawn (custom names beat auto-titles).
+- **Upstream:** manaflow-ai/cmux#10190, fixed by PR #10198 (merged
+  2026-08-17) by reading `--agent-name` from the teammate's argv - not by
+  honouring `-T`, which stays a no-op. Unreleased as of 0.64.22; the same PR
+  also runs teammate respawns through `/bin/sh -lc`, so teammate hooks get the
+  login `PATH` (until then, hooks that call bare `node` fail in teammate
+  panes with `/bin/sh: node: command not found`).
+
+## The vertical stack is Claude Code's layout, not cmux's
+
+Teammates appear stacked in one column to the right of the leader. That is the
+layout Claude Code asks for, faithfully applied: first teammate
+`split-window -h -l 70%` off the leader; each later one splits the *middle*
+teammate (`-v` on odd counts, `-h` on even); then `select-layout main-vertical`
+and `resize-pane -x 30%` on the leader. There is no Claude-side setting for it
+(`main-horizontal`, `teammateLayout` do not exist in the binary; the only knob
+in that area is `CLAUDE_CODE_TEAMMATE_COMMAND`). Rearranging is a cmux action
+after the spawn, and a feature request in either project, not a config fix.
+
 ## Name and rename tabs from the CLI
 Consistent naming makes a multi-agent run legible. A useful convention is
 `<project>-<issue>-<role>` (e.g. `dd-93-dev`, `dd-93-rev`, `dd-93-qa`).
@@ -301,7 +375,10 @@ cmux tab-action --action clear-name --tab surface:16        # revert to auto tit
 | Goal | Command |
 |---|---|
 | Claude teammates -> cmux tabs | launch via `cmux claude-teams ...` |
-| Claude Agent-tool subagents | never tab - watch in the native agent list, steer via `SendMessage` |
+| Claude Agent-tool subagents | unnamed: never tab - native agent list, steer via `SendMessage`. Named (`Agent(name: ...)`, 2.1.24x + agent teams): teammates, they tab |
+| Tabs all say `general-purpose` | cmux <= 0.64.22 ignores `select-pane -T`; rename with `cmux tab-action --action rename`, or update past cmux PR #10198 |
+| Teammates stacked in a column | Claude Code's `main-vertical` layout; no setting |
+| `which tmux` -> `.../cmux-cli-shims/<uuid>/tmux` | the shim, on 0.64.22+ (moved from `~/.cmuxterm/claude-teams-bin`) |
 | Codex agents -> cmux tabs | `cmux codex-teams ...` or `cmux hooks setup codex` |
 | Is the Claude bridge active? | `which tmux` (shim present) + `TMUX` set |
 | Can I name tabs at all? | `which cmux` (CLI present, separate from the shim) |

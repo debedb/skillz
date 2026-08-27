@@ -78,15 +78,21 @@ def read_payload():
 def sender_name(payload):
     """Identity, in decreasing confidence.
 
-    `agent_type` is present only inside a subagent, and it is the agent's type
-    (or custom agent name), not its per-instance name - so it groups a role
-    rather than pinpointing an instance. That is the right granularity for
-    reading a run: "the reviewer asked the developer" is the question, not
-    which reviewer object. Outside a subagent, fall through and let xs apply
-    its own $XS_NAME / $CMUX_TAB_TITLE resolution."""
+    Inside a teammate the payload carries `agent_id` ("<name>@<team>") and
+    `agent_type`. Prefer the name: on the first real team run two teammates of
+    the same type (pinger, ponger) both logged as `general-purpose`, and a log
+    where every line reads "general-purpose -> pinger" cannot tell who spoke.
+    Fall back to the type when there is no name, which still groups a role.
+    Outside a subagent, fall through and let xs apply its own $XS_NAME /
+    $CMUX_TAB_TITLE resolution."""
     explicit = os.environ.get("XS_NAME")
     if explicit:
         return explicit
+    agent_id = payload.get("agent_id") or ""
+    if "@" in agent_id:
+        name = agent_id.split("@", 1)[0].strip()
+        if name:
+            return name
     retval = payload.get("agent_type") or ""
     return retval
 
