@@ -727,6 +727,15 @@
         "codex"
       ],
       "summary": "Move Jira issues through a customised workflow via the REST API. Covers why transition ids are per-SOURCE-status (the same destination has a different id from a different status), multi-hop walks when there is no direct edge, setting required fields at the right hop, sprint membership as an ordinary field entirely independent of status, why transition-screen allowedValues is a truncated subset rather than the vocabulary, and verifying by whole-batch read-back."
+    },
+    {
+      "name": "grafana-cloudwatch-cross-region-dashboards",
+      "path": "skills/grafana-cloudwatch-cross-region-dashboards/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Port or extend Grafana dashboards that query CloudWatch across AWS regions: {{Dim}} legend syntax never substitutes (use ${PROP('Dim.X')}), per-target region overrides defaultRegion with no new datasource or IAM, region-NAMED custom namespaces exist only in their own region, SEARCH matches dimension schemas exactly and has no regex, and every expression can be pre-validated verbatim through aws cloudwatch get-metric-data."
     }
   ],
   "collections": [
@@ -825,7 +834,8 @@
         "work-on-pr",
         "dashboard-query-preflight",
         "dropwizard-prometheus-scrape-endpoint",
-        "jira-transition-and-sprint-mechanics"
+        "jira-transition-and-sprint-mechanics",
+        "grafana-cloudwatch-cross-region-dashboards"
       ],
       "summary": "Bundle: every catalog skill in one plugin, except skills whose own plugin ships hooks - install those plugins directly."
     },
@@ -1700,6 +1710,19 @@
         "jira-transition-and-sprint-mechanics"
       ],
       "summary": "Single-skill plugin: jira-transition-and-sprint-mechanics."
+    },
+    {
+      "name": "grafana-cloudwatch-cross-region-dashboards",
+      "claude_manifest": "plugins/grafana-cloudwatch-cross-region-dashboards/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/grafana-cloudwatch-cross-region-dashboards/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "grafana-cloudwatch-cross-region-dashboards"
+      ],
+      "summary": "Single-skill plugin: grafana-cloudwatch-cross-region-dashboards."
     }
   ],
   "defaults": {

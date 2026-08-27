@@ -340,6 +340,11 @@
       "name": "jira-transition-and-sprint-mechanics",
       "source": "./plugins/jira-transition-and-sprint-mechanics/",
       "description": "Drive a customised Jira workflow over REST: transition ids are per-SOURCE-status, and sprint is a field independent of status."
+    },
+    {
+      "name": "grafana-cloudwatch-cross-region-dashboards",
+      "source": "./plugins/grafana-cloudwatch-cross-region-dashboards/",
+      "description": "Port or extend Grafana dashboards that query CloudWatch across AWS regions, and fix their {{Dim}} legends."
     }
   ]
 }
