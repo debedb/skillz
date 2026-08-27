@@ -582,6 +582,15 @@
         "codex"
       ],
       "summary": "Serve one LLM call from an ordered list of vendors so a rate limit, a dead key, or an out-of-credits account fails over instead of failing the request. Covers the ordered-config to LiteLLM Router mapping, which Router knobs earn their keep (cooldown_time, allowed_fails, context_window_fallbacks, per-deployment budgets) and which to leave alone, the invisible dead fallback that reads as random flakiness, what must not be waterfalled, and how to prove failover actually happens."
+    },
+    {
+      "name": "cmux-config-silent-drop-triage",
+      "path": "skills/cmux-config-silent-drop-triage/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Find out why a cmux.json entry that passes `cmux config doctor` never shows up in the palette, plus-button menu or tab bar. Doctor is syntax-only, the schema is additionalProperties: true, and the unified log stays silent - so the working oracles are a backup-diff bisect, the binary's own [CmuxConfig] diagnostics, and enum triads read straight off `strings`. Worked example: a workspaceCommand action hidden by `\"restart\": \"restart\"` (valid: ignore/confirm/recreate, or omit for a new workspace each time)."
     }
   ],
   "collections": [
@@ -668,7 +677,8 @@
         "terraform-noninteractive-prod-apply",
         "llm-vendor-waterfall",
         "confluence-rovo-mcp-readonly-rest-fallback",
-        "github-actions-startup-failure-triage"
+        "github-actions-startup-failure-triage",
+        "cmux-config-silent-drop-triage"
       ],
       "summary": "Full repo bundle: every skill in one plugin."
     },
@@ -1350,6 +1360,19 @@
         "llm-vendor-waterfall"
       ],
       "summary": "Single-skill plugin: llm-vendor-waterfall."
+    },
+    {
+      "name": "cmux-config-silent-drop-triage",
+      "claude_manifest": "plugins/cmux-config-silent-drop-triage/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/cmux-config-silent-drop-triage/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "cmux-config-silent-drop-triage"
+      ],
+      "summary": "Single-skill plugin: cmux-config-silent-drop-triage."
     }
   ],
   "defaults": {
