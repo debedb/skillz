@@ -4,12 +4,17 @@ description: |
   Claudeception is a continuous learning system that extracts reusable knowledge from work sessions.
   Triggers: (1) /claudeception command to review session learnings, (2) "save this as a skill"
   or "extract a skill from this", (3) "what did we learn?", (4) After any task involving
-  non-obvious debugging, workarounds, or trial-and-error discovery. Creates new Claude Code
-  skills when valuable, reusable knowledge is identified. Repeatable, broadly-useful
+  non-obvious debugging, workarounds, or trial-and-error discovery. Creates new skills, on
+  either host, when valuable reusable knowledge is identified. Repeatable, broadly-useful
   procedures are promoted into the public skillz catalog via a pull request; specific
-  recollections (one-off fixes, gotchas, project quirks) go to memory instead.
+  recollections (one-off fixes, gotchas, project quirks) go to memory instead. Owns the
+  **Wiring procedure** for that promotion - `catalog.json`, the bundle's per-host symlinks,
+  the optional single-skill plugin, and the version bumps CI requires - which is the one
+  copy both hosts follow. On Codex the same retrospective is driven by `Stop` and
+  `UserPromptSubmit` hooks instead of an explicit call; that entry point is
+  `continuous-learning`, which defers here for the classification and the wiring.
 author: Claude Code
-version: 4.0.0
+version: 4.1.0
 date: 2026-06-14
 source: https://github.com/voitta-ai/skillz
 source_file: skills/claudeception/SKILL.md
@@ -200,6 +205,10 @@ recollection?**
   fact per file, with `name`/`description` frontmatter) and stop. **Most session
   learnings are memory, not skills.**
 
+This classification is shared with `continuous-learning`, the Codex-hook-driven
+form of the same retrospective. Both must answer identically for the same
+learning; a divergence is a defect in one of them, not a host difference.
+
 For a **skill**, decide where it lives:
 
 1. **Project-specific** — only meaningful inside this one codebase. Save to
@@ -247,15 +256,43 @@ is missing, clone it first. Always branch from `master`.)
 2. **Register in `catalog.json`**: add a `skills` entry
    (`{ "name", "path": "skills/NAME/SKILL.md", "hosts": [...], "summary": "..." }`) and
    add `NAME` to the `skillz` bundle plugin's `skills` list.
-3. **Symlink into the bundle**: `REPO/plugins/skillz/skills/NAME` -> `../../../skills/NAME`.
-4. **Single-skill plugin** (the repo keeps one per skill): mirror an existing
-   `plugins/<name>/` dir (both `.claude-plugin` and `.codex-plugin` manifests + the
-   `skills/NAME` symlink) and add its `catalog.json` `plugins` entry.
-5. **Update marketplace + README**: add `NAME` to the bundle description in
-   `.claude-plugin/marketplace.json` and `.codex-plugin/marketplace.json`, and add a
-   README catalog row.
-6. **Validate**: run `REPO/scripts/validate-catalog.sh`; fix until it prints `OK`.
-7. **Branch, commit, PR**: from `master`, branch `add-skill-NAME`, commit, push, open a
+3. **Symlink into the bundle, once per host.** The bundle keeps a separate
+   directory per host and the symlinks must match the `hosts` declared in step 2:
+
+   ```bash
+   ln -s ../../../skills/NAME REPO/plugins/skillz/skills-claude/NAME   # if hosts has "claude"
+   ln -s ../../../skills/NAME REPO/plugins/skillz/skills-codex/NAME    # if hosts has "codex"
+   ```
+
+   There is no `plugins/skillz/skills/` and there must not be: Claude Code
+   always *also* scans a default `skills/` dir alongside whatever the manifest
+   names, so a stray one would re-expose every skill to both hosts.
+   `validate-catalog.sh` fails on it by name.
+4. **Single-skill plugin — optional.** It is what lets someone install this one
+   skill without the bundle. Mirror an existing `plugins/<name>/`: both
+   `.claude-plugin` and `.codex-plugin` manifests plus a `skills/NAME` symlink
+   (single-skill plugins use a plain `skills/` dir — the split above is the
+   bundle's problem, not theirs), and add a `catalog.json` `plugins` entry.
+   Skipping it is normal and common; a fifth of the catalog ships bundle-only.
+5. **README row.** Add one to the README catalog table. The bundle's
+   marketplace description does not enumerate skills, so the two
+   `marketplace.json` files need an edit **only if** step 4 produced a plugin —
+   in which case add its entry to *both* of them, since a plugin advertised on
+   one host and not the other is installable on one host only.
+6. **Bump versions. CI fails the PR without this.** A version is the install
+   cache key, so leaving one unchanged means no install ever re-extracts and
+   every user silently keeps the old copy:
+   - `plugins/skillz/.claude-plugin/plugin.json` **and** its `.codex-plugin`
+     twin must both advance past master's, and must equal each other.
+   - Every plugin whose content the diff touches bumps too. A plugin you just
+     created starts at `1.0.0` and needs nothing further.
+   - Editing an *existing* skill also bumps that `SKILL.md`'s own frontmatter
+     `version:`, which is separate from the packaging version.
+
+   `python3 scripts/check-plugin-version-bumps.py origin/master` is the same
+   check CI runs, and it reads the working tree, so run it before committing.
+7. **Validate**: run `REPO/scripts/validate-catalog.sh`; fix until it prints `OK`.
+8. **Branch, commit, PR**: from `master`, branch `add-skill-NAME`, commit, push, open a
    PR with `gh pr create`. The PR is the review gate — do **not** self-merge; report the
    URL and ask for review.
 
@@ -427,3 +464,13 @@ If yes to any, invoke this skill immediately.
 
 Remember: The goal is continuous, autonomous improvement. Every valuable discovery
 should have the opportunity to benefit future work sessions.
+
+## Related
+
+- `continuous-learning` — the same retrospective driven by Codex `Stop` and
+  `UserPromptSubmit` hooks instead of an explicit invocation. The trigger
+  differs; the rules do not. It defers to the **Wiring procedure** above for
+  anything promoted to `voitta-ai/skillz`, so that section is the single copy
+  and this file owns it.
+- `agent-host-skill-loading` — reaching a third host that has neither of the
+  above, by loading `SKILL.md` files directly.
