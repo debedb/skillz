@@ -425,6 +425,11 @@
       "name": "codex-hook-wire-schema-from-binary",
       "source": "./plugins/codex-hook-wire-schema-from-binary/",
       "description": "Read the Codex CLI hook contract out of the shipped native binary with strings rather than a live probe turn:"
+    },
+    {
+      "name": "credential-redactor-audit",
+      "source": "./plugins/credential-redactor-audit/",
+      "description": "Audit a credential-redaction layer you own: find the holes a normal test suite misses (fixtures that hide the bug, patterns that bypass the value guard, dropped overlap spans, non-idempotence, backwards allow-lists, fail-open imports), then scrub what already leaked."
     }
   ]
 }
