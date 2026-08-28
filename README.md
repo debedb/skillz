@@ -146,7 +146,6 @@ environments and older Codex versions.
 | [`dropwizard-prometheus-scrape-endpoint` plugin](./plugins/dropwizard-prometheus-scrape-endpoint/) | plugin | Claude, Codex | Single-skill plugin: dropwizard-prometheus-scrape-endpoint |
 | [dashboard-query-preflight](./skills/dashboard-query-preflight/SKILL.md) | skill | Claude, Codex | Execute every panel's query against the live datasource before calling a dashboard done - a wrong query and an idle workload both render as an empty rectangle, so "it renders" is evidence of nothing |
 | [`dashboard-query-preflight` plugin](./plugins/dashboard-query-preflight/) | plugin | Claude, Codex | Single-skill plugin: dashboard-query-preflight |
-| [grafana-cloudwatch-cross-region-dashboards](./skills/grafana-cloudwatch-cross-region-dashboards/SKILL.md) | skill | Claude, Codex | Grafana dashboards over CloudWatch cross-region: ${PROP} legends, per-target region override, region-named namespaces, SEARCH pre-validation via get-metric-data |
 
 Machine-readable index: [`catalog.json`](./catalog.json). The
 installer and validation script both read from it, so new entries
