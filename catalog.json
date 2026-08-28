@@ -13,6 +13,15 @@
       "summary": "Find and clean the seven local surfaces where a coding agent accumulates copies of your secrets (git remote URLs, memory stores, file-history snapshots, tool config literals, permission allowlists, tool-output caches, and OS credential stores a filesystem sweep cannot see). Covers why prefix-grep gives false confidence, why a prefix-anchored pattern needs a left boundary, and why keyword-adjacency redaction loses to prose."
     },
     {
+      "name": "agent-host-skill-loading",
+      "path": "skills/agent-host-skill-loading/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Make a non-Claude, non-Codex agent host load skillz-format SKILL.md files: two-stage disclosure (menu line in the system prompt, body behind a load_skill tool) with the measured cost of each alternative, block-scalar-safe frontmatter parsing, ordered-path precedence with shadow reporting, refresh without restart and its turn-boundary gotcha, and why the reload belongs behind a privilege gate."
+    },
+    {
       "name": "agent-session-credential-audit",
       "path": "skills/agent-session-credential-audit/SKILL.md",
       "hosts": [
@@ -31,6 +40,37 @@
       "summary": "Run a team of agents over a repo's open issues: architect plans the parallel set, per-issue squads (dev + adversarial reviewer + SDET + productivity engineer), each individually watchable."
     },
     {
+      "name": "agent-traffic-log",
+      "path": "skills/agent-traffic-log/SKILL.md",
+      "files": [
+        "scripts/xs",
+        "scripts/xs-hook"
+      ],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "An append-only JSONL event log of agent-to-agent traffic plus a live pane over it, giving a fleet an org-wide view instead of N private conversations. No daemon and no lock: concurrent appends are safe because a single write of under PIPE_BUF bytes to an O_APPEND descriptor cannot interleave, verified at 24 concurrent writers producing 960 lines with zero torn. Ships scripts/xs with log, tail, recent, status (who is waiting on whom, derived from events rather than tracked), and prune. Includes the acceptance test that only a real team run can satisfy."
+    },
+    {
+      "name": "alb-per-rule-traffic-attribution",
+      "path": "skills/alb-per-rule-traffic-attribution/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Attribute ALB traffic to individual listener rules and callers: AWS/ApplicationELB has no rule-level dimension, and matched_rule_priority in access logs is a POSITION that renumbers when a rule is inserted, silently mislabelling any query spanning that deploy; attribute by request_url + user_agent instead"
+    },
+    {
+      "name": "archive-today-fetcher-hierarchy",
+      "path": "skills/archive-today-fetcher-hierarchy/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Reach archive.today when automation is refused, cite it reproducibly, and send a truthful user agent."
+    },
+    {
       "name": "aws-http-server-on-lambda-web-adapter",
       "path": "skills/aws-http-server-on-lambda-web-adapter/SKILL.md",
       "hosts": [
@@ -40,6 +80,24 @@
       "summary": "Host an unmodified HTTP server (incl. LLM-proxy demos) as a scale-to-zero Lambda via the Web Adapter; Function-URL-403 fallback to API Gateway and its 30s-cap latency tradeoff; cost guardrails."
     },
     {
+      "name": "chrome-localhost-mic-autoblock",
+      "path": "skills/chrome-localhost-mic-autoblock/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Fix a web app's mic failing in Chrome with a not-allowed error on localhost even though the OS granted Chrome mic access: Chrome auto-blocks the mic per-site and the OS Privacy toggle / Chrome restart never clears it; set the site to Allow."
+    },
+    {
+      "name": "chrome-not-secure-tls-interception",
+      "path": "skills/chrome-not-secure-tls-interception/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Diagnose Chrome's \"Your connection to this site is not secure\" on a major site (gmail.com, google.com, github.com) on a machine behind a corporate TLS-inspecting proxy (Zscaler, Netskope, Palo Alto, Blue Coat). Use when: (1) Chrome's site-info bubble shows the red triangle and \"You should not enter any sensitive information on this site\", (2) a CLI `openssl`/`curl` check of the same host looks perfectly clean and you cannot reproduce the browser's complaint, (3) you are about to tell someone their proxy is MITM-ing them. Covers the PAC-proxy blind spot in CLI checks, how to read the intercepted chain, and \u2014 critically \u2014 why a forged proxy certificate with zero SCTs is the NORMAL steady state and usually NOT the cause."
+    },
+    {
       "name": "claude-code-codex-plugin-parity",
       "path": "skills/claude-code-codex-plugin-parity/SKILL.md",
       "hosts": [
@@ -47,6 +105,15 @@
         "codex"
       ],
       "summary": "Port a Claude Code plugin to the Codex CLI (or back); where the two plugin systems match vs diverge, and the shared hooks.json caveats."
+    },
+    {
+      "name": "claude-code-cross-session-messaging",
+      "path": "skills/claude-code-cross-session-messaging/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Talk to a Claude Code session that is already running via the native ListAgents + SendMessage pair instead of a headless `claude -p` call or a terminal-scraping bridge. Covers addressing (the name is the address; refs do not survive outside the listing that produced them), the idle-subscription primitive that replaces every polling loop, the no-TTY law that makes headless and in-process transports wedge silently rather than fail, multi-hop transport dependency failures, the per-session permission boundary that forbids delegating around your own denials, and the honest dividing line where a launch-a-callee tool is still the right answer."
     },
     {
       "name": "claude-code-plugin-from-existing-repo",
@@ -76,15 +143,6 @@
       "summary": "Bootstrap Python deps from a Claude Code plugin hook so /plugin install is one-click on systems lacking them (PEP 668-safe)."
     },
     {
-      "name": "claude-code-plugin-update-flow",
-      "path": "skills/claude-code-plugin-update-flow/SKILL.md",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "summary": "Why `claude plugin update` reports \"up to date\" while the plugin still runs stale code: the install cache is keyed by plugin.json#version. Authors bump on every shipping merge; verify against the cache dir, never the marketplace clone."
-    },
-    {
       "name": "claude-code-plugin-release-automation",
       "path": "skills/claude-code-plugin-release-automation/SKILL.md",
       "hosts": [
@@ -92,6 +150,15 @@
         "codex"
       ],
       "summary": "Tag and publish release notes automatically from a plugin repo's manifest version, with CI enforcing the bump."
+    },
+    {
+      "name": "claude-code-plugin-update-flow",
+      "path": "skills/claude-code-plugin-update-flow/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Why `claude plugin update` reports \"up to date\" while the plugin still runs stale code: the install cache is keyed by plugin.json#version. Authors bump on every shipping merge; verify against the cache dir, never the marketplace clone."
     },
     {
       "name": "claude-json-mcp-migration-slice",
@@ -141,6 +208,37 @@
       "summary": "Diagnose why cmux does not resume agent sessions after a macOS reboot even though terminal.autoResumeAgentSessions is enabled."
     },
     {
+      "name": "cmux-claude-codex-cross-runtime-messaging",
+      "path": "skills/cmux-claude-codex-cross-runtime-messaging/SKILL.md",
+      "files": [
+        "scripts/pp-send",
+        "scripts/pp-register"
+      ],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Run a Claude Code agent and a Codex CLI agent as messaging peers in cmux panes, each named as a tab and both in the agent traffic log. Codex has no SendMessage and Claude's peer socket needs auth, so the cross-runtime hop is keystroke injection (cmux send + send-key Enter) through a small helper that also logs to xs explicitly; each agent names its own tab first via cmux identify + tab-action rename. Covers the Codex TUI parking on a startup modal with no way to read its screen (diagnose from ~/.codex logs and the missing rollout file, inject one Enter), and where the lead, teammate and Codex transcripts live on disk afterwards. Verified 2026-08-27: five rounds in 50 s, every message exactly once."
+    },
+    {
+      "name": "cmux-config-silent-drop-triage",
+      "path": "skills/cmux-config-silent-drop-triage/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Find out why a cmux.json entry that passes `cmux config doctor` never shows up in the palette, plus-button menu or tab bar. Doctor is syntax-only, the schema is additionalProperties: true, and the unified log stays silent - so the working oracles are a backup-diff bisect, the binary's own [CmuxConfig] diagnostics, and enum triads read straight off `strings`. Worked example: a workspaceCommand action hidden by `\"restart\": \"restart\"` (valid: ignore/confirm/recreate, or omit for a new workspace each time)."
+    },
+    {
+      "name": "cmux-cross-session-visibility",
+      "path": "skills/cmux-cross-session-visibility/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Make agent-to-agent traffic visible to the human watching: a structured SendMessage envelope (kind + direction + topic in the summary field, plus a one-line header that survives raw transcripts) paired with a cmux sidebar status pill per workspace showing whether a session is waiting on a peer or owes one an answer. Covers why spawned teams are cross-workspace traffic by construction (tmux-compat maps a window to a workspace), why the pill key must not collide with cmux's own claude_code key, and the stale-pill failure mode plus every exit that must clear it."
+    },
+    {
       "name": "cmux-search",
       "path": "skills/cmux-search/SKILL.md",
       "hosts": [
@@ -148,6 +246,24 @@
         "codex"
       ],
       "summary": "Search all open cmux workspaces/tabs/panes - live scrollback + agent transcripts."
+    },
+    {
+      "name": "cmux-session-restore-forensics",
+      "path": "skills/cmux-session-restore-forensics/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Diagnose what cmux actually restored after a relaunch and recover panes it silently dropped."
+    },
+    {
+      "name": "cmux-session-self-identity",
+      "path": "skills/cmux-session-self-identity/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Determine which cmux workspace, tab and surface a session is actually running in, and map other live sessions to theirs. Never answer from CMUX_* env vars: the tab and workspace variables can carry the same id (so tab identity is not in the environment at all), and on a resumed session they are a stale launch-time snapshot that can name a workspace the session has left. Uses the bundled CLI -- identify for the caller's own refs (read caller, not focused), tree --all --id-format both to resolve refs to names, top --all --processes to map pids to surfaces. Matters because a session that cannot name its own tab cannot tell a human which tab to address."
     },
     {
       "name": "codex-adversarial-pr-review",
@@ -178,7 +294,7 @@
       "hosts": [
         "codex"
       ],
-      "summary": "Run the end-of-task retrospective that Codex's `Stop` and `UserPromptSubmit` hooks demand, and decide what the session actually produced. Most turns end with `No reusable learning.` Of the rest, most are **memory** — a single cause->fix, an API gotcha, a config detail — and must NOT become a `SKILL.md`; only a repeatable procedure does. Use when a `Stop` hook fires at end-of-task, when a debugging-heavy session ends, or when the user asks \"what did we learn?\". Covers the four gates (discovery cost, recurrence, verifiable trigger, verified result), the skill-vs-memory classification, the install-location choice, and the `No reusable learning.` escape hatch. For an explicitly invoked retrospective, and for the wiring that promotes a skill into the `voitta-ai/skillz` catalog, see `claudeception` — this skill defers to it rather than restating it."
+      "summary": "Run the end-of-task retrospective that Codex's `Stop` and `UserPromptSubmit` hooks demand, and decide what the session actually produced. Most turns end with `No reusable learning.` Of the rest, most are **memory** \u2014 a single cause->fix, an API gotcha, a config detail \u2014 and must NOT become a `SKILL.md`; only a repeatable procedure does. Use when a `Stop` hook fires at end-of-task, when a debugging-heavy session ends, or when the user asks \"what did we learn?\". Covers the four gates (discovery cost, recurrence, verifiable trigger, verified result), the skill-vs-memory classification, the install-location choice, and the `No reusable learning.` escape hatch. For an explicitly invoked retrospective, and for the wiring that promotes a skill into the `voitta-ai/skillz` catalog, see `claudeception` \u2014 this skill defers to it rather than restating it."
     },
     {
       "name": "gh-pr-merge-delete-branch-closes-dependent-pr",
@@ -217,6 +333,15 @@
       "summary": "Work out why a pull request will not merge and who can actually unblock it, on github.com or self-hosted GitHub Enterprise. Covers the states with no error message: bot approvals satisfy nothing CODEOWNERS checks so a PR reads approved and green while reviewDecision stays REVIEW_REQUIRED, a teams-only reviewer request notifies no individual, CODEOWNERS is matched per-path so a repo-wide owner answer is usually wrong, and the highest-yield reviewer is the changed file's recent author."
     },
     {
+      "name": "git-simulate-sequential-merges",
+      "path": "skills/git-simulate-sequential-merges/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Determine which merges in a queue of N branches actually conflict, and preview the fully-merged file content, using merge-tree --write-tree chained through commit-tree - no refs, worktrees, index or working tree touched."
+    },
+    {
       "name": "git-worktree-convention",
       "path": "skills/git-worktree-convention/SKILL.md",
       "hosts": [
@@ -235,6 +360,15 @@
       "summary": "Tell a GitHub Actions outage apart from a workflow file you broke, and get the PR unstuck without bypassing branch protection. Covers the three-signal test (actions/runs says completed/startup_failure while check-runs still says queued; zero jobs and zero annotations; .github/workflows untouched by the diff), the githubstatus summary.json one-liner that confirms it, close/reopen as the retrigger that adds no commit, and why a required check that never ran is a reason to wait rather than to force-merge."
     },
     {
+      "name": "github-oidc-immutable-subject-claim",
+      "path": "skills/github-oidc-immutable-subject-claim/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Diagnose a GitHub Actions job that cannot assume an AWS role by OIDC (`Not authorized to perform sts:AssumeRoleWithWebIdentity`) while every sibling repo in the same org assumes the same role fine -- GitHub now issues an immutable `sub` (`repo:ORG@ORG_ID/REPO@REPO_ID`) that a `repo:ORG/*` trust policy cannot match, per repo and depending on when it was created"
+    },
+    {
       "name": "istio-multicluster-endpointless-mesh-service",
       "path": "skills/istio-multicluster-endpointless-mesh-service/SKILL.md",
       "hosts": [
@@ -244,6 +378,24 @@
       "summary": "Istio multi-cluster endpoint-less away-Service: use a decoy selector (not an omitted one) so an EndpointSlice anchor exists for the mesh to merge remote endpoints into; for cross-region write-routing / home-away Service topologies."
     },
     {
+      "name": "litellm-custom-provider-dispatch-order",
+      "path": "skills/litellm-custom-provider-dispatch-order/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "A LiteLLM CustomLLM provider that is registered correctly and still never runs: litellm.completion() dispatches through an if/elif chain in which seven branches match on the BARE MODEL NAME (open_ai_chat_completion_models and six more) before the custom-provider branch, so a custom row reusing a real upstream model id is captured earlier and silently billed to that vendor's API key. Covers the collision check, the namespaced-model fix, why custom_llm_setup() is a second required call that Router needs at construction time, and the assertion that proves the handler actually ran."
+    },
+    {
+      "name": "llm-vendor-waterfall",
+      "path": "skills/llm-vendor-waterfall/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Serve one LLM call from an ordered list of vendors so a rate limit, a dead key, or an out-of-credits account fails over instead of failing the request. Covers the ordered-config to LiteLLM Router mapping, which Router knobs earn their keep (cooldown_time, allowed_fails, context_window_fallbacks, per-deployment budgets) and which to leave alone, the invisible dead fallback that reads as random flakiness, what must not be waterfalled, and how to prove failover actually happens."
+    },
+    {
       "name": "macos-sparkle-update-quarantine-relaunch",
       "path": "skills/macos-sparkle-update-quarantine-relaunch/SKILL.md",
       "hosts": [
@@ -251,6 +403,15 @@
         "codex"
       ],
       "summary": "Fix macOS Sparkle updater error 4005 / 'Failed to create installation cache directory' that persists after stripping quarantine: relaunch the un-quarantined bundle."
+    },
+    {
+      "name": "metrics-zero-provenance-audit",
+      "path": "skills/metrics-zero-provenance-audit/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Audit a multi-source metrics client before believing its zeros."
     },
     {
       "name": "multi-phase-feature-pr-worktrees",
@@ -278,6 +439,15 @@
         "codex"
       ],
       "summary": "Diagnose OpenClaw model-cascade failures (gateway process up but every run FailoverErrors because all providers are down), build a free OpenRouter fallback basket to survive codex cooldowns, and verify with one-shot `openclaw agent`."
+    },
+    {
+      "name": "parallel-agent-session-collisions",
+      "path": "skills/parallel-agent-session-collisions/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Avoid duplicating, superseding, or clobbering work done by another agent session on the same repos: the three collision shapes, the pre-flight check for each, and how to reconcile. Also covers the collision that no artifact check can catch -- two sessions both about to do the same work, with nothing pushed for `gh pr list` to find -- detected by enumerating live peer sessions and asking directly, then split into named lanes with an explicit gate and the decision routed through the shared human."
     },
     {
       "name": "playwright-mcp-upload-hidden-file-input",
@@ -334,6 +504,15 @@
       "summary": "Handle credentials during a coding-agent session without writing them into the transcript, tool-output cache, permission allowlist or logs. Fingerprint comparison, ask-the-service identification, and env-to-file transfer that never passes through the model."
     },
     {
+      "name": "secretsmanager-prove-no-consumer-before-destroy",
+      "path": "skills/secretsmanager-prove-no-consumer-before-destroy/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Prove nothing consumes a Secrets Manager secret before a terraform destroy: per-resource CloudTrail lookup + GetSecretValue-vs-metadata classification, minus your own terraform refresh -- because a populated LastAccessedDate is NOT evidence of use (a secret with zero GetSecretValue still reports one)"
+    },
+    {
       "name": "slack-app-token-rotation",
       "path": "skills/slack-app-token-rotation/SKILL.md",
       "hosts": [
@@ -356,49 +535,13 @@
       "summary": "Drive the Slack web API as yourself via a live browser session (xoxc token + httpOnly d cookie) when you cannot install a Slack app; ships a runnable Python client that self-labels agent posts by default."
     },
     {
-      "name": "terraform-ecs-capacity-provider-staged-teardown",
-      "path": "skills/terraform-ecs-capacity-provider-staged-teardown/SKILL.md",
+      "name": "spa-request-capture-and-block",
+      "path": "skills/spa-request-capture-and-block/SKILL.md",
       "hosts": [
         "claude",
         "codex"
       ],
-      "summary": "Tear down an ECS-on-EC2 capacity-provider stack when one apply deadlocks with ResourceInUseException: destroy order is reverse-dependency, so compute tears down before the workload; split into two sequential untargeted applies, workload first"
-    },
-    {
-      "name": "terraform-state-version-apply-forensics",
-      "path": "skills/terraform-state-version-apply-forensics/SKILL.md",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "summary": "Prove a terraform change really was applied to an env: census versioned S3 tfstate objects (serial + resource-type counts) + cross-check CloudTrail; separates a real apply from a reverted one, identifies which variant of a stacked change ran, and tells untracked orphans from failed destroys"
-    },
-    {
-      "name": "wordpress-com-publish",
-      "path": "skills/wordpress-com-publish/SKILL.md",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "summary": "Acquire a WordPress.com OAuth2 token (authorization-code flow) and publish/update posts via public-api.wordpress.com."
-    },
-    {
-      "name": "work-on-pr",
-      "path": "skills/work-on-pr/SKILL.md",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "summary": "Author-side PR iteration loop."
-    },
-    {
-      "name": "cmux-session-restore-forensics",
-      "path": "skills/cmux-session-restore-forensics/SKILL.md",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "summary": "Diagnose what cmux actually restored after a relaunch and recover panes it silently dropped."
+      "summary": "Capture the exact outbound request body a single-page app sends and block it before it leaves the browser: patch window.fetch AND XMLHttpRequest together (the XHR half is the one usually missed, so a fetch-only wrapper lets the request through), read the parsed payload off window, and disarm with a reload \u2014 including why a hash-route change does not remove the patch. For actions whose side effect costs credits or creates an irreversible record."
     },
     {
       "name": "spring-profile-config-overlay-dedupe",
@@ -410,13 +553,51 @@
       "summary": "Strip an application-<profile>.yml down to real overrides and prove the effective config is unchanged, by flattening base+profile before and after and diffing the key sets. Covers confirming profiles are layered at all, and when keeping a duplicate is correct."
     },
     {
-      "name": "spa-request-capture-and-block",
-      "path": "skills/spa-request-capture-and-block/SKILL.md",
+      "name": "subagent-no-report-channel",
+      "path": "skills/subagent-no-report-channel/SKILL.md",
       "hosts": [
         "claude",
         "codex"
       ],
-      "summary": "Capture the exact outbound request body a single-page app sends and block it before it leaves the browser: patch window.fetch AND XMLHttpRequest together (the XHR half is the one usually missed, so a fetch-only wrapper lets the request through), read the parsed payload off window, and disarm with a reload — including why a hash-route change does not remove the patch. For actions whose side effect costs credits or creates an irreversible record."
+      "summary": "Recover the work of a spawned subagent that finished but never reported, and tell that case apart from a genuinely wedged one. Root cause: an agent type's declared toolset may omit a messaging tool, so a correct, completed agent has no channel to deliver through -- or it is a forward-only wrapper scoped not to poll the background job it dispatched. Idle notifications are runtime-generated and are NOT evidence the agent's own send worked; the reliable oracle is the transcript (tool_use with no tool_result). Covers recovering the result from the agent's final text, from the job runtime's state directory, and the one-sentence fallback brief that prevents the loss."
+    },
+    {
+      "name": "tamarian",
+      "path": "skills/tamarian/SKILL.md",
+      "files": [
+        "LEXICON.md"
+      ],
+      "hosts": [
+        "claude"
+      ],
+      "summary": "Tamarian mode persona: Claude speaks as the Children of Tama - meaning carried by metaphor and allusion (canon ST:TNG phrases plus ones coined from Earth myth, history, and engineering lore), technical substance fully intact. Levels lite/full/ultra via /tamarian; code, commands, errors and numbers stay literal; security warnings and destructive-action confirmations always drop to plain speech. Ships LEXICON.md, a phrasebook with coinage rules."
+    },
+    {
+      "name": "terraform-ecs-capacity-provider-staged-teardown",
+      "path": "skills/terraform-ecs-capacity-provider-staged-teardown/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Tear down an ECS-on-EC2 capacity-provider stack when one apply deadlocks with ResourceInUseException: destroy order is reverse-dependency, so compute tears down before the workload; split into two sequential untargeted applies, workload first"
+    },
+    {
+      "name": "terraform-noninteractive-prod-apply",
+      "path": "skills/terraform-noninteractive-prod-apply/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Apply terraform to prod from a non-interactive context when the repo's apply.sh wrapper has no `-auto-approve` and blocks on the approval prompt -- use a saved plan file, not `echo yes |`, because a prompt-piped apply approves a plan terraform RECOMPUTES at that moment rather than the one you reviewed"
+    },
+    {
+      "name": "terraform-state-version-apply-forensics",
+      "path": "skills/terraform-state-version-apply-forensics/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Prove a terraform change really was applied to an env: census versioned S3 tfstate objects (serial + resource-type counts) + cross-check CloudTrail; separates a real apply from a reverted one, identifies which variant of a stacked change ran, and tells untracked orphans from failed destroys"
     },
     {
       "name": "us-federal-open-data-claim-verification",
@@ -437,194 +618,22 @@
       "summary": "Retrieve exact original text of Truth Social / X posts (incl. deleted ones) for fact-checking: api.fxtwitter.com JSON, trumpstruth.org archive with its query= param and deletion flags, date-bounded negatives, HTTP 451 syndication fallback."
     },
     {
-      "name": "chrome-localhost-mic-autoblock",
-      "path": "skills/chrome-localhost-mic-autoblock/SKILL.md",
+      "name": "wordpress-com-publish",
+      "path": "skills/wordpress-com-publish/SKILL.md",
       "hosts": [
         "claude",
         "codex"
       ],
-      "summary": "Fix a web app's mic failing in Chrome with a not-allowed error on localhost even though the OS granted Chrome mic access: Chrome auto-blocks the mic per-site and the OS Privacy toggle / Chrome restart never clears it; set the site to Allow."
+      "summary": "Acquire a WordPress.com OAuth2 token (authorization-code flow) and publish/update posts via public-api.wordpress.com."
     },
     {
-      "name": "metrics-zero-provenance-audit",
-      "path": "skills/metrics-zero-provenance-audit/SKILL.md",
+      "name": "work-on-pr",
+      "path": "skills/work-on-pr/SKILL.md",
       "hosts": [
         "claude",
         "codex"
       ],
-      "summary": "Audit a multi-source metrics client before believing its zeros."
-    },
-    {
-      "name": "archive-today-fetcher-hierarchy",
-      "path": "skills/archive-today-fetcher-hierarchy/SKILL.md",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "summary": "Reach archive.today when automation is refused, cite it reproducibly, and send a truthful user agent."
-    },
-    {
-      "name": "agent-host-skill-loading",
-      "path": "skills/agent-host-skill-loading/SKILL.md",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "summary": "Make a non-Claude, non-Codex agent host load skillz-format SKILL.md files: two-stage disclosure (menu line in the system prompt, body behind a load_skill tool) with the measured cost of each alternative, block-scalar-safe frontmatter parsing, ordered-path precedence with shadow reporting, refresh without restart and its turn-boundary gotcha, and why the reload belongs behind a privilege gate."
-    },
-    {
-      "name": "litellm-custom-provider-dispatch-order",
-      "path": "skills/litellm-custom-provider-dispatch-order/SKILL.md",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "summary": "A LiteLLM CustomLLM provider that is registered correctly and still never runs: litellm.completion() dispatches through an if/elif chain in which seven branches match on the BARE MODEL NAME (open_ai_chat_completion_models and six more) before the custom-provider branch, so a custom row reusing a real upstream model id is captured earlier and silently billed to that vendor's API key. Covers the collision check, the namespaced-model fix, why custom_llm_setup() is a second required call that Router needs at construction time, and the assertion that proves the handler actually ran."
-    },
-    {
-      "name": "secretsmanager-prove-no-consumer-before-destroy",
-      "path": "skills/secretsmanager-prove-no-consumer-before-destroy/SKILL.md",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "summary": "Prove nothing consumes a Secrets Manager secret before a terraform destroy: per-resource CloudTrail lookup + GetSecretValue-vs-metadata classification, minus your own terraform refresh -- because a populated LastAccessedDate is NOT evidence of use (a secret with zero GetSecretValue still reports one)"
-    },
-    {
-      "name": "github-oidc-immutable-subject-claim",
-      "path": "skills/github-oidc-immutable-subject-claim/SKILL.md",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "summary": "Diagnose a GitHub Actions job that cannot assume an AWS role by OIDC (`Not authorized to perform sts:AssumeRoleWithWebIdentity`) while every sibling repo in the same org assumes the same role fine -- GitHub now issues an immutable `sub` (`repo:ORG@ORG_ID/REPO@REPO_ID`) that a `repo:ORG/*` trust policy cannot match, per repo and depending on when it was created"
-    },
-    {
-      "name": "parallel-agent-session-collisions",
-      "path": "skills/parallel-agent-session-collisions/SKILL.md",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "summary": "Avoid duplicating, superseding, or clobbering work done by another agent session on the same repos: the three collision shapes, the pre-flight check for each, and how to reconcile. Also covers the collision that no artifact check can catch -- two sessions both about to do the same work, with nothing pushed for `gh pr list` to find -- detected by enumerating live peer sessions and asking directly, then split into named lanes with an explicit gate and the decision routed through the shared human."
-    },
-    {
-      "name": "claude-code-cross-session-messaging",
-      "path": "skills/claude-code-cross-session-messaging/SKILL.md",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "summary": "Talk to a Claude Code session that is already running via the native ListAgents + SendMessage pair instead of a headless `claude -p` call or a terminal-scraping bridge. Covers addressing (the name is the address; refs do not survive outside the listing that produced them), the idle-subscription primitive that replaces every polling loop, the no-TTY law that makes headless and in-process transports wedge silently rather than fail, multi-hop transport dependency failures, the per-session permission boundary that forbids delegating around your own denials, and the honest dividing line where a launch-a-callee tool is still the right answer."
-    },
-    {
-      "name": "cmux-cross-session-visibility",
-      "path": "skills/cmux-cross-session-visibility/SKILL.md",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "summary": "Make agent-to-agent traffic visible to the human watching: a structured SendMessage envelope (kind + direction + topic in the summary field, plus a one-line header that survives raw transcripts) paired with a cmux sidebar status pill per workspace showing whether a session is waiting on a peer or owes one an answer. Covers why spawned teams are cross-workspace traffic by construction (tmux-compat maps a window to a workspace), why the pill key must not collide with cmux's own claude_code key, and the stale-pill failure mode plus every exit that must clear it."
-    },
-    {
-      "name": "agent-traffic-log",
-      "path": "skills/agent-traffic-log/SKILL.md",
-      "files": [
-        "scripts/xs",
-        "scripts/xs-hook"
-      ],
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "summary": "An append-only JSONL event log of agent-to-agent traffic plus a live pane over it, giving a fleet an org-wide view instead of N private conversations. No daemon and no lock: concurrent appends are safe because a single write of under PIPE_BUF bytes to an O_APPEND descriptor cannot interleave, verified at 24 concurrent writers producing 960 lines with zero torn. Ships scripts/xs with log, tail, recent, status (who is waiting on whom, derived from events rather than tracked), and prune. Includes the acceptance test that only a real team run can satisfy."
-    },
-    {
-      "name": "subagent-no-report-channel",
-      "path": "skills/subagent-no-report-channel/SKILL.md",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "summary": "Recover the work of a spawned subagent that finished but never reported, and tell that case apart from a genuinely wedged one. Root cause: an agent type's declared toolset may omit a messaging tool, so a correct, completed agent has no channel to deliver through -- or it is a forward-only wrapper scoped not to poll the background job it dispatched. Idle notifications are runtime-generated and are NOT evidence the agent's own send worked; the reliable oracle is the transcript (tool_use with no tool_result). Covers recovering the result from the agent's final text, from the job runtime's state directory, and the one-sentence fallback brief that prevents the loss."
-    },
-    {
-      "name": "cmux-session-self-identity",
-      "path": "skills/cmux-session-self-identity/SKILL.md",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "summary": "Determine which cmux workspace, tab and surface a session is actually running in, and map other live sessions to theirs. Never answer from CMUX_* env vars: the tab and workspace variables can carry the same id (so tab identity is not in the environment at all), and on a resumed session they are a stale launch-time snapshot that can name a workspace the session has left. Uses the bundled CLI -- identify for the caller's own refs (read caller, not focused), tree --all --id-format both to resolve refs to names, top --all --processes to map pids to surfaces. Matters because a session that cannot name its own tab cannot tell a human which tab to address."
-    },
-    {
-      "name": "git-simulate-sequential-merges",
-      "path": "skills/git-simulate-sequential-merges/SKILL.md",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "summary": "Determine which merges in a queue of N branches actually conflict, and preview the fully-merged file content, using merge-tree --write-tree chained through commit-tree - no refs, worktrees, index or working tree touched."
-    },
-    {
-      "name": "terraform-noninteractive-prod-apply",
-      "path": "skills/terraform-noninteractive-prod-apply/SKILL.md",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "summary": "Apply terraform to prod from a non-interactive context when the repo's apply.sh wrapper has no `-auto-approve` and blocks on the approval prompt -- use a saved plan file, not `echo yes |`, because a prompt-piped apply approves a plan terraform RECOMPUTES at that moment rather than the one you reviewed"
-    },
-    {
-      "name": "llm-vendor-waterfall",
-      "path": "skills/llm-vendor-waterfall/SKILL.md",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "summary": "Serve one LLM call from an ordered list of vendors so a rate limit, a dead key, or an out-of-credits account fails over instead of failing the request. Covers the ordered-config to LiteLLM Router mapping, which Router knobs earn their keep (cooldown_time, allowed_fails, context_window_fallbacks, per-deployment budgets) and which to leave alone, the invisible dead fallback that reads as random flakiness, what must not be waterfalled, and how to prove failover actually happens."
-    },
-    {
-      "name": "cmux-config-silent-drop-triage",
-      "path": "skills/cmux-config-silent-drop-triage/SKILL.md",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "summary": "Find out why a cmux.json entry that passes `cmux config doctor` never shows up in the palette, plus-button menu or tab bar. Doctor is syntax-only, the schema is additionalProperties: true, and the unified log stays silent - so the working oracles are a backup-diff bisect, the binary's own [CmuxConfig] diagnostics, and enum triads read straight off `strings`. Worked example: a workspaceCommand action hidden by `\"restart\": \"restart\"` (valid: ignore/confirm/recreate, or omit for a new workspace each time)."
-    },
-    {
-      "name": "alb-per-rule-traffic-attribution",
-      "path": "skills/alb-per-rule-traffic-attribution/SKILL.md",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "summary": "Attribute ALB traffic to individual listener rules and callers: AWS/ApplicationELB has no rule-level dimension, and matched_rule_priority in access logs is a POSITION that renumbers when a rule is inserted, silently mislabelling any query spanning that deploy; attribute by request_url + user_agent instead"
-    },
-    {
-      "name": "cmux-claude-codex-cross-runtime-messaging",
-      "path": "skills/cmux-claude-codex-cross-runtime-messaging/SKILL.md",
-      "files": [
-        "scripts/pp-send",
-        "scripts/pp-register"
-      ],
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "summary": "Run a Claude Code agent and a Codex CLI agent as messaging peers in cmux panes, each named as a tab and both in the agent traffic log. Codex has no SendMessage and Claude's peer socket needs auth, so the cross-runtime hop is keystroke injection (cmux send + send-key Enter) through a small helper that also logs to xs explicitly; each agent names its own tab first via cmux identify + tab-action rename. Covers the Codex TUI parking on a startup modal with no way to read its screen (diagnose from ~/.codex logs and the missing rollout file, inject one Enter), and where the lead, teammate and Codex transcripts live on disk afterwards. Verified 2026-08-27: five rounds in 50 s, every message exactly once."
-    },
-    {
-      "name": "tamarian",
-      "path": "skills/tamarian/SKILL.md",
-      "files": [
-        "LEXICON.md"
-      ],
-      "hosts": [
-        "claude"
-      ],
-      "summary": "Tamarian mode persona: Claude speaks as the Children of Tama - meaning carried by metaphor and allusion (canon ST:TNG phrases plus ones coined from Earth myth, history, and engineering lore), technical substance fully intact. Levels lite/full/ultra via /tamarian; code, commands, errors and numbers stay literal; security warnings and destructive-action confirmations always drop to plain speech. Ships LEXICON.md, a phrasebook with coinage rules."
+      "summary": "Author-side PR iteration loop."
     }
   ],
   "collections": [
@@ -650,69 +659,70 @@
         "codex"
       ],
       "skills": [
-        "work-on-pr",
-        "review-pr-loop",
-        "codex-adversarial-pr-review",
-        "cmux-search",
-        "cmux-agent-tabs",
-        "python-ast-static-analyzer-scoping",
-        "wordpress-com-publish",
-        "git-graft-worktree-onto-remote",
-        "multi-phase-feature-pr-worktrees",
-        "gist-to-repo-migration",
-        "neon-vercel-db-identify-and-migrate",
-        "claudeception",
+        "agent-credential-leak-surfaces",
+        "agent-host-skill-loading",
+        "agent-session-credential-audit",
+        "agent-team-orchestration",
+        "agent-traffic-log",
+        "alb-per-rule-traffic-attribution",
+        "archive-today-fetcher-hierarchy",
+        "aws-http-server-on-lambda-web-adapter",
+        "chrome-localhost-mic-autoblock",
+        "chrome-not-secure-tls-interception",
         "claude-code-codex-plugin-parity",
+        "claude-code-cross-session-messaging",
         "claude-code-plugin-from-existing-repo",
+        "claude-code-plugin-publish-anthropic-marketplace",
         "claude-code-plugin-python-bootstrap",
+        "claude-code-plugin-release-automation",
         "claude-code-plugin-update-flow",
         "claude-json-mcp-migration-slice",
-        "playwright-mcp-upload-hidden-file-input",
-        "agent-team-orchestration",
-        "slack-xoxc-session-client",
-        "istio-multicluster-endpointless-mesh-service",
-        "macos-sparkle-update-quarantine-relaunch",
-        "pre-open-source-credential-audit",
-        "git-worktree-convention",
-        "openclaw-model-cascade-debugging",
-        "claude-code-plugin-publish-anthropic-marketplace",
+        "claudeception",
+        "cmux-agent-tabs",
         "cmux-autoresume-after-reboot",
-        "terraform-state-version-apply-forensics",
-        "terraform-ecs-capacity-provider-staged-teardown",
-        "gh-pr-merge-delete-branch-closes-dependent-pr",
-        "aws-http-server-on-lambda-web-adapter",
-        "slack-app-token-rotation",
-        "agent-credential-leak-surfaces",
-        "prevent-committing-secrets",
-        "agent-session-credential-audit",
-        "claude-code-plugin-release-automation",
+        "cmux-claude-codex-cross-runtime-messaging",
+        "cmux-config-silent-drop-triage",
+        "cmux-cross-session-visibility",
+        "cmux-search",
         "cmux-session-restore-forensics",
-        "spring-profile-config-overlay-dedupe",
+        "cmux-session-self-identity",
+        "codex-adversarial-pr-review",
+        "confluence-rovo-mcp-readonly-rest-fallback",
+        "gh-pr-merge-delete-branch-closes-dependent-pr",
+        "gist-to-repo-migration",
+        "git-graft-worktree-onto-remote",
+        "git-pr-merge-unblock",
+        "git-simulate-sequential-merges",
+        "git-worktree-convention",
+        "github-actions-startup-failure-triage",
+        "github-oidc-immutable-subject-claim",
+        "istio-multicluster-endpointless-mesh-service",
+        "litellm-custom-provider-dispatch-order",
+        "llm-vendor-waterfall",
+        "macos-sparkle-update-quarantine-relaunch",
+        "metrics-zero-provenance-audit",
+        "multi-phase-feature-pr-worktrees",
+        "neon-vercel-db-identify-and-migrate",
+        "openclaw-model-cascade-debugging",
+        "parallel-agent-session-collisions",
+        "playwright-mcp-upload-hidden-file-input",
+        "pre-open-source-credential-audit",
+        "prevent-committing-secrets",
+        "python-ast-static-analyzer-scoping",
+        "review-pr-loop",
+        "secretsmanager-prove-no-consumer-before-destroy",
+        "slack-app-token-rotation",
+        "slack-xoxc-session-client",
         "spa-request-capture-and-block",
+        "spring-profile-config-overlay-dedupe",
+        "subagent-no-report-channel",
+        "terraform-ecs-capacity-provider-staged-teardown",
+        "terraform-noninteractive-prod-apply",
+        "terraform-state-version-apply-forensics",
         "us-federal-open-data-claim-verification",
         "verbatim-social-post-retrieval",
-        "chrome-localhost-mic-autoblock",
-        "metrics-zero-provenance-audit",
-        "archive-today-fetcher-hierarchy",
-        "agent-host-skill-loading",
-        "litellm-custom-provider-dispatch-order",
-        "secretsmanager-prove-no-consumer-before-destroy",
-        "github-oidc-immutable-subject-claim",
-        "parallel-agent-session-collisions",
-        "claude-code-cross-session-messaging",
-        "cmux-cross-session-visibility",
-        "agent-traffic-log",
-        "subagent-no-report-channel",
-        "cmux-session-self-identity",
-        "git-simulate-sequential-merges",
-        "git-pr-merge-unblock",
-        "terraform-noninteractive-prod-apply",
-        "llm-vendor-waterfall",
-        "confluence-rovo-mcp-readonly-rest-fallback",
-        "github-actions-startup-failure-triage",
-        "cmux-config-silent-drop-triage",
-        "alb-per-rule-traffic-attribution",
-        "cmux-claude-codex-cross-runtime-messaging"
+        "wordpress-com-publish",
+        "work-on-pr"
       ],
       "summary": "Bundle: every catalog skill in one plugin, except skills whose own plugin ships hooks - install those plugins directly."
     },
@@ -730,6 +740,19 @@
       "summary": "Single-skill plugin: agent-credential-leak-surfaces."
     },
     {
+      "name": "agent-session-credential-audit",
+      "claude_manifest": "plugins/agent-session-credential-audit/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/agent-session-credential-audit/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "agent-session-credential-audit"
+      ],
+      "summary": "Single-skill plugin: agent-session-credential-audit."
+    },
+    {
       "name": "agent-team-orchestration",
       "claude_manifest": "plugins/agent-team-orchestration/.claude-plugin/plugin.json",
       "codex_manifest": "plugins/agent-team-orchestration/.codex-plugin/plugin.json",
@@ -743,6 +766,58 @@
       "summary": "Single-skill plugin: agent-team-orchestration."
     },
     {
+      "name": "agent-traffic-log",
+      "claude_manifest": "plugins/agent-traffic-log/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/agent-traffic-log/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "agent-traffic-log"
+      ],
+      "summary": "Single-skill plugin: agent-traffic-log."
+    },
+    {
+      "name": "alb-per-rule-traffic-attribution",
+      "claude_manifest": "plugins/alb-per-rule-traffic-attribution/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/alb-per-rule-traffic-attribution/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "alb-per-rule-traffic-attribution"
+      ],
+      "summary": "Single-skill plugin: alb-per-rule-traffic-attribution."
+    },
+    {
+      "name": "chrome-localhost-mic-autoblock",
+      "claude_manifest": "plugins/chrome-localhost-mic-autoblock/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/chrome-localhost-mic-autoblock/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "chrome-localhost-mic-autoblock"
+      ],
+      "summary": "Single-skill plugin: chrome-localhost-mic-autoblock."
+    },
+    {
+      "name": "chrome-not-secure-tls-interception",
+      "claude_manifest": "plugins/chrome-not-secure-tls-interception/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/chrome-not-secure-tls-interception/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "chrome-not-secure-tls-interception"
+      ],
+      "summary": "Single-skill plugin: chrome-not-secure-tls-interception."
+    },
+    {
       "name": "claude-code-codex-plugin-parity",
       "claude_manifest": "plugins/claude-code-codex-plugin-parity/.claude-plugin/plugin.json",
       "codex_manifest": "plugins/claude-code-codex-plugin-parity/.codex-plugin/plugin.json",
@@ -754,6 +829,19 @@
         "claude-code-codex-plugin-parity"
       ],
       "summary": "Single-skill plugin: claude-code-codex-plugin-parity."
+    },
+    {
+      "name": "claude-code-cross-session-messaging",
+      "claude_manifest": "plugins/claude-code-cross-session-messaging/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/claude-code-cross-session-messaging/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "claude-code-cross-session-messaging"
+      ],
+      "summary": "Single-skill plugin: claude-code-cross-session-messaging."
     },
     {
       "name": "claude-code-plugin-from-existing-repo",
@@ -782,19 +870,6 @@
       "summary": "Single-skill plugin: claude-code-plugin-python-bootstrap."
     },
     {
-      "name": "claude-code-plugin-update-flow",
-      "claude_manifest": "plugins/claude-code-plugin-update-flow/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/claude-code-plugin-update-flow/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "claude-code-plugin-update-flow"
-      ],
-      "summary": "Single-skill plugin: claude-code-plugin-update-flow."
-    },
-    {
       "name": "claude-code-plugin-release-automation",
       "claude_manifest": "plugins/claude-code-plugin-release-automation/.claude-plugin/plugin.json",
       "codex_manifest": "plugins/claude-code-plugin-release-automation/.codex-plugin/plugin.json",
@@ -806,6 +881,19 @@
         "claude-code-plugin-release-automation"
       ],
       "summary": "Single-skill plugin: claude-code-plugin-release-automation."
+    },
+    {
+      "name": "claude-code-plugin-update-flow",
+      "claude_manifest": "plugins/claude-code-plugin-update-flow/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/claude-code-plugin-update-flow/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "claude-code-plugin-update-flow"
+      ],
+      "summary": "Single-skill plugin: claude-code-plugin-update-flow."
     },
     {
       "name": "claude-json-mcp-migration-slice",
@@ -834,6 +922,45 @@
       "summary": "Single-skill plugin: cmux-agent-tabs."
     },
     {
+      "name": "cmux-claude-codex-cross-runtime-messaging",
+      "claude_manifest": "plugins/cmux-claude-codex-cross-runtime-messaging/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/cmux-claude-codex-cross-runtime-messaging/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "cmux-claude-codex-cross-runtime-messaging"
+      ],
+      "summary": "Single-skill plugin: cmux-claude-codex-cross-runtime-messaging."
+    },
+    {
+      "name": "cmux-config-silent-drop-triage",
+      "claude_manifest": "plugins/cmux-config-silent-drop-triage/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/cmux-config-silent-drop-triage/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "cmux-config-silent-drop-triage"
+      ],
+      "summary": "Single-skill plugin: cmux-config-silent-drop-triage."
+    },
+    {
+      "name": "cmux-cross-session-visibility",
+      "claude_manifest": "plugins/cmux-cross-session-visibility/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/cmux-cross-session-visibility/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "cmux-cross-session-visibility"
+      ],
+      "summary": "Single-skill plugin: cmux-cross-session-visibility."
+    },
+    {
       "name": "cmux-search",
       "claude_manifest": "plugins/cmux-search/.claude-plugin/plugin.json",
       "codex_manifest": "plugins/cmux-search/.codex-plugin/plugin.json",
@@ -845,6 +972,32 @@
         "cmux-search"
       ],
       "summary": "Single-skill plugin: cmux-search."
+    },
+    {
+      "name": "cmux-session-restore-forensics",
+      "claude_manifest": "plugins/cmux-session-restore-forensics/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/cmux-session-restore-forensics/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "cmux-session-restore-forensics"
+      ],
+      "summary": "Single-skill plugin: cmux-session-restore-forensics."
+    },
+    {
+      "name": "cmux-session-self-identity",
+      "claude_manifest": "plugins/cmux-session-self-identity/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/cmux-session-self-identity/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "cmux-session-self-identity"
+      ],
+      "summary": "Single-skill plugin: cmux-session-self-identity."
     },
     {
       "name": "codex-adversarial-pr-review",
@@ -921,6 +1074,32 @@
       "summary": "Single-skill plugin: git-graft-worktree-onto-remote."
     },
     {
+      "name": "git-worktree-convention",
+      "claude_manifest": "plugins/git-worktree-convention/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/git-worktree-convention/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "git-worktree-convention"
+      ],
+      "summary": "Single-skill plugin: git-worktree-convention."
+    },
+    {
+      "name": "github-oidc-immutable-subject-claim",
+      "claude_manifest": "plugins/github-oidc-immutable-subject-claim/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/github-oidc-immutable-subject-claim/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "github-oidc-immutable-subject-claim"
+      ],
+      "summary": "Single-skill plugin: github-oidc-immutable-subject-claim."
+    },
+    {
       "name": "istio-multicluster-endpointless-mesh-service",
       "claude_manifest": "plugins/istio-multicluster-endpointless-mesh-service/.claude-plugin/plugin.json",
       "codex_manifest": "plugins/istio-multicluster-endpointless-mesh-service/.codex-plugin/plugin.json",
@@ -932,6 +1111,32 @@
         "istio-multicluster-endpointless-mesh-service"
       ],
       "summary": "Single-skill plugin: istio-multicluster-endpointless-mesh-service."
+    },
+    {
+      "name": "llm-vendor-waterfall",
+      "claude_manifest": "plugins/llm-vendor-waterfall/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/llm-vendor-waterfall/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "llm-vendor-waterfall"
+      ],
+      "summary": "Single-skill plugin: llm-vendor-waterfall."
+    },
+    {
+      "name": "metrics-zero-provenance-audit",
+      "claude_manifest": "plugins/metrics-zero-provenance-audit/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/metrics-zero-provenance-audit/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "metrics-zero-provenance-audit"
+      ],
+      "summary": "Single-skill plugin: metrics-zero-provenance-audit."
     },
     {
       "name": "multi-phase-feature-pr-worktrees",
@@ -971,6 +1176,19 @@
         "openclaw-model-cascade-debugging"
       ],
       "summary": "Single-skill plugin: openclaw-model-cascade-debugging."
+    },
+    {
+      "name": "parallel-agent-session-collisions",
+      "claude_manifest": "plugins/parallel-agent-session-collisions/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/parallel-agent-session-collisions/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "parallel-agent-session-collisions"
+      ],
+      "summary": "Single-skill plugin: parallel-agent-session-collisions."
     },
     {
       "name": "playwright-mcp-upload-hidden-file-input",
@@ -1065,6 +1283,19 @@
       "summary": "Single-skill plugin: secrets-in-agent-sessions."
     },
     {
+      "name": "secretsmanager-prove-no-consumer-before-destroy",
+      "claude_manifest": "plugins/secretsmanager-prove-no-consumer-before-destroy/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/secretsmanager-prove-no-consumer-before-destroy/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "secretsmanager-prove-no-consumer-before-destroy"
+      ],
+      "summary": "Single-skill plugin: secretsmanager-prove-no-consumer-before-destroy."
+    },
+    {
       "name": "slack-app-token-rotation",
       "claude_manifest": "plugins/slack-app-token-rotation/.claude-plugin/plugin.json",
       "codex_manifest": "plugins/slack-app-token-rotation/.codex-plugin/plugin.json",
@@ -1091,95 +1322,17 @@
       "summary": "Single-skill plugin: slack-xoxc-session-client (ships a runnable Python client)."
     },
     {
-      "name": "terraform-ecs-capacity-provider-staged-teardown",
-      "claude_manifest": "plugins/terraform-ecs-capacity-provider-staged-teardown/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/terraform-ecs-capacity-provider-staged-teardown/.codex-plugin/plugin.json",
+      "name": "spa-request-capture-and-block",
+      "claude_manifest": "plugins/spa-request-capture-and-block/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/spa-request-capture-and-block/.codex-plugin/plugin.json",
       "hosts": [
         "claude",
         "codex"
       ],
       "skills": [
-        "terraform-ecs-capacity-provider-staged-teardown"
+        "spa-request-capture-and-block"
       ],
-      "summary": "Single-skill plugin: terraform-ecs-capacity-provider-staged-teardown."
-    },
-    {
-      "name": "terraform-state-version-apply-forensics",
-      "claude_manifest": "plugins/terraform-state-version-apply-forensics/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/terraform-state-version-apply-forensics/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "terraform-state-version-apply-forensics"
-      ],
-      "summary": "Single-skill plugin: terraform-state-version-apply-forensics."
-    },
-    {
-      "name": "wordpress-com-publish",
-      "claude_manifest": "plugins/wordpress-com-publish/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/wordpress-com-publish/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "wordpress-com-publish"
-      ],
-      "summary": "Single-skill plugin: wordpress-com-publish."
-    },
-    {
-      "name": "git-worktree-convention",
-      "claude_manifest": "plugins/git-worktree-convention/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/git-worktree-convention/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "git-worktree-convention"
-      ],
-      "summary": "Single-skill plugin: git-worktree-convention."
-    },
-    {
-      "name": "work-on-pr",
-      "claude_manifest": "plugins/work-on-pr/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/work-on-pr/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "work-on-pr"
-      ],
-      "summary": "Single-skill plugin: work-on-pr."
-    },
-    {
-      "name": "agent-session-credential-audit",
-      "claude_manifest": "plugins/agent-session-credential-audit/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/agent-session-credential-audit/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "agent-session-credential-audit"
-      ],
-      "summary": "Single-skill plugin: agent-session-credential-audit."
-    },
-    {
-      "name": "cmux-session-restore-forensics",
-      "claude_manifest": "plugins/cmux-session-restore-forensics/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/cmux-session-restore-forensics/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "cmux-session-restore-forensics"
-      ],
-      "summary": "Single-skill plugin: cmux-session-restore-forensics."
+      "summary": "Capture the exact outbound request body a single-page app sends and block it before it leaves the browser: patch window.fetch AND XMLHttpRequest together (the XHR half is the one usually missed, so a fetch-only wrapper lets the request through), read the parsed payload off window, and disarm with a reload \u2014 including why a hash-route change does not remove the patch. For actions whose side effect costs credits or creates an irreversible record."
     },
     {
       "name": "spring-profile-config-overlay-dedupe",
@@ -1197,17 +1350,67 @@
       "summary": "Single-skill plugin: spring-profile-config-overlay-dedupe"
     },
     {
-      "name": "spa-request-capture-and-block",
-      "claude_manifest": "plugins/spa-request-capture-and-block/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/spa-request-capture-and-block/.codex-plugin/plugin.json",
+      "name": "subagent-no-report-channel",
+      "claude_manifest": "plugins/subagent-no-report-channel/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/subagent-no-report-channel/.codex-plugin/plugin.json",
       "hosts": [
         "claude",
         "codex"
       ],
       "skills": [
-        "spa-request-capture-and-block"
+        "subagent-no-report-channel"
       ],
-      "summary": "Capture the exact outbound request body a single-page app sends and block it before it leaves the browser: patch window.fetch AND XMLHttpRequest together (the XHR half is the one usually missed, so a fetch-only wrapper lets the request through), read the parsed payload off window, and disarm with a reload — including why a hash-route change does not remove the patch. For actions whose side effect costs credits or creates an irreversible record."
+      "summary": "Single-skill plugin: subagent-no-report-channel."
+    },
+    {
+      "name": "tamarian",
+      "claude_manifest": "plugins/tamarian/.claude-plugin/plugin.json",
+      "hosts": [
+        "claude"
+      ],
+      "skills": [
+        "tamarian"
+      ],
+      "summary": "Tamarian-mode persona plugin: tamarian skill plus SessionStart + UserPromptSubmit hooks that persist the level across sessions."
+    },
+    {
+      "name": "terraform-ecs-capacity-provider-staged-teardown",
+      "claude_manifest": "plugins/terraform-ecs-capacity-provider-staged-teardown/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/terraform-ecs-capacity-provider-staged-teardown/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "terraform-ecs-capacity-provider-staged-teardown"
+      ],
+      "summary": "Single-skill plugin: terraform-ecs-capacity-provider-staged-teardown."
+    },
+    {
+      "name": "terraform-noninteractive-prod-apply",
+      "claude_manifest": "plugins/terraform-noninteractive-prod-apply/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/terraform-noninteractive-prod-apply/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "terraform-noninteractive-prod-apply"
+      ],
+      "summary": "Single-skill plugin: terraform-noninteractive-prod-apply."
+    },
+    {
+      "name": "terraform-state-version-apply-forensics",
+      "claude_manifest": "plugins/terraform-state-version-apply-forensics/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/terraform-state-version-apply-forensics/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "terraform-state-version-apply-forensics"
+      ],
+      "summary": "Single-skill plugin: terraform-state-version-apply-forensics."
     },
     {
       "name": "us-federal-open-data-claim-verification",
@@ -1240,210 +1443,30 @@
       "summary": "Single-skill plugin: verbatim-social-post-retrieval."
     },
     {
-      "name": "chrome-localhost-mic-autoblock",
-      "claude_manifest": "plugins/chrome-localhost-mic-autoblock/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/chrome-localhost-mic-autoblock/.codex-plugin/plugin.json",
+      "name": "wordpress-com-publish",
+      "claude_manifest": "plugins/wordpress-com-publish/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/wordpress-com-publish/.codex-plugin/plugin.json",
       "hosts": [
         "claude",
         "codex"
       ],
       "skills": [
-        "chrome-localhost-mic-autoblock"
+        "wordpress-com-publish"
       ],
-      "summary": "Single-skill plugin: chrome-localhost-mic-autoblock."
+      "summary": "Single-skill plugin: wordpress-com-publish."
     },
     {
-      "name": "metrics-zero-provenance-audit",
-      "claude_manifest": "plugins/metrics-zero-provenance-audit/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/metrics-zero-provenance-audit/.codex-plugin/plugin.json",
+      "name": "work-on-pr",
+      "claude_manifest": "plugins/work-on-pr/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/work-on-pr/.codex-plugin/plugin.json",
       "hosts": [
         "claude",
         "codex"
       ],
       "skills": [
-        "metrics-zero-provenance-audit"
+        "work-on-pr"
       ],
-      "summary": "Single-skill plugin: metrics-zero-provenance-audit."
-    },
-    {
-      "name": "secretsmanager-prove-no-consumer-before-destroy",
-      "claude_manifest": "plugins/secretsmanager-prove-no-consumer-before-destroy/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/secretsmanager-prove-no-consumer-before-destroy/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "secretsmanager-prove-no-consumer-before-destroy"
-      ],
-      "summary": "Single-skill plugin: secretsmanager-prove-no-consumer-before-destroy."
-    },
-    {
-      "name": "github-oidc-immutable-subject-claim",
-      "claude_manifest": "plugins/github-oidc-immutable-subject-claim/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/github-oidc-immutable-subject-claim/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "github-oidc-immutable-subject-claim"
-      ],
-      "summary": "Single-skill plugin: github-oidc-immutable-subject-claim."
-    },
-    {
-      "name": "parallel-agent-session-collisions",
-      "claude_manifest": "plugins/parallel-agent-session-collisions/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/parallel-agent-session-collisions/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "parallel-agent-session-collisions"
-      ],
-      "summary": "Single-skill plugin: parallel-agent-session-collisions."
-    },
-    {
-      "name": "claude-code-cross-session-messaging",
-      "claude_manifest": "plugins/claude-code-cross-session-messaging/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/claude-code-cross-session-messaging/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "claude-code-cross-session-messaging"
-      ],
-      "summary": "Single-skill plugin: claude-code-cross-session-messaging."
-    },
-    {
-      "name": "cmux-cross-session-visibility",
-      "claude_manifest": "plugins/cmux-cross-session-visibility/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/cmux-cross-session-visibility/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "cmux-cross-session-visibility"
-      ],
-      "summary": "Single-skill plugin: cmux-cross-session-visibility."
-    },
-    {
-      "name": "agent-traffic-log",
-      "claude_manifest": "plugins/agent-traffic-log/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/agent-traffic-log/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "agent-traffic-log"
-      ],
-      "summary": "Single-skill plugin: agent-traffic-log."
-    },
-    {
-      "name": "subagent-no-report-channel",
-      "claude_manifest": "plugins/subagent-no-report-channel/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/subagent-no-report-channel/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "subagent-no-report-channel"
-      ],
-      "summary": "Single-skill plugin: subagent-no-report-channel."
-    },
-    {
-      "name": "cmux-session-self-identity",
-      "claude_manifest": "plugins/cmux-session-self-identity/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/cmux-session-self-identity/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "cmux-session-self-identity"
-      ],
-      "summary": "Single-skill plugin: cmux-session-self-identity."
-    },
-    {
-      "name": "terraform-noninteractive-prod-apply",
-      "claude_manifest": "plugins/terraform-noninteractive-prod-apply/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/terraform-noninteractive-prod-apply/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "terraform-noninteractive-prod-apply"
-      ],
-      "summary": "Single-skill plugin: terraform-noninteractive-prod-apply."
-    },
-    {
-      "name": "llm-vendor-waterfall",
-      "claude_manifest": "plugins/llm-vendor-waterfall/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/llm-vendor-waterfall/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "llm-vendor-waterfall"
-      ],
-      "summary": "Single-skill plugin: llm-vendor-waterfall."
-    },
-    {
-      "name": "cmux-config-silent-drop-triage",
-      "claude_manifest": "plugins/cmux-config-silent-drop-triage/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/cmux-config-silent-drop-triage/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "cmux-config-silent-drop-triage"
-      ],
-      "summary": "Single-skill plugin: cmux-config-silent-drop-triage."
-    },
-    {
-      "name": "alb-per-rule-traffic-attribution",
-      "claude_manifest": "plugins/alb-per-rule-traffic-attribution/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/alb-per-rule-traffic-attribution/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "alb-per-rule-traffic-attribution"
-      ],
-      "summary": "Single-skill plugin: alb-per-rule-traffic-attribution."
-    },
-    {
-      "name": "cmux-claude-codex-cross-runtime-messaging",
-      "claude_manifest": "plugins/cmux-claude-codex-cross-runtime-messaging/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/cmux-claude-codex-cross-runtime-messaging/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "cmux-claude-codex-cross-runtime-messaging"
-      ],
-      "summary": "Single-skill plugin: cmux-claude-codex-cross-runtime-messaging."
-    },
-    {
-      "name": "tamarian",
-      "claude_manifest": "plugins/tamarian/.claude-plugin/plugin.json",
-      "hosts": [
-        "claude"
-      ],
-      "skills": [
-        "tamarian"
-      ],
-      "summary": "Tamarian-mode persona plugin: tamarian skill plus SessionStart + UserPromptSubmit hooks that persist the level across sessions."
+      "summary": "Single-skill plugin: work-on-pr."
     }
   ],
   "defaults": {

@@ -189,7 +189,7 @@
     {
       "name": "spa-request-capture-and-block",
       "source": "./plugins/spa-request-capture-and-block/",
-      "description": "Capture the exact outbound request body a single-page app sends and block it before it leaves the browser: patch window.fetch AND XMLHttpRequest together (the XHR half is the one usually missed, so a fetch-only wrapper lets the request through), read the parsed payload off window, and disarm with a reload — including why a hash-route change does not remove the patch. For actions whose side effect costs credits or creates an irreversible record."
+      "description": "Capture the exact outbound request body a single-page app sends and block it before it leaves the browser: patch window.fetch AND XMLHttpRequest together (the XHR half is the one usually missed, so a fetch-only wrapper lets the request through), read the parsed payload off window, and disarm with a reload \u2014 including why a hash-route change does not remove the patch. For actions whose side effect costs credits or creates an irreversible record."
     },
     {
       "name": "us-federal-open-data-claim-verification",
@@ -280,6 +280,11 @@
       "name": "tamarian",
       "source": "./plugins/tamarian/",
       "description": "Tamarian mode: metaphor-and-allusion persona (Darmok-style) with technical content intact; hooks persist the level across sessions."
+    },
+    {
+      "name": "chrome-not-secure-tls-interception",
+      "source": "./plugins/chrome-not-secure-tls-interception/",
+      "description": "Chrome 'not secure' behind a TLS-inspecting proxy: CLI checks miss the PAC, and the forged zero-SCT cert is steady state, usually not the cause."
     }
   ]
 }
