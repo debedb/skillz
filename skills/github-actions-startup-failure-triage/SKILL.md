@@ -10,12 +10,19 @@ description: |
   (4) `gh run rerun <id>` refuses with "This workflow run cannot be retried",
   (5) a PR sits at `mergeStateStatus: BLOCKED` with `mergeable: MERGEABLE` and
   a required check that has never reported, (6) you are tempted to
-  force-merge or push an empty commit to make CI notice a PR. Covers the
-  three-signal test that identifies an infra failure in one minute, the
-  githubstatus API one-liner that confirms it, close/reopen as the
-  no-junk-commit retrigger, and why waiting beats an admin bypass.
+  force-merge or push an empty commit to make CI notice a PR, (7) a push,
+  force-push, or merge produced NO run at all — `actions/runs` has nothing
+  for the new sha (a dropped push event, not a failed run), (8) close/reopen
+  retriggered nothing because the workflow is `on: [push]`, not
+  `on: pull_request`, (9) `gh workflow run` refuses with HTTP 422 "Workflow
+  does not have 'workflow_dispatch' trigger". Covers the three-signal test
+  that identifies an infra failure in one minute, the githubstatus API
+  one-liner that confirms it, the dropped-event variant where no run exists,
+  a retrigger matrix keyed by the workflow's trigger type, why an
+  apply-on-push repo needs `workflow_dispatch` as a recovery path, and why
+  waiting beats an admin bypass.
 author: Claude Code
-version: 1.0.0
+version: 1.1.0
 date: 2026-08-26
 ---
 
@@ -37,6 +44,10 @@ control plane cannot start the run, and the two look identical from the PR.
 The cost of guessing wrong is asymmetric. Debugging a workflow file that was
 never broken is an hour; worse, the "it must be my branch" theory leads to
 force-merging past a required check that simply never got the chance to run.
+
+An outage also produces a second, quieter shape: the push event is **dropped
+entirely** and no run is ever created — covered in its own section below,
+because both the diagnosis and the retrigger differ.
 
 ## The three-signal test
 
@@ -143,10 +154,77 @@ So the two directions are not symmetric:
 
 A human saying "it's back" is worth exactly one retrigger, whatever the API says.
 
+## The other shape: the event is dropped and no run exists
+
+During the same incident class, some push events are throttled away entirely
+("delayed queues are burning down; some customers will continue to see
+increased delays" is the incident language for it). Then there is no
+`startup_failure` to find — there is **nothing**:
+
+```bash
+git ls-remote origin <branch>          # the sha IS on the remote
+gh run list --repo OWNER/REPO --branch <branch> --limit 10 \
+  --json headSha,status,conclusion,workflowName
+# → no row at all for your sha; older shas have runs
+```
+
+Observed in one incident for a force-push to a PR branch AND for merge
+commits landing on the default branch — where the missing run is the
+dev-deploy/apply. Absence reads exactly like repo or org misconfiguration
+("why did CI ignore my push?"), and it is inconsistent across repos: one
+repo's merge fired on its own (`ev=push`) while a sibling repo's merge
+minutes earlier never fired. Inconsistency across repos is what throttling
+looks like — check `summary.json` (section above) before rewiring anything.
+
+### Retrigger matrix — keyed by the workflow's `on:` triggers
+
+Read the workflow's `on:` block first; the right retrigger depends on it.
+
+- **`on: pull_request`** → close/reopen works (next section).
+- **`on: [push]`** (with or without `workflow_dispatch`) → close/reopen does
+  **nothing**: it emits `pull_request` events the workflow does not listen
+  to. Observed directly — after a close/reopen, only an unrelated
+  `pull_request`-triggered check fired; the push-triggered CI stayed absent.
+  Dispatch it instead:
+
+  ```bash
+  gh workflow run <workflow-name-or-file> --repo OWNER/REPO --ref <branch>
+  ```
+
+  Steps gated on the ref (e.g. a deploy step under
+  `if: github.ref == 'refs/heads/main'`) behave according to the ref you
+  dispatch on — dispatching on the default branch still runs the deploy,
+  which is usually what you want after a dropped merge event.
+- **No `workflow_dispatch` in `on:`** → the dispatch is refused:
+
+  ```
+  HTTP 422: Workflow does not have 'workflow_dispatch' trigger
+  ```
+
+  There is no clean retrigger left: wait for the queue to drain, or create a
+  new push event (an empty commit on a PR branch; on the default branch that
+  means landing another merge).
+
+### Hardening: apply-on-push repos need a second door
+
+A repo whose **only** path to deploy/apply is the push trigger has no
+recovery at all when that one event is dropped — the 422 above is a dead
+end. The fix is one line with no behavior change:
+
+```yaml
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+```
+
+Add it during calm weather, not mid-incident.
+
 ## Getting the run to happen again
 
 Once the incident clears, the PR still needs runs. Three options, in order of
-preference:
+preference — note these assume `on: pull_request` workflows; for
+push-triggered workflows use the matrix in the previous section.
 
 **1. `gh run rerun` — try it, but expect refusals.**
 
@@ -157,7 +235,8 @@ gh run rerun "$RUN_ID"
 
 Refusal is inconsistent: of two runs that failed the same way seconds apart,
 one accepted the rerun and the other refused it. Do not read the refusal as
-"your run is specially broken" — just move to the next option.
+"your run is specially broken" — just move to the next option. (A dropped
+event has no run id at all, so this option does not exist there.)
 
 **2. Close and reopen the PR.** This is the retrigger that costs nothing:
 
@@ -212,12 +291,15 @@ side effect of an agent unblocking itself.
 
 You have correctly diagnosed infra, not your PR, when all of these hold:
 
-1. `actions/runs` shows `completed/startup_failure`, not `queued`.
-2. `runs/$ID/jobs` is empty and the check's `annotations` is `[]`.
+1. `actions/runs` shows `completed/startup_failure`, not `queued` — or, in
+   the dropped-event shape, shows no run at all for a sha that is verifiably
+   on the remote.
+2. `runs/$ID/jobs` is empty and the check's `annotations` is `[]` (when a
+   run exists).
 3. `git diff --name-only origin/HEAD...HEAD -- .github/workflows/` is empty.
 4. The same workflow's most recent run on the base branch is `success`.
 5. `summary.json` reports the Actions component degraded, with an incident
-   whose `created_at` brackets your first failed run.
+   whose `created_at` brackets your first failed (or missing) run.
 
 And you have confirmed recovery when a re-triggered run reaches
 `completed/success` — check the run's `created_at`, since a stale
@@ -238,3 +320,10 @@ easy to re-read as a fresh failure.
 - `gh pr checks --watch` inherits the staleness in signal 1: it watches the
   checks view, so it can sit on a run that has already failed. Prefer a loop
   over `actions/runs` when scripting a wait.
+- When hunting a run for a merge commit rather than a branch head, filter
+  `gh run list --json headSha` by the sha — branch filters follow the
+  triggering event and can hide the row you want.
+- Do not conclude "this org is dropping push triggers" from one repo's
+  silence — that theory was voiced and wrong in the incident this section
+  was written from; the platform incident explained every repo's behavior,
+  including the inconsistency.
