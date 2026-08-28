@@ -612,6 +612,15 @@
       "summary": "Tamarian mode persona: Claude speaks as the Children of Tama - meaning carried by metaphor and allusion (canon ST:TNG phrases plus ones coined from Earth myth, history, and engineering lore), technical substance fully intact. Levels lite/full/ultra via /tamarian; code, commands, errors and numbers stay literal; security warnings and destructive-action confirmations always drop to plain speech. Ships LEXICON.md, a phrasebook with coinage rules."
     },
     {
+      "name": "targetgroupbinding-unattached-tg-readiness-wedge",
+      "path": "skills/targetgroupbinding-unattached-tg-readiness-wedge/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Diagnose and unwedge Kubernetes rollouts stuck because an AWS Load Balancer Controller TargetGroupBinding points at a target group no listener rule forwards to. Use when: (1) `helm upgrade` / a Deployment rollout times out with \"context deadline exceeded\" while every container in the new pods is healthy, (2) new pods show `Ready=False` with reason `ReadinessGatesNotReady` and a readiness gate named `target-health.elbv2.k8s.aws/<name>`, (3) `aws elbv2 describe-target-health` shows every target `unused` / `Target.NotInUse`, (4) a PodDisruptionBudget reports `ALLOWED DISRUPTIONS: 0` and node drains or consolidation (e.g. Karpenter) are blocked by a service that serves no traffic, (5) you staged a target group ahead of its listener rule \"so it's ready for the cutover\" and want to know why that wedges every future rollout. Core facts: the controller injects a target-health readiness gate into every pod a TargetGroupBinding matches; a target group attached to no load balancer listener keeps its targets permanently `Target.NotInUse`, so the gate can never pass. Unwedge with `kubectl delete targetgroupbinding`; durable fix is gating the binding separately from the target group and attaching the listener rule before the binding."
+    },
+    {
       "name": "terraform-ecs-capacity-provider-staged-teardown",
       "path": "skills/terraform-ecs-capacity-provider-staged-teardown/SKILL.md",
       "hosts": [
@@ -759,6 +768,7 @@
         "spa-request-capture-and-block",
         "spring-profile-config-overlay-dedupe",
         "subagent-no-report-channel",
+        "targetgroupbinding-unattached-tg-readiness-wedge",
         "terraform-ecs-capacity-provider-staged-teardown",
         "terraform-noninteractive-prod-apply",
         "terraform-state-version-apply-forensics",
@@ -1467,6 +1477,19 @@
         "tamarian"
       ],
       "summary": "Tamarian-mode persona plugin: tamarian skill plus SessionStart + UserPromptSubmit hooks that persist the level across sessions."
+    },
+    {
+      "name": "targetgroupbinding-unattached-tg-readiness-wedge",
+      "claude_manifest": "plugins/targetgroupbinding-unattached-tg-readiness-wedge/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/targetgroupbinding-unattached-tg-readiness-wedge/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "targetgroupbinding-unattached-tg-readiness-wedge"
+      ],
+      "summary": "Single-skill plugin: targetgroupbinding-unattached-tg-readiness-wedge."
     },
     {
       "name": "terraform-ecs-capacity-provider-staged-teardown",

@@ -310,6 +310,11 @@
       "name": "git-worktree-add-relative-path-nests-inside-repo",
       "source": "./plugins/git-worktree-add-relative-path-nests-inside-repo/",
       "description": "git worktree add with a relative path nests the worktree inside the repo - why, and how to relocate it with git worktree move."
+    },
+    {
+      "name": "targetgroupbinding-unattached-tg-readiness-wedge",
+      "source": "./plugins/targetgroupbinding-unattached-tg-readiness-wedge/",
+      "description": "A TargetGroupBinding on a target group no listener forwards to wedges every future rollout: the readiness gate that can never pass, and the PDB fallout."
     }
   ]
 }
