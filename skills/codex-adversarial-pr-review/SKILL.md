@@ -9,14 +9,18 @@ description: |
   with the developer agent, (3) you want a deterministic, scriptable reviewer
   rather than an LLM hand-posting comments, (4) you need to sweep a whole PR
   backlog and post one review per PR. Encodes the codex-companion `--json`
-  call, the finding->diff-line mapping, and the GitHub gotchas: inline comments
+  call, the finding->diff-line mapping, the GitHub gotchas: inline comments
   are rejected (422) on lines not in the PR diff (out-of-diff findings are rolled
   up into the body), self-review forbids APPROVE/REQUEST_CHANGES (default
   COMMENT), low-confidence findings are demoted to a collapsed section, and a
   `--dry-run` payload is byte-for-byte the POST body so it can be saved,
-  edited, and posted later without a second Codex pass.
+  edited, and posted later without a second Codex pass — plus the recurring
+  false-positive shapes (type-strictness on coerced config, "missing
+  attribution" demanding a refactor, stale-branch mass-deletion artifacts) and
+  degenerate-output shapes (plan-only "zero findings", quiet background-launch
+  failure) to judge before posting.
 author: Claude Code
-version: 1.1.0
+version: 1.2.0
 date: 2026-08-24
 source: https://github.com/voitta-ai/skillz
 source_file: skills/codex-adversarial-pr-review/SKILL.md
@@ -143,6 +147,50 @@ it, and that exact form was already shipping on `main`. A single `grep` of the
 tree refuted it. Type-strictness claims about dynamically-coerced config
 languages are a recurring false-positive shape.
 
+A second recurring shape: the **"missing observability / attribution"
+finding**. Codex asserts a new code path is indistinguishable from existing ones
+at the call site, escalates it to `high` with a "Do not ship yet" verdict, and
+prescribes a typed-result refactor (a sealed `Result{Success, NotFound, Timeout,
+Error, Shed}` threaded through callers). On one such PR — a P1 fix for a
+production outage that had recurred twice that morning — the sibling counters providing
+exactly that attribution already existed on the same `MeterRegistry`, and the new
+one was added by the PR under review. One `grep` of the metric-name constants
+file refuted it.
+
+Before accepting an attribution finding, run two checks:
+
+1. **`grep` the metric-name constants file** (`MetricNames`, `Telemetry`,
+   `metrics.py`, whatever the project centralizes on) for sibling counters
+   registered against the same registry. Codex reasons from the diff and does not
+   reliably see them.
+2. **Separate fleet-level from per-request attribution.** Fleet-level (a dedicated
+   counter, so the rate is dashboard- and alert-visible) is usually already there
+   and is what the finding actually demands. Per-request attribution (this
+   specific call knows *why* it degraded) is usually the real gap — and is usually
+   minor, often one line, not a refactor.
+
+Both shapes share a tell: the remedy is disproportionate to the defect. Weigh a
+blocking verdict against what the PR is for. Parking a P1 outage fix to thread a
+sealed type through a money path is the wrong trade, and "needs-attention" on a
+correct patch reads to the author as a real defect.
+
+A third shape: the **stale-branch mass-change artifact**. In a 61-PR sweep, a
+`critical` 0.86 finding read "1,918 deletions — mass removal of tests and
+dashboards". The branch was merely old: the "deleted" files landed on the base
+branch *after* this PR's merge-base, and the reviewer's narrative showed it had
+reasoned over a two-dot `origin/main..HEAD` range. The PR's real (merge-base,
+three-dot) diff was 4 files, +109/−4. Before believing any finding about mass
+deletions or sweeping changes, measure the PR's actual diff yourself:
+
+```bash
+git fetch origin "refs/pull/N/head:refs/remotes/pr/N"
+git diff --stat origin/main...refs/remotes/pr/N   # three dots: merge-base diff
+```
+
+If that diffstat and the finding disagree, the finding is describing branch
+staleness, not the PR — drop it, and consider telling the author to rebase
+instead.
+
 Spot-check at least every `critical` finding against the existing tree before
 posting; drop the bad ones with the `jq` filter above. Posting a wrong critical
 costs the author more time than the review saves.
@@ -191,10 +239,34 @@ costs the author more time than the review saves.
    sha=<headOid> -->` marker so prior runs are identifiable; dismissing/minimizing
    old reviews is intentionally out of scope for v1.
 
-6. **A saved payload does not expire, but its anchor does.** The payload pins
+7. **A saved payload does not expire, but its anchor does.** The payload pins
    `commit_id` to the head SHA at review time. If the author pushes before you
    post, GitHub rejects the stale commit — re-review that PR rather than forcing
    the old payload through.
+
+8. **A "clean pass" can be a degenerate run: zero findings with a body that is
+   the model's PLAN.** A run can exit successfully with an empty `findings[]`
+   and a summary/body that reads like intent, not conclusion — "Kicking off a
+   targeted diff read of ... Next steps: inspect ...". That is not "no issues
+   found"; it is a review that never happened. Treat *empty findings + body in
+   planning language* as a failed run and re-run it. One diff re-run three
+   times produced three different outcomes (plan-only, parse failure, real
+   findings), so a single run's shape is evidence about the run, not the diff.
+   Grep payloads for planning tells before trusting a batch's "clean" set:
+
+   ```bash
+   jq -r 'select((.comments|length)==0) | .body' OUT/payloads/pr-*.json \
+     | grep -nE "Kicking off|Next steps:|I will|Plan:" && echo "degenerate run(s) present"
+   ```
+
+9. **Backgrounding the wrapper can fail with no output at all.** Launching the
+   `.mjs` as a background job quiet-failed twice — no payload file, no error,
+   nothing in the log — and the identical command run in the foreground worked
+   first try. Run single-PR reviews in the **foreground** (budget ~90s, large
+   diffs several minutes). If you must background (the batch scripts do,
+   under their own job control), treat a missing or zero-byte payload with a
+   silent log as a launch failure to retry, never as a clean empty review —
+   the same `-s` rule batch mode's resume logic applies.
 
 ## Requirements
 
