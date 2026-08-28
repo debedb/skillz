@@ -320,6 +320,11 @@
       "name": "alb-controller-custom-sg-narrowing-inert",
       "source": "./plugins/alb-controller-custom-sg-narrowing-inert/",
       "description": "A custom SG on an ALB ingress narrows nothing while the controller'\\''s backend SG stays attached - SGs are additive; the real fix and its ordering traps."
+    },
+    {
+      "name": "cloudwatch-metric-filter-dimensions-default-value-exclusive",
+      "source": "./plugins/cloudwatch-metric-filter-dimensions-default-value-exclusive/",
+      "description": "Metric filter with dimensions AND default_value passes validate and plan, fails only at apply - and which of the two to drop."
     }
   ]
 }

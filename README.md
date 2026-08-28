@@ -139,6 +139,7 @@ environments and older Codex versions.
 | [git-worktree-add-relative-path-nests-inside-repo](./skills/git-worktree-add-relative-path-nests-inside-repo/SKILL.md) | skill | Claude, Codex | git worktree add with a relative path nests the worktree inside the repo - why, and how to relocate it with git worktree move. |
 | [targetgroupbinding-unattached-tg-readiness-wedge](./skills/targetgroupbinding-unattached-tg-readiness-wedge/SKILL.md) | skill | Claude, Codex | A TargetGroupBinding on a target group no listener forwards to wedges every future rollout: the readiness gate that can never pass, and the PDB fallout. |
 | [alb-controller-custom-sg-narrowing-inert](./skills/alb-controller-custom-sg-narrowing-inert/SKILL.md) | skill | Claude, Codex | A custom SG on an ALB ingress narrows nothing while the controller'\''s backend SG stays attached - SGs are additive; the real fix and its ordering traps. |
+| [cloudwatch-metric-filter-dimensions-default-value-exclusive](./skills/cloudwatch-metric-filter-dimensions-default-value-exclusive/SKILL.md) | skill | Claude, Codex | Metric filter with dimensions AND default_value passes validate and plan, fails only at apply - and which of the two to drop. |
 
 Machine-readable index: [`catalog.json`](./catalog.json). The
 installer and validation script both read from it, so new entries
