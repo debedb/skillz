@@ -850,11 +850,16 @@ The level lives in `$CLAUDE_CONFIG_DIR/.tamarian-mode` (default
 plugin changes nothing until `/tamarian` is invoked. The SessionStart
 hook reads `skills/tamarian/SKILL.md` at runtime, so the skill stays
 the single source of truth. Both hooks are plain bash with no
-dependencies and print `OK` when the mode is off. The `skillz` bundle
-carries the skill too; without the hooks the level applies to the
-current session only.
+dependencies and print `OK` when the mode is off.
+
+Install the `tamarian` plugin, not just the `skillz` bundle. The
+bundle ships the skill, so `/tamarian full` works there for the
+current session - but the bundle manifest carries no hooks, so nothing
+re-arms the level next session and there is no per-prompt reminder.
+The hooks live only in this plugin's manifest.
 
 ```text
+/plugin marketplace update skillz
 /plugin install tamarian@skillz
 ```
 
