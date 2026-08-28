@@ -98,6 +98,18 @@
       "summary": "Diagnose Chrome's \"Your connection to this site is not secure\" on a major site (gmail.com, google.com, github.com) on a machine behind a corporate TLS-inspecting proxy (Zscaler, Netskope, Palo Alto, Blue Coat). Use when: (1) Chrome's site-info bubble shows the red triangle and \"You should not enter any sensitive information on this site\", (2) a CLI `openssl`/`curl` check of the same host looks perfectly clean and you cannot reproduce the browser's complaint, (3) you are about to tell someone their proxy is MITM-ing them. Covers the PAC-proxy blind spot in CLI checks, how to read the intercepted chain, and \u2014 critically \u2014 why a forged proxy certificate with zero SCTs is the NORMAL steady state and usually NOT the cause."
     },
     {
+      "name": "claude-ai-conversation-history-search",
+      "path": "skills/claude-ai-conversation-history-search/SKILL.md",
+      "files": [
+        "scripts/search_claude_export.py"
+      ],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Search your own past claude.ai conversations for something you said or were told. Use when: (1) you need to find or disprove a claim about what was said in an earlier Claude chat, (2) you want to grep your whole Claude history, (3) someone references \"that chat we had\" and you need the receipts, (4) you tried grepping ~/Library/Application Support/Claude and found nothing, (5) a claude.ai export arrived as a manifest JSON instead of a data zip, or (6) curl on an export URL returns HTTP 403 with a Cloudflare \"Just a moment...\" page. Covers the export request flow, the multi-file manifest with one-time URLs, and searching conversations.json."
+    },
+    {
       "name": "claude-code-codex-plugin-parity",
       "path": "skills/claude-code-codex-plugin-parity/SKILL.md",
       "hosts": [
@@ -687,6 +699,7 @@
         "aws-http-server-on-lambda-web-adapter",
         "chrome-localhost-mic-autoblock",
         "chrome-not-secure-tls-interception",
+        "claude-ai-conversation-history-search",
         "claude-code-codex-plugin-parity",
         "claude-code-cross-session-messaging",
         "claude-code-plugin-from-existing-repo",
@@ -836,6 +849,19 @@
         "chrome-not-secure-tls-interception"
       ],
       "summary": "Single-skill plugin: chrome-not-secure-tls-interception."
+    },
+    {
+      "name": "claude-ai-conversation-history-search",
+      "claude_manifest": "plugins/claude-ai-conversation-history-search/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/claude-ai-conversation-history-search/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "claude-ai-conversation-history-search"
+      ],
+      "summary": "Single-skill plugin: claude-ai-conversation-history-search."
     },
     {
       "name": "claude-code-codex-plugin-parity",
