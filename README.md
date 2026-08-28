@@ -140,6 +140,12 @@ environments and older Codex versions.
 | [targetgroupbinding-unattached-tg-readiness-wedge](./skills/targetgroupbinding-unattached-tg-readiness-wedge/SKILL.md) | skill | Claude, Codex | A TargetGroupBinding on a target group no listener forwards to wedges every future rollout: the readiness gate that can never pass, and the PDB fallout. |
 | [alb-controller-custom-sg-narrowing-inert](./skills/alb-controller-custom-sg-narrowing-inert/SKILL.md) | skill | Claude, Codex | A custom SG on an ALB ingress narrows nothing while the controller'\''s backend SG stays attached - SGs are additive; the real fix and its ordering traps. |
 | [cloudwatch-metric-filter-dimensions-default-value-exclusive](./skills/cloudwatch-metric-filter-dimensions-default-value-exclusive/SKILL.md) | skill | Claude, Codex | Metric filter with dimensions AND default_value passes validate and plan, fails only at apply - and which of the two to drop. |
+| [jira-transition-and-sprint-mechanics](./skills/jira-transition-and-sprint-mechanics/SKILL.md) | skill | Claude, Codex | Move Jira issues through a customised workflow over REST: transition ids are per-**source**-status, transition-screen metadata under-reports allowed values, and sprint is an ordinary field that status changes never touch |
+| [`jira-transition-and-sprint-mechanics` plugin](./plugins/jira-transition-and-sprint-mechanics/) | plugin | Claude, Codex | Single-skill plugin: jira-transition-and-sprint-mechanics |
+| [dropwizard-prometheus-scrape-endpoint](./skills/dropwizard-prometheus-scrape-endpoint/SKILL.md) | skill | Claude, Codex | Add `/metrics` to a Dropwizard-Metrics JVM service without migrating to Micrometer; the two bridges bind **different** registry packages and the wrong one compiles, registers, and exports zero series |
+| [`dropwizard-prometheus-scrape-endpoint` plugin](./plugins/dropwizard-prometheus-scrape-endpoint/) | plugin | Claude, Codex | Single-skill plugin: dropwizard-prometheus-scrape-endpoint |
+| [dashboard-query-preflight](./skills/dashboard-query-preflight/SKILL.md) | skill | Claude, Codex | Execute every panel's query against the live datasource before calling a dashboard done - a wrong query and an idle workload both render as an empty rectangle, so "it renders" is evidence of nothing |
+| [`dashboard-query-preflight` plugin](./plugins/dashboard-query-preflight/) | plugin | Claude, Codex | Single-skill plugin: dashboard-query-preflight |
 
 Machine-readable index: [`catalog.json`](./catalog.json). The
 installer and validation script both read from it, so new entries

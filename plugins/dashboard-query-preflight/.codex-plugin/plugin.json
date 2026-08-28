@@ -1,0 +1,21 @@
+{
+  "name": "dashboard-query-preflight",
+  "version": "1.0.0",
+  "description": "Run every dashboard query against its live datasource before shipping: a wrong query and an idle workload render identically.",
+  "author": "voitta-ai",
+  "homepage": "https://github.com/voitta-ai/skillz",
+  "repository": "https://github.com/voitta-ai/skillz",
+  "license": "MIT",
+  "keywords": [
+    "claude",
+    "codex",
+    "skills",
+    "grafana",
+    "prometheus",
+    "cloudwatch",
+    "dashboards",
+    "observability",
+    "preflight"
+  ],
+  "skills": "./skills/"
+}
