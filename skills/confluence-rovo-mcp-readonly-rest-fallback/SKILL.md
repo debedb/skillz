@@ -2,11 +2,16 @@
 name: confluence-rovo-mcp-readonly-rest-fallback
 description: |
   Create or update a Confluence Cloud page when the Claude "Atlassian Rovo"
-  connector cannot write. Use when: (1) `createConfluencePage` /
+  connector cannot write -- and check first that it still cannot, since the
+  connector gets re-authorized and a writable site needs none of this. Use
+  when: (1) `createConfluencePage` /
   `updateConfluencePage` fails with `403 Forbidden ... "The app is not installed
-  on this instance"`, (2) `getAccessibleAtlassianResources` shows only read
-  scopes (`read:page:confluence`, `read:space:confluence`, `search:confluence`)
-  and no `write:page:confluence`, (3) you need a numeric `spaceId` from a
+  on this instance"`, (1b) an agent-harness permission classifier BLOCKS the
+  REST credential probe because it reads API tokens from the environment,
+  making the MCP write the only unattended path, (2)
+  `getAccessibleAtlassianResources` shows only read scopes
+  (`read:page:confluence`, `read:space:confluence`, `search:confluence`) and no
+  `write:page:confluence`, (3) you need a numeric `spaceId` from a
   personal-space key like `~7120200000aaaa...`, (4) a REST page create returns 400 on a
   body that the MCP accepted, (5) storage-format XHTML fails to parse because
   of named HTML entities, or (6) you need to EDIT an existing page that contains
@@ -16,8 +21,8 @@ description: |
   actually works, the HTML+ -> storage-format conversion table, and the
   surgical storage-format edit that round-trips macros intact.
 author: Claude Code
-version: 1.2.0
-date: 2026-08-26
+version: 1.3.0
+date: 2026-08-27
 ---
 
 # Confluence page create when the Rovo connector is read-only
@@ -38,9 +43,20 @@ Failed to create page: 403 Forbidden. Details: {
 The app *is* reachable — reads work fine. The real cause is the granted scope
 set. Nothing in the error says "scope".
 
+**This is a per-site, per-authorization condition, not a property of the Rovo
+connector.** The same connector on the same site can be writable later; treat
+everything below as a fallback you fall *into* on a 403, never as the default
+path. See *Solution* step 1.
+
 ## Trigger conditions
 
 - `createConfluencePage` or `updateConfluencePage` returns the 403 above.
+  **Verify this on the current site before following the rest of this skill** —
+  the connector may since have been granted write scope, in which case none of
+  the REST fallback applies. See *Solution* step 1.
+- An agent-harness permission layer refuses to run the credential probe in
+  step 2 because it reads API tokens from the environment. See *When an agent
+  harness blocks this probe*.
 - `getAccessibleAtlassianResources` returns scopes containing
   `read:page:confluence` / `read:space:confluence` / `search:confluence` but
   **not** `write:page:confluence`.
@@ -51,15 +67,31 @@ set. Nothing in the error says "scope".
 
 ## Solution
 
-### 1. Confirm it is a scope problem
+### 1. Try the MCP write first -- do not assume it is still read-only
+
+**Attempt `createConfluencePage` / `updateConfluencePage` before doing anything
+else.** Connector scopes are re-authorized out of band, so a site that was
+read-only when this skill was written can be writable today, and the fastest
+scope check is the write itself. On 2026-08-27 a site that had previously
+forced the whole REST fallback accepted `createConfluencePage` directly and
+returned a page id -- the entire procedure below was unnecessary.
+
+Only if the write returns the 403 above:
 
 ```bash
 # via the MCP
 getAccessibleAtlassianResources
 ```
 
-If the `scopes` array has no `write:*`, the MCP can never write. Do not retry
-the tool; go to REST.
+If the `scopes` array has no `write:*`, the MCP cannot write. Go to REST.
+
+Note that the MCP write path and the REST path take **different body formats**:
+the MCP wants Confluence HTML+ (`data-type` attributes, `<div
+data-type="panel-info">`) and rejects storage XML, while REST v2 with
+`representation: "storage"` wants exactly the storage XML the MCP refuses. The
+MCP converts HTML+ to storage on save and returns the stored value, so a
+successful MCP create is also a cheap way to see what storage format your
+markup became. The conversion table in step 4 reads in both directions.
 
 ### 2. Pick the working credential
 
@@ -79,8 +111,42 @@ for t in CONFLUENCE_API_TOKEN ATLASSIAN_API_TOKEN; do
 done
 ```
 
-A 404 here means *wrong token*, not a missing space — the space lookup 404s
-before it reports "not found" when the credential lacks Confluence access.
+A 404 here usually means *wrong token*, not a missing space — the space lookup
+404s before it reports "not found" when the credential lacks Confluence access.
+One exception worth ruling out before you go token-hunting: a 404 on a
+**personal-space tilde key** (`?keys=~7120200000aaaa...`) can also be the key
+filter rather than the credential. Re-probe with an unfiltered
+`/wiki/api/v2/spaces?limit=1` — if that returns 200 on the same token, the
+token is fine and the tilde-key filter was the problem.
+
+#### When an agent harness blocks this probe
+
+**This loop reads API tokens out of the environment, and a coding-agent
+permission layer may refuse to run it on those grounds.** Under Claude Code's
+auto mode the probe was denied twice — including a narrowed version that only
+read the two credentials this skill already names in `~/.claude.json` — with:
+
+```
+Permission for this action was denied by the Claude Code auto mode classifier.
+Reason: Blocked by classifier.
+```
+
+That is a *denial*, not a failure: nothing was probed, so a denial says nothing
+about which token works. It matters because it inverts the fallback's economics
+— under such a harness the REST path is the one that cannot run unattended,
+while the MCP write may be available. Hence step 1.
+
+If you hit this:
+
+1. Re-try the MCP write (step 1). It needs no token handling at all, which is
+   exactly why the classifier does not object to it.
+2. If REST is genuinely required, ask the user to run the probe themselves
+   (in Claude Code, `! <command>` runs it in-session) or to add a Bash
+   permission rule, rather than reshaping the script to slip past the
+   classifier.
+3. Do not work around it by echoing token values into a command line — that is
+   both what the classifier is guarding against and a good way to leak a
+   credential into shell history and logs.
 
 ### 3. Resolve the numeric spaceId
 
