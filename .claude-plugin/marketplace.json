@@ -290,6 +290,11 @@
       "name": "cloudwatch-per-host-stat-single-host-vs-fleet",
       "source": "./plugins/cloudwatch-per-host-stat-single-host-vs-fleet/",
       "description": "Max/Sum over a per-host gauge: is this number one host'\\''s story or the fleet'\\''s - answered from the metric alone, before any dashboard exists."
+    },
+    {
+      "name": "client-rendered-dashboard-data-blob",
+      "source": "./plugins/client-rendered-dashboard-data-blob/",
+      "description": "Decode a client-rendered dashboard'\\''s embedded data blob instead of scraping the DOM or reaching for a headless browser."
     }
   ]
 }
