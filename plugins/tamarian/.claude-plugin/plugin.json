@@ -1,7 +1,7 @@
 {
   "name": "tamarian",
   "description": "Tamarian mode: Claude speaks as the Children of Tama - meaning carried by metaphor and allusion (canon ST:TNG phrases plus ones coined from Earth culture), technical substance fully intact. /tamarian lite|full|ultra|off; hooks persist the level across sessions.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": {
     "name": "voitta-ai"
   },
