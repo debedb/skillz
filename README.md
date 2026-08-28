@@ -135,6 +135,7 @@ environments and older Codex versions.
 | [chrome-not-secure-tls-interception](./skills/chrome-not-secure-tls-interception/SKILL.md) | skill | Claude, Codex | Chrome 'not secure' behind a TLS-inspecting proxy: CLI checks miss the PAC, and the forged zero-SCT cert is steady state, usually not the cause. |
 | [cloudwatch-per-host-stat-single-host-vs-fleet](./skills/cloudwatch-per-host-stat-single-host-vs-fleet/SKILL.md) | skill | Claude, Codex | Max/Sum over a per-host gauge: is this number one host'\''s story or the fleet'\''s - answered from the metric alone, before any dashboard exists. |
 | [client-rendered-dashboard-data-blob](./skills/client-rendered-dashboard-data-blob/SKILL.md) | skill | Claude, Codex | Decode a client-rendered dashboard'\''s embedded data blob instead of scraping the DOM or reaching for a headless browser. |
+| [claude-ai-conversation-history-search](./skills/claude-ai-conversation-history-search/SKILL.md) | skill | Claude, Codex | Export and grep your own claude.ai conversation history: manifest exports, one-time URLs, the Cloudflare 403, and conversations.json search. |
 
 Machine-readable index: [`catalog.json`](./catalog.json). The
 installer and validation script both read from it, so new entries

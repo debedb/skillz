@@ -300,6 +300,11 @@
       "name": "client-rendered-dashboard-data-blob",
       "source": "./plugins/client-rendered-dashboard-data-blob/",
       "description": "Decode a client-rendered dashboard'\\''s embedded data blob instead of scraping the DOM or reaching for a headless browser."
+    },
+    {
+      "name": "claude-ai-conversation-history-search",
+      "source": "./plugins/claude-ai-conversation-history-search/",
+      "description": "Export and grep your own claude.ai conversation history: manifest exports, one-time URLs, the Cloudflare 403, and conversations.json search."
     }
   ]
 }
