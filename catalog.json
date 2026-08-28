@@ -597,6 +597,15 @@
       "summary": "Prove nothing consumes a Secrets Manager secret before a terraform destroy: per-resource CloudTrail lookup + GetSecretValue-vs-metadata classification, minus your own terraform refresh -- because a populated LastAccessedDate is NOT evidence of use (a secret with zero GetSecretValue still reports one)"
     },
     {
+      "name": "session-transcript-mining",
+      "path": "skills/session-transcript-mining/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Sweep every Claude Code session transcript on a machine for skill-worthy knowledge: root-caused bugs, non-obvious gotchas, painfully derived procedures - and for HOMELESS artifacts (skills written to ~/.claude/skills but never committed, skill edits stranded in worktrees, harvest PRs left open). Use when: (1) asked to \"mine sessions\", \"harvest what we learned\", or \"sweep transcripts for skills\", (2) daily/per-session harvesting has been running and you need the periodic catch-up pass that finds what it missed, (3) a skills repo looks behind what you know was learned recently, (4) you need to reconstruct what a lost or crashed session discovered. Method verified at scale: 50+ sessions condensed and mined by 8 parallel subagent miners in one sweep, yielding 22 shipped skill PRs."
+    },
+    {
       "name": "slack-app-token-rotation",
       "path": "skills/slack-app-token-rotation/SKILL.md",
       "hosts": [
@@ -822,6 +831,7 @@
         "review-pr-loop",
         "rxjava-dofinally-terminal-then-finally-test-race",
         "secretsmanager-prove-no-consumer-before-destroy",
+        "session-transcript-mining",
         "slack-app-token-rotation",
         "slack-xoxc-session-client",
         "spa-request-capture-and-block",
@@ -1524,6 +1534,19 @@
         "secretsmanager-prove-no-consumer-before-destroy"
       ],
       "summary": "Single-skill plugin: secretsmanager-prove-no-consumer-before-destroy."
+    },
+    {
+      "name": "session-transcript-mining",
+      "claude_manifest": "plugins/session-transcript-mining/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/session-transcript-mining/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "session-transcript-mining"
+      ],
+      "summary": "Single-skill plugin: session-transcript-mining."
     },
     {
       "name": "slack-app-token-rotation",

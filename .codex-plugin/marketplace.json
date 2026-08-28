@@ -345,6 +345,11 @@
       "name": "personal-skills-shadow-bundle-audit",
       "source": "./plugins/personal-skills-shadow-bundle-audit/",
       "description": "Audit ~/.claude/skills copies that shadow plugin-bundle skills: the three-directory model, the drift table, and the delete-vs-fork decision tree."
+    },
+    {
+      "name": "session-transcript-mining",
+      "source": "./plugins/session-transcript-mining/",
+      "description": "Mine all local Claude Code session transcripts for skills: inventory, condense 26-90x, fan out miners, tier the findings, ship serially."
     }
   ]
 }
