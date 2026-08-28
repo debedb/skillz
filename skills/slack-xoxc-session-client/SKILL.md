@@ -7,14 +7,14 @@ description: |
   rights, so OAuth bot/user tokens are off the table; (2) you need to read history,
   list channels, search, or post programmatically acting as the logged-in user;
   (3) a prior attempt failed because the `d` auth cookie is httpOnly and
-  document.cookie / JS extraction returns it empty (the wall the
-  slack-automation-workaround skill hit). Headline insight: decrypt the httpOnly
+  document.cookie / JS extraction returns it empty (the wall every
+  browser-automation attempt hits). Headline insight: decrypt the httpOnly
   `d` cookie straight from the browser cookie store with pycookiecheat, and scrape
   the `xoxc-` web token from the authenticated workspace HTML (`"api_token"` key).
   Ships a working, generalized Python client (slack_client.py) that self-labels
   outgoing posts with a good-faith agent marker by default.
 author: Claude Code
-version: 1.1.0
+version: 1.2.0
 date: 2026-07-06
 source: https://github.com/voitta-ai/skillz/issues/67
 source_file: skills/slack-xoxc-session-client/slack_client.py
@@ -40,7 +40,8 @@ Headless browser automation (Playwright/Selenium) does not rescue this: Slack
 detects the automation and blanks the page, and the captured session cookies are
 missing the critical `d` auth token because it is **httpOnly** —
 `document.cookie` and any in-page JS extraction return it empty. That is exactly
-where the [[slack-automation-workaround]] skill stalls.
+where a browser-automation workaround stalls: it drives the already-open
+Slack tab, so it inherits every UI change and login prompt.
 
 ## Context / Trigger Conditions
 
@@ -164,7 +165,7 @@ channel of mixed humans and agents stays honestly readable.
 
 When the local-cookie path is unavailable (no decryptable profile, or you only
 have an interactive browser), fall back to the **Claude-in-Chrome** approach
-from [[slack-automation-workaround]]: navigate the already-authenticated Chrome
+from browser automation: navigate the already-authenticated Chrome
 tab and read the rendered page with the MCP tools. That avoids the httpOnly wall
 by never needing the cookie at all, at the cost of being interactive rather than
 scriptable.
@@ -193,12 +194,11 @@ correct.
   `xoxc` web token carries your user scope, which a bot token would not.
 - pycookiecheat may prompt for Keychain access on macOS the first time; grant it
   for the browser whose store you are decrypting.
-- This supersedes the dead-end note in [[slack-automation-workaround]]
-  ("session cookies never capture the `d` auth token") for the scriptable case;
-  keep that skill for the interactive Claude-in-Chrome fallback.
+- This supersedes the older conclusion that "session cookies never capture the
+  `d` auth token" for the scriptable case. The interactive Claude-in-Chrome
+  fallback is still the right move when you need a human-driven session.
 
 ## References
 
 - [Slack web API methods](https://api.slack.com/methods)
 - [pycookiecheat](https://github.com/n8henrie/pycookiecheat)
-- Related skills: [[slack-automation-workaround]] (interactive fallback).

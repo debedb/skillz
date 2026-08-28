@@ -28,7 +28,7 @@ err()  { echo "ERROR: $*" >&2; fail=1; }
 echo "Validating catalog at $CATALOG"
 
 CATALOG_JSON="$(cat "$CATALOG")" ROOT="$ROOT" python3 <<'PY'
-import json, os, re, sys
+import collections, json, os, re, sys
 
 root = os.environ["ROOT"]
 catalog = json.loads(os.environ["CATALOG_JSON"])
@@ -346,6 +346,124 @@ for rel, host_dir in (
             f"'{rel}' does not advertise it - it cannot be installed by name"
         )
 
+
+# ---------------------------------------------------------------------------
+# Cross-reference and coverage gate (issue #222).
+#
+# Every condition below was at 100% (or zero) before this was written, which is
+# the only reason it can block rather than report. These are the #207 overhaul's
+# hand findings made recurring: nothing else notices when the next skill arrives
+# wired to only half the places it has to appear.
+# ---------------------------------------------------------------------------
+
+# The heading is load-bearing, not cosmetic. A checker keyed on `## Related`
+# silently SKIPS a file that says `## Related skills` and reports green - which
+# is how three references that resolve nowhere survived until the five variant
+# spellings were normalised. The variant is therefore an error in its own right.
+#
+# Inside the section, only a bullet's LEADING backticked token is a reference.
+# Backticks later in the bullet are prose - config values, CLI flags, package
+# names - and scanning all of them reproduces the ~80% false-positive rate that
+# made whole-body scanning useless. With this rule no allowlist is needed.
+REF_RE = re.compile(r"(?m)^[-*] +`([a-z0-9][a-z0-9-]{3,})`")
+SECTION_RE = re.compile(r"(?ms)^## Related\s*\n(.*?)(?=\n##\s|\Z)")
+
+for entry in skills:
+    name, path = entry.get("name"), entry.get("path")
+    if not name or not path:
+        continue
+    abs_path = os.path.join(root, path)
+    if not os.path.isfile(abs_path):
+        continue
+    with open(abs_path) as f:
+        body = f.read()
+
+    for variant in re.findall(r"(?m)^##+ +Related\b.*$", body):
+        if variant.strip() != "## Related":
+            errors.append(
+                f"skill '{name}' uses heading '{variant.strip()}' - the "
+                f"canonical heading is '## Related', and a variant is skipped "
+                f"by every checker that keys on it"
+            )
+
+    section = SECTION_RE.search(body)
+    if not section:
+        continue
+    for ref in sorted(set(REF_RE.findall(section.group(1)))):
+        if ref not in skill_names:
+            errors.append(
+                f"skill '{name}' has a Related entry `{ref}` that is not a "
+                f"skill in this catalog - if it lives in a private catalog or "
+                f"skillz-memory the reader cannot resolve it either, so say "
+                f"where it lives or state the technique instead"
+            )
+
+# Every skill needs its own plugin, or it is installable only as part of the
+# bundle and `/plugin install <name>@skillz` 404s. 15 skills were in that state
+# before #263, and the gap is invisible without this check because the bundle
+# keeps working.
+for entry in skills:
+    name = entry.get("name")
+    if name and not os.path.isdir(os.path.join(root, "plugins", name)):
+        errors.append(
+            f"skill '{name}' has no plugins/{name}/ directory - it ships only "
+            f"inside the bundle and cannot be installed by name"
+        )
+
+# The README catalog table is the human index. A missing row makes a skill
+# undiscoverable to anyone not reading catalog.json; a duplicated row is the
+# quieter failure, since nothing looks wrong at the point of insertion (master
+# carried one row three times).
+readme_path = os.path.join(root, "README.md")
+if os.path.isfile(readme_path):
+    with open(readme_path) as f:
+        readme_text = f.read()
+    for entry in skills:
+        name = entry.get("name")
+        if name and f"/{name}/SKILL.md" not in readme_text:
+            errors.append(f"skill '{name}' has no README catalog row")
+    rows = [ln for ln in readme_text.splitlines() if ln.startswith("| [")]
+    for row, count in collections.Counter(rows).items():
+        if count > 1:
+            errors.append(
+                f"README catalog row appears {count} times: {row[:70]}..."
+            )
+
+# The inverse of the hooked-plugin rule above. That check catches a hooked skill
+# wrongly IN the bundle; this catches an ordinary skill wrongly OUT of it, which
+# is the direction that happens by default - a new skill gets its own plugin and
+# nobody remembers the bundle. Two skills were in exactly that state when this
+# was written, shipping standalone-only while bundle users never saw them.
+hooked_skills = set()
+for p in catalog.get("plugins", []):
+    if p.get("name") == "skillz":
+        continue
+    for key in ("claude_manifest", "codex_manifest"):
+        rel = p.get(key)
+        if not rel:
+            continue
+        manifest_path = os.path.join(root, rel)
+        plugin_root = os.path.dirname(os.path.dirname(manifest_path))
+        hooked_here = os.path.isfile(
+            os.path.join(plugin_root, "hooks", "hooks.json")
+        )
+        if not hooked_here:
+            try:
+                with open(manifest_path) as mf:
+                    hooked_here = "hooks" in json.load(mf)
+            except (OSError, ValueError):
+                hooked_here = False
+        if hooked_here:
+            hooked_skills.update(p.get("skills", []))
+
+for entry in skills:
+    name = entry.get("name")
+    if not name or name in hooked_skills or name in bundle_skills:
+        continue
+    errors.append(
+        f"skill '{name}' ships no hooks but is missing from the skillz "
+        f"bundle's skill list - bundle users never get it"
+    )
 
 if errors:
     for e in errors:

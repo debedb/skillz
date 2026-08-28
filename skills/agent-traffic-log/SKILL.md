@@ -18,7 +18,7 @@ description: |
   of a ten-message exchange with no agent calling `xs log`. Ships `scripts/xs`
   (log, tail, recent, status, prune) and `scripts/xs-hook`.
 author: Claude Code
-version: 1.2.0
+version: 1.3.0
 date: 2026-08-26
 source: https://github.com/voitta-ai/skillz
 source_file: skills/agent-traffic-log/SKILL.md
@@ -158,7 +158,7 @@ when it exists. `$XS_NAME` still overrides both.
 
 ### What it maps
 
-The hook reads the [[cmux-cross-session-visibility]] envelope out of
+The hook reads the `cmux-cross-session-visibility` envelope out of
 `SendMessage`'s `summary` field, so the same grammar that makes a message
 legible in the UI is what makes the log line accurate.
 
@@ -211,8 +211,8 @@ Three layers, each useful alone:
 | Pill | one workspace's sidebar | is *this* session blocked |
 | **Log** | one pane, or any reader | what is the *run* doing, and what happened |
 
-See [[cmux-cross-session-visibility]] for the envelope and pill, and
-[[claude-code-cross-session-messaging]] for the transport underneath. Log the
+See `cmux-cross-session-visibility` for the envelope and pill, and
+`claude-code-cross-session-messaging` for the transport underneath. Log the
 same `kind` you put in the message summary, so a pane line and a transcript
 line describe the same event in the same vocabulary.
 
@@ -225,7 +225,7 @@ wait that nobody is actually waiting on.
 Static tests prove the writer; only a real run proves the conventions. Run this
 on a **fresh cmux launch**, not a resumed one - resumed panes have neither
 `$TMUX` nor the shim directory, so a team spawned from one behaves differently
-(see [[cmux-agent-tabs]]).
+(see `cmux-agent-tabs`).
 
 **1. A team, per the documented shape.** From the palette, launch
 `cmux claude-teams`, give the main agent a task, and let it spawn a squad:

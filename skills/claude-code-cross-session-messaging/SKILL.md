@@ -16,7 +16,7 @@ description: |
   headless and in-process transports, the idle-subscription primitive that
   replaces polling, and the permission-laundering boundary.
 author: Claude Code
-version: 1.0.0
+version: 1.1.0
 date: 2026-08-20
 source: https://github.com/voitta-ai/skillz
 source_file: skills/claude-code-cross-session-messaging/SKILL.md
@@ -283,10 +283,10 @@ ListAgents                                        // names are addresses
 
 ## Related
 
-- [[agent-team-orchestration]] - spawning a *team* of agents over a backlog,
+- `agent-team-orchestration` - spawning a *team* of agents over a backlog,
   where watchability per agent is the design constraint. This skill is the
   point-to-point case between sessions that already exist.
-- [[cmux-agent-tabs]] - making spawned agents land on watchable surfaces, i.e.
+- `cmux-agent-tabs` - making spawned agents land on watchable surfaces, i.e.
   giving them the TTY the no-TTY law demands. Also the home of the multi-hop
   `PATH` failures that break a shim-based transport.
 - Worked example of the multi-hop trap in a real long-lived setup:

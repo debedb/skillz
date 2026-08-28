@@ -16,7 +16,7 @@ description: |
   file pruning, frontmatter `source:` field rewrite, and the
   redirect-README pattern that points users at the new repo.
 author: Claude Code
-version: 1.1.0
+version: 1.2.0
 date: 2026-05-14
 ---
 
@@ -263,7 +263,8 @@ Result:
 - [git rebase --onto / --root](https://git-scm.com/docs/git-rebase)
 - [git merge strategy options `-X ours` / `-X theirs`](https://git-scm.com/docs/merge-strategies#Documentation/merge-strategies.txt-ours)
 - [gh gist subcommands](https://cli.github.com/manual/gh_gist)
-- Related: [[claude-code-static-allow-bypasses-hook]] (relevant if
-  the migrated artifact triggers shell-permission prompts),
-  [[gh-git-heredoc-body-file]] (for the redirect-README + PR body
+- Related, both in the sibling `skillz-memory` repo rather than this
+  catalog: `claude-code-static-allow-bypasses-hook` (relevant if the
+  migrated artifact triggers shell-permission prompts) and
+  `gh-git-heredoc-body-file` (for the redirect-README + PR body
   authoring step).

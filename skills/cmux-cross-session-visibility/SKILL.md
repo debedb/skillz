@@ -15,7 +15,7 @@ description: |
   cheap conventions first. Also covers why a stale pill is the main failure
   mode and what must clear it.
 author: Claude Code
-version: 1.0.0
+version: 1.1.0
 date: 2026-08-21
 source: https://github.com/voitta-ai/skillz
 source_file: skills/cmux-cross-session-visibility/SKILL.md
@@ -174,8 +174,8 @@ re-set each turn cannot go stale for longer than one turn.
 
 ## Related
 
-- [[claude-code-cross-session-messaging]] - the transport these conventions
+- `claude-code-cross-session-messaging` - the transport these conventions
   decorate: addressing, `notify_when_idle`, and why the reply and the idle
   notice are different signals.
-- [[cmux-agent-tabs]] - why teammates land in separate workspaces at all, and
+- `cmux-agent-tabs` - why teammates land in separate workspaces at all, and
   the `PATH` failures that stop them appearing anywhere.
