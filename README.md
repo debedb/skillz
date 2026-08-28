@@ -24,6 +24,7 @@ environments and older Codex versions.
   - [pr-loop](#pr-loop-collection)
 - [Plugins](#plugins)
   - [codex-continuous-learning](#codex-continuous-learning-codex-only)
+  - [tamarian](#tamarian-claude-only)
 - [Validation](#validation)
   - [Rebasing a stale skill branch](#rebasing-a-stale-skill-branch)
 - [Related code-review approaches](#related-code-review-approaches)
@@ -129,6 +130,8 @@ environments and older Codex versions.
 | [cmux-claude-codex-cross-runtime-messaging](./skills/cmux-claude-codex-cross-runtime-messaging/SKILL.md) | skill | Claude, Codex | Claude Code <-> Codex CLI agents as messaging peers in cmux: `cmux send` transport, self-named tabs, both sides in the traffic log, where the three transcripts live |
 | [`alb-per-rule-traffic-attribution` plugin](./plugins/alb-per-rule-traffic-attribution/) | plugin | Claude, Codex | Single-skill plugin: alb-per-rule-traffic-attribution |
 | [`cmux-claude-codex-cross-runtime-messaging` plugin](./plugins/cmux-claude-codex-cross-runtime-messaging/) | plugin | Claude, Codex | Single-skill plugin: cmux-claude-codex-cross-runtime-messaging |
+| [tamarian](./skills/tamarian/SKILL.md) | skill | Claude | Tamarian mode: Claude speaks as the Children of Tama - metaphor and allusion carry the meaning, the technical substance stays literal; `/tamarian lite\|full\|ultra\|off`, phrasebook in `LEXICON.md` |
+| [`tamarian` plugin](./plugins/tamarian/) | plugin | Claude | tamarian skill plus SessionStart + UserPromptSubmit hooks that persist the level across sessions |
 
 Machine-readable index: [`catalog.json`](./catalog.json). The
 installer and validation script both read from it, so new entries
@@ -791,6 +794,73 @@ Install (when supported by the local Codex CLI):
 
 Or, from a clone, point Codex at `plugins/codex-continuous-learning/`
 as a local plugin folder.
+
+### tamarian (Claude only)
+
+Darmok and Jalad at Tanagra. A persona mode, purely for entertainment:
+Claude answers as the Children of Tama, meaning carried by metaphor and
+allusion to shared stories - the canon ST:TNG phrases plus ones coined
+from Earth myth, history and engineering lore ("Hopper, the moth in
+the relay" is a bug, found). Inspired by
+[caveman](https://github.com/juliusbrussee/caveman) for the mechanics
+and by [Design Patterns are
+Darmok](https://blog.debedb.com/2026/08/06/design-patterns-are-darmok/)
+for the premise: a pattern name is a compressed story that only
+decompresses against shared knowledge, and this mode makes the
+compression audible.
+
+The substance never leaves. Code, commands, paths, errors and numbers
+stay literal at every level; security warnings, destructive-action
+confirmations and step-by-step instructions always drop to plain
+speech.
+
+```text
+> why is the build failing?
+
+Shaka, when the walls fell - the build fails. Hopper, the moth in the
+relay - `user` may be `undefined` at `auth.ts:42`. Temba, his arms
+wide -
+
+    if (!user) return null;
+```
+
+Levels: `lite` (one glossed metaphor, then plain speech), `full`
+(default: every prose beat is metaphor, dash, literal statement), and
+`ultra` (pure metaphor, a `The river Temarc` glossary at the end).
+
+```text
+/tamarian full      # persist the level; speaks Tamarian from that reply on
+/tamarian           # status
+/tamarian off       # plain speech; "stop tamarian" / "normal mode" also work
+```
+
+Layout:
+
+```
+plugins/tamarian/
+  .claude-plugin/plugin.json   # manifest; SessionStart + UserPromptSubmit hooks inline
+  skills/tamarian -> ../../../skills/tamarian
+  hooks/
+    tamarian-activate.sh       # SessionStart: emits the SKILL.md body when a level is set
+    tamarian-reminder.sh       # UserPromptSubmit: one-line reminder against drift
+```
+
+The level lives in `$CLAUDE_CONFIG_DIR/.tamarian-mode` (default
+`~/.claude/.tamarian-mode`); no file means off, so installing the
+plugin changes nothing until `/tamarian` is invoked. The SessionStart
+hook reads `skills/tamarian/SKILL.md` at runtime, so the skill stays
+the single source of truth. Both hooks are plain bash with no
+dependencies and print `OK` when the mode is off. The `skillz` bundle
+carries the skill too; without the hooks the level applies to the
+current session only.
+
+```text
+/plugin install tamarian@skillz
+```
+
+The phrasebook, with coinage templates and rules, is
+[`skills/tamarian/LEXICON.md`](./skills/tamarian/LEXICON.md). Temba,
+his arms wide - additions welcome by PR.
 
 ## Validation
 
