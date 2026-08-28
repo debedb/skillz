@@ -462,6 +462,15 @@
       "summary": "Fix macOS Sparkle updater error 4005 / 'Failed to create installation cache directory' that persists after stripping quarantine: relaunch the un-quarantined bundle."
     },
     {
+      "name": "mcp-language-server-orphan-fd-exhaustion",
+      "path": "skills/mcp-language-server-orphan-fd-exhaustion/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Diagnose and clear a system-wide file-descriptor exhaustion on a macOS workstation caused by orphaned `mcp-language-server` (LSP-to-MCP bridge) processes leaking file descriptors until the kernel file table is full. The symptom masquerades as whatever tool happens to open a file next - \"ENFILE: file table overflow\" from a CLI, terraform failing, DNS lookups timing out - so it reads as that tool's bug, not the machine's. Use when: (1) any process on a dev machine dies with `ENFILE: file table overflow` or errno 23, (2) unrelated tools start failing at once with open/socket errors while the machine otherwise seems fine, (3) `sysctl kern.num_files` is within a few percent of `kern.maxfiles`, (4) `ps` shows many `mcp-language-server` (or other per-session MCP bridge) processes with PPID 1. Verified 2026-08-19: 20 orphaned bridge processes held 255,298 fds (kern.num_files 275,146 of kern.maxfiles 276,480 - 99.5%); killing them dropped usage to 19,885 and the failing tool ran clean."
+    },
+    {
       "name": "metrics-zero-provenance-audit",
       "path": "skills/metrics-zero-provenance-audit/SKILL.md",
       "hosts": [
@@ -781,6 +790,7 @@
         "litellm-custom-provider-dispatch-order",
         "llm-vendor-waterfall",
         "macos-sparkle-update-quarantine-relaunch",
+        "mcp-language-server-orphan-fd-exhaustion",
         "metrics-zero-provenance-audit",
         "multi-phase-feature-pr-worktrees",
         "neon-vercel-db-identify-and-migrate",
@@ -1285,6 +1295,19 @@
         "llm-vendor-waterfall"
       ],
       "summary": "Single-skill plugin: llm-vendor-waterfall."
+    },
+    {
+      "name": "mcp-language-server-orphan-fd-exhaustion",
+      "claude_manifest": "plugins/mcp-language-server-orphan-fd-exhaustion/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/mcp-language-server-orphan-fd-exhaustion/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "mcp-language-server-orphan-fd-exhaustion"
+      ],
+      "summary": "Single-skill plugin: mcp-language-server-orphan-fd-exhaustion."
     },
     {
       "name": "metrics-zero-provenance-audit",
