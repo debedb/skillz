@@ -440,6 +440,11 @@
       "name": "git-default-branch-detection",
       "source": "./plugins/git-default-branch-detection/",
       "description": "Detect a repo's real default branch; init.defaultBranch is not the answer."
+    },
+    {
+      "name": "macos-sandbox-exec-agent-command-confinement",
+      "source": "./plugins/macos-sandbox-exec-agent-command-confinement/",
+      "description": "Confine agent-run shell commands to one tree with macOS sandbox-exec: reads, writes, symlinks, runtime paths."
     }
   ]
 }

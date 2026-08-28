@@ -212,6 +212,8 @@ environments and older Codex versions.
 | [`credential-redactor-audit` plugin](./plugins/credential-redactor-audit/) | plugin | Claude, Codex | Single-skill plugin: credential-redactor-audit |
 | [git-default-branch-detection](./skills/git-default-branch-detection/SKILL.md) | skill | Claude, Codex | Detect a repo's real default branch; `init.defaultBranch` is a preference for repos that don't exist yet, not the answer |
 | [`git-default-branch-detection` plugin](./plugins/git-default-branch-detection/) | plugin | Claude, Codex | Single-skill plugin: git-default-branch-detection |
+| [macos-sandbox-exec-agent-command-confinement](./skills/macos-sandbox-exec-agent-command-confinement/SKILL.md) | skill | Claude, Codex | Confine agent-run commands to one tree with macOS sandbox-exec |
+| [`macos-sandbox-exec-agent-command-confinement` plugin](./plugins/macos-sandbox-exec-agent-command-confinement/) | plugin | Claude, Codex | Single-skill plugin: macos-sandbox-exec-agent-command-confinement |
 
 Machine-readable index: [`catalog.json`](./catalog.json). The
 installer and validation script both read from it, so new entries
