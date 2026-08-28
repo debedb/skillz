@@ -132,6 +132,7 @@ environments and older Codex versions.
 | [`cmux-claude-codex-cross-runtime-messaging` plugin](./plugins/cmux-claude-codex-cross-runtime-messaging/) | plugin | Claude, Codex | Single-skill plugin: cmux-claude-codex-cross-runtime-messaging |
 | [tamarian](./skills/tamarian/SKILL.md) | skill | Claude | Tamarian mode: Claude speaks as the Children of Tama - metaphor and allusion carry the meaning, the technical substance stays literal; `/tamarian lite\|full\|ultra\|off`, phrasebook in `LEXICON.md` |
 | [`tamarian` plugin](./plugins/tamarian/) | plugin | Claude | tamarian skill plus SessionStart + UserPromptSubmit hooks that persist the level across sessions |
+| [chrome-not-secure-tls-interception](./skills/chrome-not-secure-tls-interception/SKILL.md) | skill | Claude, Codex | Chrome 'not secure' behind a TLS-inspecting proxy: CLI checks miss the PAC, and the forged zero-SCT cert is steady state, usually not the cause. |
 
 Machine-readable index: [`catalog.json`](./catalog.json). The
 installer and validation script both read from it, so new entries
