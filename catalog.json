@@ -178,7 +178,7 @@
       "hosts": [
         "codex"
       ],
-      "summary": "Run the end-of-task retrospective that Codex's `Stop` and `UserPromptSubmit` hooks demand, and decide what the session actually produced. Most turns end with `No reusable learning.` Of the rest, most are **memory** \u2014 a single cause->fix, an API gotcha, a config detail \u2014 and must NOT become a `SKILL.md`; only a repeatable procedure does. Use when a `Stop` hook fires at end-of-task, when a debugging-heavy session ends, or when the user asks \"what did we learn?\". Covers the four gates (discovery cost, recurrence, verifiable trigger, verified result), the skill-vs-memory classification, the install-location choice, and the `No reusable learning.` escape hatch. For an explicitly invoked retrospective, and for the wiring that promotes a skill into the `voitta-ai/skillz` catalog, see `claudeception` \u2014 this skill defers to it rather than restating it."
+      "summary": "Run the end-of-task retrospective that Codex's `Stop` and `UserPromptSubmit` hooks demand, and decide what the session actually produced. Most turns end with `No reusable learning.` Of the rest, most are **memory** — a single cause->fix, an API gotcha, a config detail — and must NOT become a `SKILL.md`; only a repeatable procedure does. Use when a `Stop` hook fires at end-of-task, when a debugging-heavy session ends, or when the user asks \"what did we learn?\". Covers the four gates (discovery cost, recurrence, verifiable trigger, verified result), the skill-vs-memory classification, the install-location choice, and the `No reusable learning.` escape hatch. For an explicitly invoked retrospective, and for the wiring that promotes a skill into the `voitta-ai/skillz` catalog, see `claudeception` — this skill defers to it rather than restating it."
     },
     {
       "name": "gh-pr-merge-delete-branch-closes-dependent-pr",
@@ -416,7 +416,7 @@
         "claude",
         "codex"
       ],
-      "summary": "Capture the exact outbound request body a single-page app sends and block it before it leaves the browser: patch window.fetch AND XMLHttpRequest together (the XHR half is the one usually missed, so a fetch-only wrapper lets the request through), read the parsed payload off window, and disarm with a reload \u2014 including why a hash-route change does not remove the patch. For actions whose side effect costs credits or creates an irreversible record."
+      "summary": "Capture the exact outbound request body a single-page app sends and block it before it leaves the browser: patch window.fetch AND XMLHttpRequest together (the XHR half is the one usually missed, so a fetch-only wrapper lets the request through), read the parsed payload off window, and disarm with a reload — including why a hash-route change does not remove the patch. For actions whose side effect costs credits or creates an irreversible record."
     },
     {
       "name": "us-federal-open-data-claim-verification",
@@ -601,6 +601,19 @@
         "codex"
       ],
       "summary": "Attribute ALB traffic to individual listener rules and callers: AWS/ApplicationELB has no rule-level dimension, and matched_rule_priority in access logs is a POSITION that renumbers when a rule is inserted, silently mislabelling any query spanning that deploy; attribute by request_url + user_agent instead"
+    },
+    {
+      "name": "cmux-claude-codex-cross-runtime-messaging",
+      "path": "skills/cmux-claude-codex-cross-runtime-messaging/SKILL.md",
+      "files": [
+        "scripts/pp-send",
+        "scripts/pp-register"
+      ],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Run a Claude Code agent and a Codex CLI agent as messaging peers in cmux panes, each named as a tab and both in the agent traffic log. Codex has no SendMessage and Claude's peer socket needs auth, so the cross-runtime hop is keystroke injection (cmux send + send-key Enter) through a small helper that also logs to xs explicitly; each agent names its own tab first via cmux identify + tab-action rename. Covers the Codex TUI parking on a startup modal with no way to read its screen (diagnose from ~/.codex logs and the missing rollout file, inject one Enter), and where the lead, teammate and Codex transcripts live on disk afterwards. Verified 2026-08-27: five rounds in 50 s, every message exactly once."
     }
   ],
   "collections": [
@@ -689,7 +702,8 @@
         "confluence-rovo-mcp-readonly-rest-fallback",
         "github-actions-startup-failure-triage",
         "cmux-config-silent-drop-triage",
-        "alb-per-rule-traffic-attribution"
+        "alb-per-rule-traffic-attribution",
+        "cmux-claude-codex-cross-runtime-messaging"
       ],
       "summary": "Full repo bundle: every skill in one plugin."
     },
@@ -1184,7 +1198,7 @@
       "skills": [
         "spa-request-capture-and-block"
       ],
-      "summary": "Capture the exact outbound request body a single-page app sends and block it before it leaves the browser: patch window.fetch AND XMLHttpRequest together (the XHR half is the one usually missed, so a fetch-only wrapper lets the request through), read the parsed payload off window, and disarm with a reload \u2014 including why a hash-route change does not remove the patch. For actions whose side effect costs credits or creates an irreversible record."
+      "summary": "Capture the exact outbound request body a single-page app sends and block it before it leaves the browser: patch window.fetch AND XMLHttpRequest together (the XHR half is the one usually missed, so a fetch-only wrapper lets the request through), read the parsed payload off window, and disarm with a reload — including why a hash-route change does not remove the patch. For actions whose side effect costs credits or creates an irreversible record."
     },
     {
       "name": "us-federal-open-data-claim-verification",
@@ -1397,6 +1411,19 @@
         "alb-per-rule-traffic-attribution"
       ],
       "summary": "Single-skill plugin: alb-per-rule-traffic-attribution."
+    },
+    {
+      "name": "cmux-claude-codex-cross-runtime-messaging",
+      "claude_manifest": "plugins/cmux-claude-codex-cross-runtime-messaging/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/cmux-claude-codex-cross-runtime-messaging/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "cmux-claude-codex-cross-runtime-messaging"
+      ],
+      "summary": "Single-skill plugin: cmux-claude-codex-cross-runtime-messaging."
     }
   ],
   "defaults": {
