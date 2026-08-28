@@ -799,6 +799,15 @@
         "codex"
       ],
       "summary": "Determine a repo's actual default branch: init.defaultBranch is a preference for repos that do not exist yet, not a fact about this one, and origin/HEAD is often absent; treat every source as a candidate verified against a real ref."
+    },
+    {
+      "name": "macos-sandbox-exec-agent-command-confinement",
+      "path": "skills/macos-sandbox-exec-agent-command-confinement/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Confine agent-run shell commands to one tree with macOS sandbox-exec: reads, writes, symlinks, runtime paths."
     }
   ],
   "collections": [
@@ -903,7 +912,8 @@
         "wordpress-com-publish",
         "work-on-pr",
         "credential-redactor-audit",
-        "git-default-branch-detection"
+        "git-default-branch-detection",
+        "macos-sandbox-exec-agent-command-confinement"
       ],
       "summary": "Bundle: every catalog skill in one plugin, except skills whose own plugin ships hooks - install those plugins directly."
     },
@@ -2038,6 +2048,19 @@
         "git-default-branch-detection"
       ],
       "summary": "Single-skill plugin: git-default-branch-detection."
+    },
+    {
+      "name": "macos-sandbox-exec-agent-command-confinement",
+      "claude_manifest": "plugins/macos-sandbox-exec-agent-command-confinement/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/macos-sandbox-exec-agent-command-confinement/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "macos-sandbox-exec-agent-command-confinement"
+      ],
+      "summary": "Single-skill plugin: macos-sandbox-exec-agent-command-confinement."
     }
   ],
   "defaults": {
