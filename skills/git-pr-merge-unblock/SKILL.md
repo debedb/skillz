@@ -14,7 +14,7 @@ description: |
   wrong, and the highest-yield reviewer is the changed file's recent author rather
   than whoever the team picker offers first.
 author: Claude Code
-version: 1.2.0
+version: 1.2.1
 date: 2026-08-25
 source: https://github.com/voitta-ai/skillz
 ---
@@ -125,8 +125,20 @@ GH_HOST=your-ghe.example.com gh api repos/{org}/{repo}/collaborators/{username}/
 Key insight: `write` **without** membership of the code-owner team does **not** satisfy a
 code-owner requirement. The approval has to come from a team member.
 
-Caveat: this endpoint 404s when *the caller* lacks push rights on the repo, which is
-indistinguishable from "that user is not a collaborator". A 404 is not proof of absence.
+Caveat: this endpoint is gated on **the caller's** push access, and it denies you
+differently depending on the repo. On a **public** repo you get an honest `403 "Must have
+push access to view collaborator permission."` On a **private** repo that diagnostic is
+withheld and you get a bare `404` — indistinguishable from the `404` for "that user is not
+a collaborator". So a permission sweep over private repos can exit 0, print a clean table,
+and be wrong on every row. Guard it:
+
+```bash
+# false or 404 => the permission answer above is meaningless; record UNKNOWN, not "none"
+gh api repos/{org}/{repo} --jq '.permissions.push'
+
+# read-only fallback, asymmetric: non-zero PROVES they can push; zero proves nothing
+gh api "search/issues?q=repo:{org}/{repo}+type:pr+author:{username}&per_page=1" --jq '.total_count'
+```
 
 ## Step 5: Add reviewers from the CLI
 
