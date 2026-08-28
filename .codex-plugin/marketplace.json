@@ -335,6 +335,11 @@
       "name": "mcp-language-server-orphan-fd-exhaustion",
       "source": "./plugins/mcp-language-server-orphan-fd-exhaustion/",
       "description": "ENFILE file-table overflow from orphaned mcp-language-server processes: the sysctl+lsof diagnosis and the safe pkill recovery."
+    },
+    {
+      "name": "rxjava-dofinally-terminal-then-finally-test-race",
+      "source": "./plugins/rxjava-dofinally-terminal-then-finally-test-race/",
+      "description": "TestObserver.await returns before doFinally runs - the terminal-then-finally ordering that makes post-await gauge asserts racy, and the polling fix."
     }
   ]
 }
