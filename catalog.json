@@ -614,6 +614,17 @@
         "codex"
       ],
       "summary": "Run a Claude Code agent and a Codex CLI agent as messaging peers in cmux panes, each named as a tab and both in the agent traffic log. Codex has no SendMessage and Claude's peer socket needs auth, so the cross-runtime hop is keystroke injection (cmux send + send-key Enter) through a small helper that also logs to xs explicitly; each agent names its own tab first via cmux identify + tab-action rename. Covers the Codex TUI parking on a startup modal with no way to read its screen (diagnose from ~/.codex logs and the missing rollout file, inject one Enter), and where the lead, teammate and Codex transcripts live on disk afterwards. Verified 2026-08-27: five rounds in 50 s, every message exactly once."
+    },
+    {
+      "name": "tamarian",
+      "path": "skills/tamarian/SKILL.md",
+      "files": [
+        "LEXICON.md"
+      ],
+      "hosts": [
+        "claude"
+      ],
+      "summary": "Tamarian mode persona: Claude speaks as the Children of Tama - meaning carried by metaphor and allusion (canon ST:TNG phrases plus ones coined from Earth myth, history, and engineering lore), technical substance fully intact. Levels lite/full/ultra via /tamarian; code, commands, errors and numbers stay literal; security warnings and destructive-action confirmations always drop to plain speech. Ships LEXICON.md, a phrasebook with coinage rules."
     }
   ],
   "collections": [
@@ -703,7 +714,8 @@
         "github-actions-startup-failure-triage",
         "cmux-config-silent-drop-triage",
         "alb-per-rule-traffic-attribution",
-        "cmux-claude-codex-cross-runtime-messaging"
+        "cmux-claude-codex-cross-runtime-messaging",
+        "tamarian"
       ],
       "summary": "Full repo bundle: every skill in one plugin."
     },
@@ -1424,6 +1436,17 @@
         "cmux-claude-codex-cross-runtime-messaging"
       ],
       "summary": "Single-skill plugin: cmux-claude-codex-cross-runtime-messaging."
+    },
+    {
+      "name": "tamarian",
+      "claude_manifest": "plugins/tamarian/.claude-plugin/plugin.json",
+      "hosts": [
+        "claude"
+      ],
+      "skills": [
+        "tamarian"
+      ],
+      "summary": "Tamarian-mode persona plugin: tamarian skill plus SessionStart + UserPromptSubmit hooks that persist the level across sessions."
     }
   ],
   "defaults": {

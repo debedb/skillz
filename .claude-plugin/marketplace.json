@@ -275,6 +275,11 @@
       "name": "cmux-claude-codex-cross-runtime-messaging",
       "source": "./plugins/cmux-claude-codex-cross-runtime-messaging/",
       "description": "Claude Code <-> Codex CLI agents as messaging peers in cmux panes: keystroke-injection transport, self-named tabs, both sides in the traffic log."
+    },
+    {
+      "name": "tamarian",
+      "source": "./plugins/tamarian/",
+      "description": "Tamarian mode: metaphor-and-allusion persona (Darmok-style) with technical content intact; hooks persist the level across sessions."
     }
   ]
 }

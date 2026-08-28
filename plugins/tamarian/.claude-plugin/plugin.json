@@ -1,0 +1,37 @@
+{
+  "name": "tamarian",
+  "description": "Tamarian mode: Claude speaks as the Children of Tama - meaning carried by metaphor and allusion (canon ST:TNG phrases plus ones coined from Earth culture), technical substance fully intact. /tamarian lite|full|ultra|off; hooks persist the level across sessions.",
+  "version": "1.0.0",
+  "author": {
+    "name": "voitta-ai"
+  },
+  "homepage": "https://github.com/voitta-ai/skillz",
+  "repository": "https://github.com/voitta-ai/skillz",
+  "license": "MIT",
+  "skills": "./skills/",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/tamarian-activate.sh\"",
+            "timeout": 5,
+            "statusMessage": "Consulting the Children of Tama..."
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/tamarian-reminder.sh\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}
