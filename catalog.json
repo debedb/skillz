@@ -190,6 +190,15 @@
       "summary": "Continuous-learning meta-skill for both hosts: extract verified, reusable knowledge. Repeatable procedures become catalog skills via PR; specific recollections go to memory (local or a shared git-backed vault). Owns the catalog Wiring procedure - catalog.json, per-host bundle symlinks, the optional single-skill plugin, and the version bumps CI requires. Invoked explicitly; the Codex hook-driven entry point is `continuous-learning`."
     },
     {
+      "name": "cloudwatch-per-host-stat-single-host-vs-fleet",
+      "path": "skills/cloudwatch-per-host-stat-single-host-vs-fleet/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Decide whether a CloudWatch alarm on a per-host application metric (Micrometer, Dropwizard, StatsD) reflects a fleet-wide incident or ONE sick host, and stop misreading its magnitude. Use when: (1) a per-host gauge/timer alarm fires and the Average looks catastrophic (e.g. an \"average latency\" of 21,242 when baseline is 2), (2) you are about to call an incident fleet-wide based on a CloudWatch Average, (3) a latency/queue-depth/pool-saturation metric spikes but request throughput and error counts stay flat, (4) you need to know the UNIT of a metric and get-metric-data did not return one. Covers the unweighted-mean-across-hosts trap, the Maximum/Sum concentration ratio, and SampleCount as a host-census signal."
+    },
+    {
       "name": "cmux-agent-tabs",
       "path": "skills/cmux-agent-tabs/SKILL.md",
       "hosts": [
@@ -678,6 +687,7 @@
         "claude-code-plugin-update-flow",
         "claude-json-mcp-migration-slice",
         "claudeception",
+        "cloudwatch-per-host-stat-single-host-vs-fleet",
         "cmux-agent-tabs",
         "cmux-autoresume-after-reboot",
         "cmux-claude-codex-cross-runtime-messaging",
@@ -907,6 +917,19 @@
         "claude-json-mcp-migration-slice"
       ],
       "summary": "Single-skill plugin: claude-json-mcp-migration-slice."
+    },
+    {
+      "name": "cloudwatch-per-host-stat-single-host-vs-fleet",
+      "claude_manifest": "plugins/cloudwatch-per-host-stat-single-host-vs-fleet/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/cloudwatch-per-host-stat-single-host-vs-fleet/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "cloudwatch-per-host-stat-single-host-vs-fleet"
+      ],
+      "summary": "Single-skill plugin: cloudwatch-per-host-stat-single-host-vs-fleet."
     },
     {
       "name": "cmux-agent-tabs",
