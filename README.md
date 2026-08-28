@@ -138,6 +138,7 @@ environments and older Codex versions.
 | [claude-ai-conversation-history-search](./skills/claude-ai-conversation-history-search/SKILL.md) | skill | Claude, Codex | Export and grep your own claude.ai conversation history: manifest exports, one-time URLs, the Cloudflare 403, and conversations.json search. |
 | [git-worktree-add-relative-path-nests-inside-repo](./skills/git-worktree-add-relative-path-nests-inside-repo/SKILL.md) | skill | Claude, Codex | git worktree add with a relative path nests the worktree inside the repo - why, and how to relocate it with git worktree move. |
 | [targetgroupbinding-unattached-tg-readiness-wedge](./skills/targetgroupbinding-unattached-tg-readiness-wedge/SKILL.md) | skill | Claude, Codex | A TargetGroupBinding on a target group no listener forwards to wedges every future rollout: the readiness gate that can never pass, and the PDB fallout. |
+| [alb-controller-custom-sg-narrowing-inert](./skills/alb-controller-custom-sg-narrowing-inert/SKILL.md) | skill | Claude, Codex | A custom SG on an ALB ingress narrows nothing while the controller'\''s backend SG stays attached - SGs are additive; the real fix and its ordering traps. |
 
 Machine-readable index: [`catalog.json`](./catalog.json). The
 installer and validation script both read from it, so new entries
