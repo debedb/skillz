@@ -193,3 +193,20 @@ Cross-check the payload extraction by confirming both `tool_name` and
 ## References
 
 - voitta-yolt #114: https://github.com/voitta-ai/voitta-yolt/issues/114
+
+## Related
+
+- `claude-code-codex-plugin-parity` — **read this first if you are porting.**
+  It covers where the two plugin systems match and diverge and the shared
+  `hooks.json` caveats. This skill answers the narrower question it leaves
+  open: what the Codex binary itself says the hook contract is, including the
+  decisions it refuses.
+- `claude-code-plugin-release-automation` — shipping to both hosts once the
+  hook works. Its paired-manifest rule is the other half of the two-runtime
+  story: Codex pins on its own version, so a bump that moves only the Claude
+  manifest freezes one host silently.
+- `agent-host-skill-loading` — the case where the target host has no plugin
+  or hook system at all, so there is no contract to extract and you build the
+  loading yourself.
+- `codex-adversarial-pr-review` — driving Codex as a tool you invoke, rather
+  than hooking the tool calls Codex itself makes.
