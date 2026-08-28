@@ -146,6 +146,7 @@ environments and older Codex versions.
 | [mcp-language-server-orphan-fd-exhaustion](./skills/mcp-language-server-orphan-fd-exhaustion/SKILL.md) | skill | Claude, Codex | ENFILE file-table overflow from orphaned mcp-language-server processes: the sysctl+lsof diagnosis and the safe pkill recovery. |
 | [rxjava-dofinally-terminal-then-finally-test-race](./skills/rxjava-dofinally-terminal-then-finally-test-race/SKILL.md) | skill | Claude, Codex | TestObserver.await returns before doFinally runs - the terminal-then-finally ordering that makes post-await gauge asserts racy, and the polling fix. |
 | [personal-skills-shadow-bundle-audit](./skills/personal-skills-shadow-bundle-audit/SKILL.md) | skill | Claude, Codex | Audit ~/.claude/skills copies that shadow plugin-bundle skills: the three-directory model, the drift table, and the delete-vs-fork decision tree. |
+| [session-transcript-mining](./skills/session-transcript-mining/SKILL.md) | skill | Claude, Codex | Mine all local Claude Code session transcripts for skills: inventory, condense 26-90x, fan out miners, tier the findings, ship serially. |
 
 Machine-readable index: [`catalog.json`](./catalog.json). The
 installer and validation script both read from it, so new entries
