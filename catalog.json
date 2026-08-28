@@ -516,6 +516,15 @@
       "summary": "Avoid duplicating, superseding, or clobbering work done by another agent session on the same repos: the three collision shapes, the pre-flight check for each, and how to reconcile. Also covers the collision that no artifact check can catch -- two sessions both about to do the same work, with nothing pushed for `gh pr list` to find -- detected by enumerating live peer sessions and asking directly, then split into named lanes with an explicit gate and the decision routed through the shared human."
     },
     {
+      "name": "personal-skills-shadow-bundle-audit",
+      "path": "skills/personal-skills-shadow-bundle-audit/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Audit and clean up personal `~/.claude/skills/` copies that duplicate or shadow skills a plugin bundle also ships, so sessions stop silently running stale versions. Use when: (1) a skill you know was updated upstream behaves like an old version (e.g. it ran at 4.0.0 while the installed bundle ships 4.1.0), (2) you are asked \"can I just delete the local copy?\" of a skill that also exists in a plugin, (3) `~/.claude/skills/` has accumulated copies of skills that later moved into a plugin bundle, (4) a skill appears in the session's skill list bare (no `plugin:` prefix) and you need to know which file on disk that actually is, (5) after installing or updating a bundle plugin you want to retire the loose per-skill installs it replaced. Key trap: `~/.claude/plugins/marketplaces/<mkt>/` is the fetched marketplace source, NOT loaded \u2014 only plugins present under `~/.claude/plugins/cache/` serve skills, and a bundle can turn out not installed at all, leaving the personal copies as the sole (stale) provider. Covers the audit commands (version drift table, two-way content diff against the cache copy), the delete / keep decision tree (byte-identical, version-behind with superseded wording, genuine unpushed fork), and the tar backup before any rm."
+    },
+    {
       "name": "playwright-mcp-upload-hidden-file-input",
       "path": "skills/playwright-mcp-upload-hidden-file-input/SKILL.md",
       "hosts": [
@@ -805,6 +814,7 @@
         "neon-vercel-db-identify-and-migrate",
         "openclaw-model-cascade-debugging",
         "parallel-agent-session-collisions",
+        "personal-skills-shadow-bundle-audit",
         "playwright-mcp-upload-hidden-file-input",
         "pre-open-source-credential-audit",
         "prevent-committing-secrets",
@@ -1383,6 +1393,19 @@
         "parallel-agent-session-collisions"
       ],
       "summary": "Single-skill plugin: parallel-agent-session-collisions."
+    },
+    {
+      "name": "personal-skills-shadow-bundle-audit",
+      "claude_manifest": "plugins/personal-skills-shadow-bundle-audit/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/personal-skills-shadow-bundle-audit/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "personal-skills-shadow-bundle-audit"
+      ],
+      "summary": "Single-skill plugin: personal-skills-shadow-bundle-audit."
     },
     {
       "name": "playwright-mcp-upload-hidden-file-input",

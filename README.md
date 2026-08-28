@@ -145,6 +145,7 @@ environments and older Codex versions.
 | [terraform-check-block-warn-only-ci-gate](./skills/terraform-check-block-warn-only-ci-gate/SKILL.md) | skill | Claude, Codex | Terraform check blocks only warn - plan exits 0 in CI; the tee+pipefail+grep pattern that turns a check into a real gate. |
 | [mcp-language-server-orphan-fd-exhaustion](./skills/mcp-language-server-orphan-fd-exhaustion/SKILL.md) | skill | Claude, Codex | ENFILE file-table overflow from orphaned mcp-language-server processes: the sysctl+lsof diagnosis and the safe pkill recovery. |
 | [rxjava-dofinally-terminal-then-finally-test-race](./skills/rxjava-dofinally-terminal-then-finally-test-race/SKILL.md) | skill | Claude, Codex | TestObserver.await returns before doFinally runs - the terminal-then-finally ordering that makes post-await gauge asserts racy, and the polling fix. |
+| [personal-skills-shadow-bundle-audit](./skills/personal-skills-shadow-bundle-audit/SKILL.md) | skill | Claude, Codex | Audit ~/.claude/skills copies that shadow plugin-bundle skills: the three-directory model, the drift table, and the delete-vs-fork decision tree. |
 
 Machine-readable index: [`catalog.json`](./catalog.json). The
 installer and validation script both read from it, so new entries
