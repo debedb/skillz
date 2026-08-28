@@ -8,14 +8,18 @@ description: |
   numbers look wrong or a single endpoint appears under two priorities, (3) several
   services share one credential so the ALB cannot tell them apart, (4) you must
   identify an unknown HTTP client seen only as a User-Agent in access logs, (5)
-  `SHOW PARTITIONS` on an ALB-logs Athena table returns nothing. Core trap:
+  `SHOW PARTITIONS` on an ALB-logs Athena table returns nothing, (6) a windowed
+  total looks low, or the "same" query returns different counts on different days —
+  the log bucket's S3 lifecycle expiry (often 3 days) silently truncates any longer
+  window, so a "weekly" total is really a retention-window total. Core trap:
   `matched_rule_priority` is a POSITION, not an identity — inserting a listener rule
   renumbers every rule below it, so the same priority means different rules on either
   side of that deploy, and a query spanning the change silently mislabels everything.
-  Attribute by `request_url` + `user_agent` instead.
+  Attribute by `request_url` + `user_agent` instead, quote per-day rates, and report
+  the window the data has (min/max date), not the one the WHERE clause asked for.
 author: Claude Code
-version: 1.0.0
-date: 2026-08-26
+version: 1.1.0
+date: 2026-08-27
 ---
 
 # Attributing ALB traffic to individual listener rules and callers
@@ -101,6 +105,34 @@ system was reported as two unrelated rules.
 **Only use `matched_rule_priority` inside a window with no rule-layout change**, and
 say which window that is when you report the numbers. Get rule-creation dates from
 the terraform history (`git log -S'<rule-key>'` on the ingress/rule file).
+
+### 3b. The window you asked for is not the window you got — check log retention
+
+ALB access-log buckets commonly carry a short S3 lifecycle expiry (3 days is a
+deliberate choice for high-volume ALBs — tens of GB/day compressed). A query
+`WHERE date BETWEEN <7 days ago> AND <today>` then runs without error and returns
+only the retained days. Nothing flags the truncation: no partition error, no
+empty result, just silently smaller counts.
+
+Two failure modes, both hit in practice (2026-08-27, VRS Kong cutover):
+
+- **A "N-day" total is really an R-day total** (R = retention). A count labeled
+  "requests/week" measured this way is low by N/R×. Concretely: "792,572
+  requests/week" was actually ~3 days of data; the true weekly rate was ~1.5M —
+  a 2× error that survived a PR review and two handoffs, because every re-query
+  hit the same silent floor.
+- **Numbers drift between runs of the "same" query.** The retained window is a
+  rolling one, so re-running the identical SQL a day later shifts the window and
+  changes every count. Two people "verifying" each other's numbers on different
+  days will disagree and both be right.
+
+Defenses:
+- Before quoting any windowed total, run `SELECT min(date), max(date), count(distinct date)`
+  with the same filters. Report the window the DATA has, not the one the WHERE clause asked for.
+- Check the bucket's lifecycle rules (`aws s3api get-bucket-lifecycle-configuration`)
+  once per bucket and record the retention next to the table name.
+- Prefer per-day rates (`count/day`, from a GROUP BY date) over window totals —
+  they survive retention truncation and extrapolate honestly.
 
 ### 4. Attribute by identity instead
 
@@ -210,10 +242,9 @@ have said "rule is empty" and stopped there.
   gathered for a low-volume rule is not evidence for a high-volume one — state the
   measured peak (`count(*)/3600` per hour) so a later reader cannot inherit the wrong
   number.
-- The same shifting-priority fact bites Terraform from the other side: destroying
-  and reprioritising rules in one apply can raise `PriorityInUse`, because the
-  plan reuses a number the old rule still holds. Different problem, same reason
-  not to treat a priority as an identity.
+- Related: `alb-listener-rule-priority-race` (Terraform `PriorityInUse` when
+  destroying and reprioritising rules in one apply) — a different problem, but the
+  same underlying fact that priorities shift.
 
 ## References
 
@@ -222,13 +253,3 @@ have said "rule is empty" and stopped there.
 - [Athena partition projection](https://docs.aws.amazon.com/athena/latest/ug/partition-projection.html) — why `SHOW PARTITIONS` is empty
 - [Querying ALB logs in Athena](https://docs.aws.amazon.com/athena/latest/ug/application-load-balancer-logs.html)
 - [Node.js HTTP client](https://nodejs.org/api/http.html) — no default `User-Agent` header
-
-## Related
-
-- `metrics-zero-provenance-audit` — the general form of this skill's premise:
-  before believing a zero, establish that the metric could have been non-zero.
-  Here the zero is structural — there is no per-rule metric to read at all.
-- `secretsmanager-prove-no-consumer-before-destroy` — the same proof obligation
-  for a different resource. Both answer "is anything still using this?" from
-  access evidence rather than from configuration, and both have to rule out
-  your own tooling's traffic before the answer means anything.
