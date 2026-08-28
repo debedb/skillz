@@ -639,6 +639,15 @@
       "summary": "Diagnose and unwedge Kubernetes rollouts stuck because an AWS Load Balancer Controller TargetGroupBinding points at a target group no listener rule forwards to. Use when: (1) `helm upgrade` / a Deployment rollout times out with \"context deadline exceeded\" while every container in the new pods is healthy, (2) new pods show `Ready=False` with reason `ReadinessGatesNotReady` and a readiness gate named `target-health.elbv2.k8s.aws/<name>`, (3) `aws elbv2 describe-target-health` shows every target `unused` / `Target.NotInUse`, (4) a PodDisruptionBudget reports `ALLOWED DISRUPTIONS: 0` and node drains or consolidation (e.g. Karpenter) are blocked by a service that serves no traffic, (5) you staged a target group ahead of its listener rule \"so it's ready for the cutover\" and want to know why that wedges every future rollout. Core facts: the controller injects a target-health readiness gate into every pod a TargetGroupBinding matches; a target group attached to no load balancer listener keeps its targets permanently `Target.NotInUse`, so the gate can never pass. Unwedge with `kubectl delete targetgroupbinding`; durable fix is gating the binding separately from the target group and attaching the listener rule before the binding."
     },
     {
+      "name": "terraform-check-block-warn-only-ci-gate",
+      "path": "skills/terraform-check-block-warn-only-ci-gate/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Make Terraform `check` blocks actually fail CI. Use when: (1) you wrote a check block to guard an invariant (e.g. a set of secret values must be pairwise distinct) and discovered `terraform plan` prints the failure as a Warning and exits 0, so the CI plan step stays green, (2) you are reviewing a PR that encodes a safety guard as a check block and need to know whether anything enforces it, (3) you need a guard over sensitive values whose failure message must name the offending items without leaking them. Core facts: check blocks are advisory by design - failed assertions never affect plan/apply exit status, so a guard written as one is silent by construction; the working CI gate is `set -o pipefail` + `tee` the plan output + grep for \"Check block assertion failed\" and exit 1; write the error_message to name offenders via nonsensitive() applied to KEYS only, never values. Proven end to end: a forced collision exits 1 and names the colliding pair with no values leaked; the passing path leaves plan behavior unchanged."
+    },
+    {
       "name": "terraform-ecs-capacity-provider-staged-teardown",
       "path": "skills/terraform-ecs-capacity-provider-staged-teardown/SKILL.md",
       "hosts": [
@@ -789,6 +798,7 @@
         "spring-profile-config-overlay-dedupe",
         "subagent-no-report-channel",
         "targetgroupbinding-unattached-tg-readiness-wedge",
+        "terraform-check-block-warn-only-ci-gate",
         "terraform-ecs-capacity-provider-staged-teardown",
         "terraform-noninteractive-prod-apply",
         "terraform-state-version-apply-forensics",
@@ -1536,6 +1546,19 @@
         "targetgroupbinding-unattached-tg-readiness-wedge"
       ],
       "summary": "Single-skill plugin: targetgroupbinding-unattached-tg-readiness-wedge."
+    },
+    {
+      "name": "terraform-check-block-warn-only-ci-gate",
+      "claude_manifest": "plugins/terraform-check-block-warn-only-ci-gate/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/terraform-check-block-warn-only-ci-gate/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "terraform-check-block-warn-only-ci-gate"
+      ],
+      "summary": "Single-skill plugin: terraform-check-block-warn-only-ci-gate."
     },
     {
       "name": "terraform-ecs-capacity-provider-staged-teardown",

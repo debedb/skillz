@@ -325,6 +325,11 @@
       "name": "cloudwatch-metric-filter-dimensions-default-value-exclusive",
       "source": "./plugins/cloudwatch-metric-filter-dimensions-default-value-exclusive/",
       "description": "Metric filter with dimensions AND default_value passes validate and plan, fails only at apply - and which of the two to drop."
+    },
+    {
+      "name": "terraform-check-block-warn-only-ci-gate",
+      "source": "./plugins/terraform-check-block-warn-only-ci-gate/",
+      "description": "Terraform check blocks only warn - plan exits 0 in CI; the tee+pipefail+grep pattern that turns a check into a real gate."
     }
   ]
 }
