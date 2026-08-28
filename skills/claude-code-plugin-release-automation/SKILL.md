@@ -12,16 +12,22 @@ description: |
   already say what changed, (5) users report `claude plugin update` says
   "up to date" while master has moved, and you want CI to catch the
   missing bump instead of users catching it months later, (6) you need the
-  tag to land on the squash commit in a squash-merge repo. Covers the
-  two-job workflow (PR-side bump gate + push-side tag-and-release),
-  `paths-ignore` as the docs-only exemption, why the gate must NOT be a
-  required status check, idempotence for concurrent merges, and the
+  tag to land on the squash commit in a squash-merge repo, (7) two PRs
+  merged minutes apart and the second one's release never appeared even
+  though every check is green. Covers the two-job workflow (PR-side bump
+  gate + push-side tag-and-release), `paths-ignore` as the docs-only
+  exemption, why the gate must NOT be a required status check, idempotence
+  for re-runs and the same-version concurrent-merge gap it leaves (the
+  second tag-and-release run reports success while creating nothing -
+  verify the tag's tree, then ship a bump-only PR), queueing several
+  bumping PRs against the gate (rebase + re-bump; a green gate goes stale
+  because base-branch movement does not re-trigger PR CI), and the
   multi-plugin case where per-plugin versions are separate cache keys the
   gate cannot see. Pairs with claude-code-plugin-update-flow, which
   explains why the version is load-bearing in the first place.
 author: Claude Code
-version: 1.1.0
-date: 2026-08-17
+version: 1.2.0
+date: 2026-08-27
 ---
 
 # Claude Code plugin repos: automatic tags and release notes
@@ -154,9 +160,82 @@ breaks on a shallow PR checkout.
 that goes *down* re-uses a cache directory that already has old content —
 the same silent staleness, harder to spot. One line prevents it.
 
-**Idempotence is the concurrency story.** The push job exits 0 when the tag
-exists. Re-runs, replays, and several merges landing close together all
-converge instead of colliding, and no state is needed anywhere.
+**Idempotence is the concurrency story — for re-runs.** The push job exits 0
+when the tag exists, so re-runs and replays converge instead of colliding,
+and no state is needed anywhere. But that same exit 0 has a documented blind
+spot when two merges land close together carrying the *same* version — the
+next section is that failure, observed in this catalog.
+
+### Where idempotence fails: two merges, one version
+
+Observed in this repo, 2026-08-20 (#182 and #183, repaired by #184): two
+skill PRs were opened against the same base, both bumped the bundle to the
+same next version, both showed `version-bumped: pass`, and both were merged
+about ten seconds apart.
+
+- The first merge's push job tagged `v1.16.0` on its squash commit.
+- The second merge's push job found the tag existing, logged
+  `v1.16.0 is already tagged; nothing to release.`, and exited 0 — a green
+  check that created nothing.
+- Result: the tag sat one commit behind the default branch. The second
+  merge's new skill resolved fine at the default branch and **404'd at
+  `?ref=v1.16.0`** — anyone installing from the tag got a release missing
+  the content it was meant to ship, with every check green.
+
+Why the gate did not catch it: both PRs were green *against the base as it
+was when their CI last ran*. Merging the first PR moved the base, but **a
+merge to the default branch does not re-trigger `pull_request` workflows on
+other open PRs** — the second PR's green `version-bumped` was stale by the
+time it merged, and nothing re-evaluated it.
+
+**Detect it** any time merges land close together (seconds to minutes):
+
+```bash
+git fetch --tags -q
+v=$(jq -r .version "$VERSION_FILE")
+git rev-parse "v$v" HEAD        # differing SHAs = the tag is behind
+# does the released tree contain the newest addition?
+gh api "repos/<owner>/<repo>/contents/<path-added-by-second-merge>?ref=v$v" --jq .name
+# 404 here while the same path resolves at the default branch = the gap
+```
+
+**Repair it** with an immediate version-bump-only PR (bump *both* manifests
+in a dual-host repo, nothing else). Merging it runs `tag-and-release`
+normally, which tags the new version on the current head — the previously
+missed content ships in that release. This is the whole fix; do not move or
+delete the existing tag.
+
+**Why not harden the push job instead:** the job cannot cheaply distinguish
+"same version because this merge was docs-only/exempt" (a legitimate no-op,
+by design) from "same version because a stale-gated shipping merge slipped
+through". That distinction is exactly what the PR-side gate exists to make,
+and it runs pre-merge. Harden the *process*: treat any second merge landing
+with an already-tagged version as the trigger for the bump PR above, and
+queue bumping PRs as described next.
+
+### Queueing several bumping PRs against the gate
+
+The version field makes every bumping PR contend for the same next number:
+whoever merges second is stale *by construction*, however disjoint the
+content. The gate is effectively a serialization lock discovered at merge
+time. Working protocol when more than one bumping PR is open:
+
+1. Pre-assign incrementing versions if you like, but treat them as
+   provisional — only the first one survives contact with the base.
+2. After each merge, **rebase the next PR onto the moved base and re-bump
+   past the new current version** before merging it. (Observed shape: a
+   branch's `1.15.0 -> 1.16.0` bump conflicting with a base already at
+   `1.17.0` resolves by taking the base's manifests and bumping to
+   `1.18.0` — the version files are typically the *only* conflict when the
+   catalog edits were made as in-place insertions.)
+3. Expect the queued PR's `version-bumped` to still show green while stale —
+   base movement does not re-trigger `pull_request` CI. Green is evidence
+   about the past, not the present; re-run the check (push any commit, or
+   re-run the workflow) after rebasing.
+4. The platform-native alternative is branch protection's "require branches
+   to be up to date before merging", which forces the re-run — at the cost
+   of an update-and-wait cycle on every queued PR, and it does not combine
+   well with making the gate a required check (see Notes).
 
 ### Where `VERSION_FILE` points
 
@@ -231,6 +310,11 @@ no-op rather than failing:
 v1.0.1 is already tagged; nothing to release.
 ```
 
+**After any close-together merge pair**, add the tag-tree check from the
+same-version section above: the newest tag must contain the newest merge's
+files. A green second `tag-and-release` run is not evidence of a release —
+the no-op log line and the success tick look identical from the checks tab.
+
 ## Notes
 
 - **Do not make `version-bumped` a required status check.** `paths-ignore`
@@ -285,3 +369,6 @@ v1.0.1 is already tagged; nothing to release.
 - `claude-code-plugin-publish-anthropic-marketplace` — the separate,
   human-reviewed step for directory listing. Automating your own tags does not
   automate that.
+- `parallel-agent-session-collisions` — the wider pattern (several agent
+  sessions moving one repo) that produces the same-version merge pair in the
+  first place.
