@@ -26,7 +26,7 @@ description: |
   gate cannot see. Pairs with claude-code-plugin-update-flow, which
   explains why the version is load-bearing in the first place.
 author: Claude Code
-version: 1.2.0
+version: 1.3.0
 date: 2026-08-27
 ---
 
@@ -220,8 +220,17 @@ whoever merges second is stale *by construction*, however disjoint the
 content. The gate is effectively a serialization lock discovered at merge
 time. Working protocol when more than one bumping PR is open:
 
-1. Pre-assign incrementing versions if you like, but treat them as
-   provisional — only the first one survives contact with the base.
+1. Better than pre-assigning: **derive the number at merge time**, not when
+   the branch is written. A version chosen an hour ago is a claim on a value
+   someone else has already taken.
+
+   ```bash
+   base=$(git show origin/master:$VERSION_FILE | jq -r .version)
+   next=$(echo "$base" | awk -F. '{printf "%d.%d.0", $1, $2+1}')
+   ```
+
+   Pre-assigned versions are fine as long as they are treated as provisional —
+   only the first survives contact with the base.
 2. After each merge, **rebase the next PR onto the moved base and re-bump
    past the new current version** before merging it. (Observed shape: a
    branch's `1.15.0 -> 1.16.0` bump conflicting with a base already at
@@ -236,6 +245,46 @@ time. Working protocol when more than one bumping PR is open:
    to be up to date before merging", which forces the re-run — at the cost
    of an update-and-wait cycle on every queued PR, and it does not combine
    well with making the gate a required check (see Notes).
+
+### Three merge mechanics that report success and do nothing
+
+Observed in one afternoon of four sessions merging into one catalog, and each
+one costs a full rebase cycle to discover:
+
+- **A rebase can delete your bump entirely.** Not "the numbers are now equal" —
+  when the base took the *identical* version change, git applies your hunk as
+  already-applied and drops it, so the manifest disappears from
+  `git diff <base>...HEAD` and there is nothing left to notice. The gate then
+  passes a PR that ships no bump at all. After every rebase, re-read the
+  version out of the file rather than trusting that you set it once.
+
+- **`gh pr merge --auto` is a silent no-op when auto-merge is disabled on the
+  repository.** It exits 0 and prints nothing useful; `gh pr view --json
+  autoMergeRequest` stays `null` while you wait for a merge that was never
+  armed. Either check that field, or watch the checks and merge explicitly.
+
+- **`--delete-branch` deletes the branch even when the merge did not happen.**
+  Deleting the head branch of an open PR closes it, so a silently-failed merge
+  plus a successful delete removes the PR from the queue with its content
+  unmerged. Merge, confirm `state == MERGED`, then delete — as separate steps:
+
+  ```bash
+  gh pr merge "$pr" --squash
+  [ "$(gh pr view "$pr" --json state --jq .state)" = MERGED ] || exit 1
+  gh api -X DELETE "repos/$OWNER/$REPO/git/refs/heads/$branch"
+  ```
+
+  The `gh api` form also sidesteps a `pre-push` hook that would otherwise run
+  the full publish gate against whatever tree the current checkout happens to
+  be on — deleting a ref ships no content, so there is nothing for that gate
+  to check.
+
+If `gh pr merge` itself fails rather than no-ops (its GraphQL call has flaked
+repeatedly), the REST path works:
+
+```bash
+gh api -X PUT "repos/$OWNER/$REPO/pulls/$pr/merge" -f merge_method=squash
+```
 
 ### Where `VERSION_FILE` points
 
