@@ -13,12 +13,15 @@ description: |
   action from you, (7) you work in an environment where several coding-agent
   sessions run against one repo, (8) you are about to start a sizeable piece of
   work and other agent sessions are live but you have not asked any of them what
-  they are doing. Covers the three collision shapes -- duplicate
+  they are doing, (9) you are about to run `git worktree add` or `git checkout -b`
+  for shared work -- the first act that claims shared state, and the point where
+  two sessions given the same issue pick the same branch name, (10) you find
+  uncommitted changes in a working tree that are not yours. Covers the three collision shapes -- duplicate
   work, pre-existing better work, and state changing under you -- the cheap
   pre-flight check for each, and how to reconcile without losing the better
   version.
 author: Claude Code
-version: 1.1.0
+version: 1.2.0
 date: 2026-08-20
 ---
 
@@ -185,6 +188,130 @@ silence that is indistinguishable from a wedge. The authoritative value is echoe
 back on any outbound message you send — read it from the tool result rather than
 assuming one name works in both directions.
 
+## Check before you claim shared state, not before you open a PR
+
+Every check in this skill so far fires at **opening a PR** or **writing a fix**.
+A live drill showed both are too late. Two sessions were given the same
+underlying bug, described differently. Neither contacted a peer during planning.
+Both wrote code. The collision was discovered an hour later, and by then it had
+already done damage.
+
+**They collided at the first act that claimed shared state: creating a worktree.**
+Both independently ran `git worktree add` on the *same path*, having
+independently derived the *same branch name* from the issue.
+
+That convergence is not bad luck, it is the default. A branch name derived from
+an issue title or number is chosen identically by any two competent agents given
+the same issue. So is the worktree path, if the convention derives it from the
+branch. **The moment you name a branch after shared work, assume someone else
+would name it the same.**
+
+So move the check earlier. Before `git worktree add`, `git checkout -b`, or the
+first write into a shared tree — not before the PR:
+
+```bash
+# 1. Has someone already claimed this name, locally or remotely?
+git worktree list
+git branch -a --list '*<topic>*'
+git ls-remote --heads origin '*<topic>*'
+
+# 2. Is the directory already there, with someone else's work in it?
+ls -la ../<repo>.worktrees/ 2>/dev/null
+
+# 3. Ask the live peers. This is the half the artifact checks cannot do.
+ListAgents          # who is live right now
+SendMessage -> peer # "are you working on <topic> in <repo>?"
+```
+
+Steps 1 and 2 cost seconds. Step 3 is the only one that fires when the other
+session has planned but not yet written, which is the window where stopping is
+free.
+
+### If you find changes in a shared tree that are not yours
+
+The drill's real damage came from the recovery, not the collision. The session
+that found foreign uncommitted edits ran `git add -A` and swept another
+session's in-flight work into its own commit, under a message describing only
+its own change. The attribution in that commit is wrong permanently.
+
+- **Never `git add -A` in a tree you do not exclusively own.** Stage explicit
+  paths. `git add -A` cannot distinguish your work from someone else's, and a
+  commit is not a reversible mistake once pushed and merged.
+- Run `git status --short` first and **read it**, rather than staging past it.
+- If foreign changes are present, ask whose they are and whether they are
+  finished **before** committing anything. Do not commit another session's work
+  on its behalf without consent — even if the change is correct.
+- If you have already swept someone's work in, **say so plainly**, name the
+  commit, and state that the message misattributes it. That disclosure is what
+  makes the error recoverable rather than silently wrong.
+
+### Interpreting a peer's silence
+
+A peer that does not answer is not necessarily ignoring you, and `ListAgents`
+state is part of reading it:
+
+| state | meaning |
+|---|---|
+| `waiting` | **blocked on user input.** It will not process your message until its human interacts with that session. A message can sit undelivered indefinitely. |
+| `busy` | working; it will drain your message at its next tool round. |
+| `idle` | should respond promptly. |
+
+A message to a `waiting` peer is not a failed send and not a refusal — it is
+queued behind a human. Check the state before concluding anything from silence,
+and tell your own operator if an answer you need is parked behind another tab.
+
+## The collision with no name to check: a shared counter
+
+Every check above finds a collision by **name** — same branch, same worktree,
+same PR, same resource. A monotonic counter in a shared file has no name to
+check, collides between sessions doing entirely unrelated work, and is invisible
+until the merge.
+
+Observed across four sessions in one afternoon on a skills catalog whose bundle
+`plugin.json` carries a version that CI requires to advance. Three sessions and
+a fourth actor were merging concurrently; the version line conflicts textually
+with *any* other change to it, so subject-matter independence bought nothing.
+One PR lost the race five times in a row.
+
+**Take the number at merge time, not at build time.** A version chosen when the
+branch is written is a claim on a value someone else will take before you land:
+
+```bash
+base=$(git show origin/master:$VERSION_FILE | jq -r .version)
+next=$(echo "$base" | awk -F. '{printf "%d.%d.0", $1, $2+1}')   # at MERGE time
+```
+
+Then rebase, set it, push, merge, and **retry the whole cycle on conflict** —
+losing the race is the normal case, not the exception.
+
+Three traps inside that loop, each of which reports success:
+
+- **A rebase deletes your bump when the base took the identical change.** Not
+  "the numbers are equal" — the hunk is dropped as already applied and vanishes
+  from `git diff origin/master...HEAD` entirely. The gate then passes on a PR
+  that ships no bump at all, and every installed copy stays frozen. After every
+  rebase, re-read the version out of the file rather than trusting that you set
+  it once.
+- **`gh pr merge --auto` is a silent no-op when auto-merge is disabled on the
+  repository.** It exits 0 and prints nothing; `gh pr view --json autoMergeRequest`
+  stays `null` while you wait for a merge that was never armed. Check that
+  field, or watch checks and merge explicitly.
+- **`gh pr merge --squash --delete-branch` deletes the branch even when the
+  merge did not happen.** A peer lost a PR that way: the delete closed it, and
+  the content left the queue silently. Merge, confirm `state == MERGED`, and
+  only then delete — as separate steps.
+
+If `gh pr merge` itself flakes (GraphQL has, repeatedly), the REST path works:
+
+```bash
+gh api -X PUT repos/OWNER/REPO/pulls/N/merge -f merge_method=squash
+```
+
+**The structural fix is not a better retry loop.** A counter shared by every PR
+is a lock discovered at merge time. Either give it one writer who batches, or
+pin it on an integration branch and bump once at merge-back — the same
+serialise-what-shares-a-file split this skill applies to worktrees and branches.
+
 ## Pre-flight, in one place
 
 Before opening a PR, writing a fix, or applying anything:
@@ -194,6 +321,7 @@ git fetch --prune                              # your local view is also stale
 gh pr list --state open --limit 50             # is someone already on this?
 gh issue list --state open --limit 50
 # for infra: re-plan, and apply a saved plan file rather than a bare apply
+# for a shared counter: read its value now, and again at merge time
 ```
 
 Cheap. A single `gh pr list` costs seconds; a duplicate PR costs a review cycle
@@ -207,6 +335,8 @@ You have collided if any of these are true. Check before acting, not after:
 - A re-plan differs from the plan you were about to act on.
 - A resource you intend to create already exists in the live system.
 - `git log origin/<default-branch>` moved since you branched.
+- A version or counter your branch advances already holds that value on the
+  default branch — or has silently disappeared from your diff since the rebase.
 
 ## Notes
 
