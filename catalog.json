@@ -1797,6 +1797,201 @@
         "work-on-pr"
       ],
       "summary": "Single-skill plugin: work-on-pr."
+    },
+    {
+      "name": "agent-host-skill-loading",
+      "claude_manifest": "plugins/agent-host-skill-loading/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/agent-host-skill-loading/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "agent-host-skill-loading"
+      ],
+      "summary": "Single-skill plugin: agent-host-skill-loading."
+    },
+    {
+      "name": "archive-today-fetcher-hierarchy",
+      "claude_manifest": "plugins/archive-today-fetcher-hierarchy/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/archive-today-fetcher-hierarchy/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "archive-today-fetcher-hierarchy"
+      ],
+      "summary": "Single-skill plugin: archive-today-fetcher-hierarchy."
+    },
+    {
+      "name": "aws-http-server-on-lambda-web-adapter",
+      "claude_manifest": "plugins/aws-http-server-on-lambda-web-adapter/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/aws-http-server-on-lambda-web-adapter/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "aws-http-server-on-lambda-web-adapter"
+      ],
+      "summary": "Single-skill plugin: aws-http-server-on-lambda-web-adapter."
+    },
+    {
+      "name": "claude-code-plugin-publish-anthropic-marketplace",
+      "claude_manifest": "plugins/claude-code-plugin-publish-anthropic-marketplace/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/claude-code-plugin-publish-anthropic-marketplace/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "claude-code-plugin-publish-anthropic-marketplace"
+      ],
+      "summary": "Single-skill plugin: claude-code-plugin-publish-anthropic-marketplace."
+    },
+    {
+      "name": "claudeception",
+      "claude_manifest": "plugins/claudeception/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/claudeception/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "claudeception"
+      ],
+      "summary": "Single-skill plugin: claudeception."
+    },
+    {
+      "name": "cmux-autoresume-after-reboot",
+      "claude_manifest": "plugins/cmux-autoresume-after-reboot/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/cmux-autoresume-after-reboot/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "cmux-autoresume-after-reboot"
+      ],
+      "summary": "Single-skill plugin: cmux-autoresume-after-reboot."
+    },
+    {
+      "name": "confluence-rovo-mcp-readonly-rest-fallback",
+      "claude_manifest": "plugins/confluence-rovo-mcp-readonly-rest-fallback/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/confluence-rovo-mcp-readonly-rest-fallback/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "confluence-rovo-mcp-readonly-rest-fallback"
+      ],
+      "summary": "Single-skill plugin: confluence-rovo-mcp-readonly-rest-fallback."
+    },
+    {
+      "name": "git-pr-merge-unblock",
+      "claude_manifest": "plugins/git-pr-merge-unblock/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/git-pr-merge-unblock/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "git-pr-merge-unblock"
+      ],
+      "summary": "Single-skill plugin: git-pr-merge-unblock."
+    },
+    {
+      "name": "git-simulate-sequential-merges",
+      "claude_manifest": "plugins/git-simulate-sequential-merges/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/git-simulate-sequential-merges/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "git-simulate-sequential-merges"
+      ],
+      "summary": "Single-skill plugin: git-simulate-sequential-merges."
+    },
+    {
+      "name": "github-actions-startup-failure-triage",
+      "claude_manifest": "plugins/github-actions-startup-failure-triage/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/github-actions-startup-failure-triage/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "github-actions-startup-failure-triage"
+      ],
+      "summary": "Single-skill plugin: github-actions-startup-failure-triage."
+    },
+    {
+      "name": "litellm-custom-provider-dispatch-order",
+      "claude_manifest": "plugins/litellm-custom-provider-dispatch-order/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/litellm-custom-provider-dispatch-order/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "litellm-custom-provider-dispatch-order"
+      ],
+      "summary": "Single-skill plugin: litellm-custom-provider-dispatch-order."
+    },
+    {
+      "name": "macos-sparkle-update-quarantine-relaunch",
+      "claude_manifest": "plugins/macos-sparkle-update-quarantine-relaunch/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/macos-sparkle-update-quarantine-relaunch/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "macos-sparkle-update-quarantine-relaunch"
+      ],
+      "summary": "Single-skill plugin: macos-sparkle-update-quarantine-relaunch."
+    },
+    {
+      "name": "launchd-env-sync-session-leak",
+      "claude_manifest": "plugins/launchd-env-sync-session-leak/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/launchd-env-sync-session-leak/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "launchd-env-sync-session-leak"
+      ],
+      "summary": "Single-skill plugin: launchd-env-sync-session-leak."
+    },
+    {
+      "name": "claude-transcript-permission-mining",
+      "claude_manifest": "plugins/claude-transcript-permission-mining/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/claude-transcript-permission-mining/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "claude-transcript-permission-mining"
+      ],
+      "summary": "Single-skill plugin: claude-transcript-permission-mining."
+    },
+    {
+      "name": "codex-hook-wire-schema-from-binary",
+      "claude_manifest": "plugins/codex-hook-wire-schema-from-binary/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/codex-hook-wire-schema-from-binary/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "codex-hook-wire-schema-from-binary"
+      ],
+      "summary": "Single-skill plugin: codex-hook-wire-schema-from-binary."
     }
   ],
   "defaults": {

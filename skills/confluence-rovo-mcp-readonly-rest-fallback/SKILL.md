@@ -21,7 +21,7 @@ description: |
   actually works, the HTML+ -> storage-format conversion table, and the
   surgical storage-format edit that round-trips macros intact.
 author: Claude Code
-version: 1.3.0
+version: 1.4.0
 date: 2026-08-27
 ---
 
@@ -388,11 +388,10 @@ is the icon class of a correctly-rendered `warning` panel, and
   SHA, and re-verify the line numbers against the remote default branch first —
   line anchors copied from an older doc or a local checkout drift silently and
   land the reader on a blank line.
-- Related: `daily-activity-log` covers Confluence publishing through the
-  separate `mcp-atlassian` server (which does accept
-  `content_format: "storage"` directly) and has the image-upload and
-  TOC-macro recipes. `mcp-atlassian-search-result-schema` covers read-side
-  result shapes.
+- The separate `mcp-atlassian` server is a different path with different
+  rules: it accepts `content_format: "storage"` directly, so the workaround
+  here is unnecessary there, and it has its own handling for image upload and
+  the TOC macro. Nothing in this skill transfers to it unchanged.
 
 ## References
 

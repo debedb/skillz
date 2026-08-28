@@ -15,7 +15,7 @@ description: |
   hot-reload, free-model selection by live tool-calling test, and one-shot
   cascade verification via `openclaw agent`.
 author: Claude Code
-version: 1.1.0
+version: 1.2.0
 date: 2026-06-26
 source: https://github.com/voitta-ai/skillz
 source_file: skills/openclaw-model-cascade-debugging/SKILL.md
@@ -325,7 +325,8 @@ openclaw directory groups list --channel slack
 grep -E "delivered.*D0" ~/.openclaw/logs/gateway.log | tail -10
 ```
 
-## Related Skills
+## Related
 
-- `openclaw-dmg-gateway-conflict` - Gateway blocked by conflicting installations
-- `openclaw-codex-dual-workspace-auth` - Codex profile collision with multiple workspaces
+- `litellm-custom-provider-dispatch-order` - the same shape one layer down: a
+  provider that is registered correctly, reports no error, and is never the one
+  that actually runs.

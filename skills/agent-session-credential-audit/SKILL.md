@@ -16,7 +16,7 @@ description: |
   granularity, and a scrub driven by a kill-list of verified-dead fingerprints
   so it cannot erase a live secret ahead of its rotation.
 author: Claude Code
-version: 1.1.0
+version: 1.2.0
 date: 2026-08-19
 source: https://github.com/voitta-ai/skillz
 source_file: skills/agent-session-credential-audit/SKILL.md
@@ -362,7 +362,7 @@ the live key in the same directory was in every one of them.
 same way you scrub transcripts. That file supplies your working credentials -
 rotation updates it, a scrubber must leave it alone.
 
-## Related skills
+## Related
 
 This is the **response** phase of a four-part family; use the right one:
 
