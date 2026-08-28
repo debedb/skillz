@@ -290,6 +290,11 @@
       "name": "chrome-not-secure-tls-interception",
       "source": "./plugins/chrome-not-secure-tls-interception/",
       "description": "Chrome 'not secure' behind a TLS-inspecting proxy: CLI checks miss the PAC, and the forged zero-SCT cert is steady state, usually not the cause."
+    },
+    {
+      "name": "cloudwatch-per-host-stat-single-host-vs-fleet",
+      "source": "./plugins/cloudwatch-per-host-stat-single-host-vs-fleet/",
+      "description": "Max/Sum over a per-host gauge: is this number one host'\\''s story or the fleet'\\''s - answered from the metric alone, before any dashboard exists."
     }
   ]
 }
