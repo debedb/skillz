@@ -1,0 +1,20 @@
+{
+  "name": "grafana-cloudwatch-cross-region-dashboards",
+  "version": "1.0.0",
+  "description": "Port or extend Grafana dashboards that query CloudWatch across AWS regions: {{Dim}} legend syntax never substitutes (use ${PROP('Dim.X')}), per-target region overrides defaultRegion with no new datasource or IAM, region-NAMED custom namespaces exist only in their own region, SEARCH matches dimension schemas exactly and has no regex, and every expression can be pre-validated verbatim through aws cloudwatch get-metric-data.",
+  "author": "voitta-ai",
+  "homepage": "https://github.com/voitta-ai/skillz",
+  "repository": "https://github.com/voitta-ai/skillz",
+  "license": "MIT",
+  "skills": "./skills/",
+  "keywords": [
+    "claude",
+    "codex",
+    "skills",
+    "grafana",
+    "cloudwatch",
+    "dashboards",
+    "terraform",
+    "observability"
+  ]
+}
