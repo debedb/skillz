@@ -340,6 +340,11 @@
       "name": "rxjava-dofinally-terminal-then-finally-test-race",
       "source": "./plugins/rxjava-dofinally-terminal-then-finally-test-race/",
       "description": "TestObserver.await returns before doFinally runs - the terminal-then-finally ordering that makes post-await gauge asserts racy, and the polling fix."
+    },
+    {
+      "name": "personal-skills-shadow-bundle-audit",
+      "source": "./plugins/personal-skills-shadow-bundle-audit/",
+      "description": "Audit ~/.claude/skills copies that shadow plugin-bundle skills: the three-directory model, the drift table, and the delete-vs-fork decision tree."
     }
   ]
 }
