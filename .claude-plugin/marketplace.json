@@ -325,6 +325,11 @@
       "name": "terraform-check-block-warn-only-ci-gate",
       "source": "./plugins/terraform-check-block-warn-only-ci-gate/",
       "description": "Terraform check blocks only warn - plan exits 0 in CI; the tee+pipefail+grep pattern that turns a check into a real gate."
+    },
+    {
+      "name": "mcp-language-server-orphan-fd-exhaustion",
+      "source": "./plugins/mcp-language-server-orphan-fd-exhaustion/",
+      "description": "ENFILE file-table overflow from orphaned mcp-language-server processes: the sysctl+lsof diagnosis and the safe pkill recovery."
     }
   ]
 }
