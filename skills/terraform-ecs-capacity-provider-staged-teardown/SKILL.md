@@ -14,7 +14,7 @@ description: |
   provider's in-use check requires. Fix: split into two sequential applies (two stacked
   PRs), workload first, infra second. Each stays a clean untargeted apply.
 author: Claude Code
-version: 1.1.0
+version: 1.2.0
 date: 2026-07-27
 ---
 
@@ -38,6 +38,18 @@ terraform will not reorder it for you.
 - Removing `aws_ecs_service` + `aws_ecs_cluster_capacity_providers` +
   `aws_ecs_capacity_provider` + `aws_autoscaling_group` in a single apply.
 - `ResourceInUseException` naming the capacity provider or its cluster association.
+  The AWS provider **retries for ~10 minutes** before erroring, so the apply looks
+  hung on `Still destroying...` rather than failed.
+- `DeleteTargetGroup ... ResourceInUse: Target group '...' is currently in use by a
+  listener or a rule`, destroying `aws_lb_target_group`. Retries ~2 minutes, then
+  errors. Same inversion, different resource: the rule that references the target
+  group outlives it in destroy order.
+- `Error: Cycle:` naming a **kept** resource (classically `aws_ecr_repository`
+  picking up tag drift) alongside `create_before_destroy` ASG and launch-template
+  destroys. A retained resource that is *also changing* in the same apply gets
+  pulled into their destroy graph. Caught at graph-build time, so **0 resources
+  change** — the state is untouched and the fix is purely to split the apply.
+- `Error acquiring the state lock`, after a previous attempt was SIGTERM'd.
 - Any `-target` / manual `aws ecs delete-service` workaround is on the table.
 
 ## Why one apply can't work
@@ -94,6 +106,25 @@ removal. Both are clean **untargeted** applies — no `-target`, no
 If the ASG has `managed_termination_protection = "ENABLED"` on the capacity provider,
 scale the ASG to 0 before apply 2 (or in apply 1) so there are no protected instances
 left to block the delete.
+
+## Recovery, when an apply is already stuck mid-teardown
+
+The staged split is the fix; these unstick a teardown that has already jammed.
+
+- **Stale lock** — `terraform force-unlock <LOCK_ID>`. A SIGTERM'd apply never
+  releases the DynamoDB/S3 lock.
+- **Association still "in use"** — `aws ecs delete-service --cluster <c>
+  --service <s> --force` deletes and drains immediately, which unblocks
+  `PutClusterCapacityProviders`. This is the one manual step worth taking; it
+  resolves the deadlock rather than hiding it.
+- **Target group "in use by a listener or a rule"** — apply just the rules first
+  (`terraform apply -target='...aws_lb_listener_rule.<r>'`, or every address from
+  `terraform state list | grep listener_rule`), then run the full apply against
+  now-unreferenced target groups.
+- **Give it time.** Service drain plus EC2 termination plus cluster delete
+  legitimately runs many minutes. A 5-10 minute command timeout SIGTERMs the apply
+  mid-flight and leaves exactly the stale lock above — the timeout manufactures the
+  next failure.
 
 ## Verification
 
