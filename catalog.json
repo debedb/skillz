@@ -191,6 +191,15 @@
       "summary": "Identify the exact ~/.claude.json slice that carries MCP config for cross-machine migration vs session bookkeeping."
     },
     {
+      "name": "claude-transcript-permission-mining",
+      "path": "skills/claude-transcript-permission-mining/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Count permission outcomes (auto-mode refusals, operator rejections) from Claude Code transcripts without the traps that corrupt the number while leaving the output plausible: an unanchored marker search that matches the very session that wrote the marker, UTC day-bucketing that splits a working evening, and the two distinct populations that both get called rejections. Covers per-1k normalization, recovering which command was refused, and why approved prompts are unrecoverable."
+    },
+    {
       "name": "claudeception",
       "path": "skills/claudeception/SKILL.md",
       "files": [
