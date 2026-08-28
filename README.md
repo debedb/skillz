@@ -17,6 +17,10 @@ environments and older Codex versions.
 - [Install — script (legacy / fallback)](#install--script-legacy--fallback)
 - [Migrating from `debedb/skillz`](#migrating-from-debedbskillz)
 - [Catalog manifest](#catalog-manifest)
+- [Contributing](#contributing)
+  - [Which branch to target](#which-branch-to-target)
+  - [Rules for a PR onto `next`](#rules-for-a-pr-onto-next)
+  - [Merging `next` back into master](#merging-next-back-into-master)
 - [Updating](#updating)
 - [Releases](#releases)
 - [Verify](#verify)
@@ -620,9 +624,117 @@ what the repo ships. It lists:
 - Plugin bundles (`name`, paths to host manifests).
 - A default for the no-arg install (currently `pr-loop`).
 
-`install.sh` parses this file at runtime. Adding a new skill is a
-two-file change: drop in `skills/<name>/SKILL.md` and add an entry
-under `skills` in `catalog.json`. No installer edits required.
+`install.sh` parses this file at runtime, so no installer edits are ever
+required — but a skill is not a two-file change. It also needs its own plugin
+directory and an entry in each host's marketplace, or it ships only inside the
+bundle; see [Contributing](#contributing).
+
+## Contributing
+
+### What a new skill consists of
+
+Six places, not one. A skill that exists only in `skills/` installs for nobody:
+
+| Path | Why |
+|---|---|
+| `skills/<name>/SKILL.md` | the skill itself; YAML frontmatter with `name`, `description`, `version` |
+| `plugins/<name>/.claude-plugin/plugin.json` | makes it installable standalone on Claude |
+| `plugins/<name>/.codex-plugin/plugin.json` | same for Codex, same version string |
+| `plugins/<name>/skills/<name>` | symlink to `../../../skills/<name>` |
+| `catalog.json` | `skills[]` entry, `plugins[]` entry — `install.sh` and every gate read this |
+| `.claude-plugin/marketplace.json`, `.codex-plugin/marketplace.json` | one entry per host that carries a manifest, or the plugin cannot be installed by name |
+
+Plus a README catalog row (skill + plugin), and the bundle symlinks under
+`plugins/skillz/skills-claude/` and `skills-codex/` unless the plugin ships
+hooks. `scripts/validate-catalog.sh` checks every one of these and is the
+authority; run it before pushing.
+
+End a skill with a `## Related` section — that exact heading — listing sibling
+skills as `` - `skill-name` — why you would go there instead ``. It is how a
+reader navigates between overlapping skills, and it is the only place a link
+checker can resolve names without an allowlist: backticks in ordinary prose are
+mostly CLI flags and config keys, so only the **leading** backticked token of a
+bullet counts as a reference.
+
+### Which branch to target
+
+**`master` for a single skill or fix that is ready now.** Every merge to master
+tags a release, so master is what ships.
+
+**`next` for a batch** — a fleet or teammate run landing several skills at once,
+or work that should accumulate before it ships.
+
+The reason there are two is one line of JSON. The bundle version in
+`plugins/skillz/.claude-plugin/plugin.json` is a **monotonic counter shared by
+every PR**, and CI requires it to advance. Two concurrent skill PRs therefore
+cannot both be correct no matter how unrelated their subject matter: whoever
+merges second is stale by construction and has to rebase. That gate is already
+a lock — a pessimistic one, discovered at merge time as a conflict (issue #188).
+
+`next` moves that collision from N PRs down to one merge-back.
+
+### Rules for a PR onto `next`
+
+- **Do not touch the bundle version.** CI enforces that
+  `plugins/skillz/.{claude,codex}-plugin/plugin.json#version` equals *master's*
+  — not "unchanged since next", so drift is self-correcting. A PR that bumps it
+  fails.
+- **Do bump everything else**: each touched skill's frontmatter `version`, and
+  both host manifests of every plugin that ships it. Those are independent cache
+  keys, never a shared counter, so they cannot collide and are never exempt.
+- The bundle bump happens once, at merge-back.
+
+### Merging `next` back into master
+
+Branch off `next`, open a PR into `master`, and merge it as a **merge commit**
+rather than a squash, so the individual skill commits survive:
+
+```bash
+git fetch origin
+git switch -c merge-next-$(date +%F) origin/next
+# resolve: bundle version -> master's + 1 minor, catalog conflicts in place
+bash scripts/validate-catalog.sh
+gh pr create --base master --title "Merge next into master: ..." 
+```
+
+One bundle bump for the whole batch, one release. Recent examples: #228, #205.
+
+### Rules for every PR, either branch
+
+- **Edit `catalog.json`, both marketplaces and the README table IN PLACE.**
+  Never regenerate or re-sort them. A re-sorted `catalog.json` turns a
+  three-line addition into a ~500-line diff that conflicts with every other open
+  PR; an in-place append merges cleanly. When a rebase does conflict in those
+  four files, resolve them with `python3 scripts/merge-skill-registry.py`
+  (see [Rebasing a stale skill branch](#rebasing-a-stale-skill-branch)) rather
+  than by hand.
+- **Pick the bundle number at merge time, not when you write the branch.** It is
+  a counter every open PR competes for, so a number chosen an hour ago is a
+  claim on a value someone else has taken. Read it when you are about to land:
+
+```bash
+base=$(git show origin/master:plugins/skillz/.claude-plugin/plugin.json | jq -r .version)
+next=$(echo "$base" | awk -F. '{printf "%d.%d.0", $1, $2+1}')
+```
+
+- **Re-check the bumps after every rebase.** The gate asserts the version
+  advanced past the *new* base. If master took the same number while your PR sat
+  open, your bump silently becomes a no-op: CI stays green and every installed
+  copy stays frozen on the old content. Worse, when master took the *identical*
+  change the rebase drops the hunk as already applied, so the bump disappears
+  from your diff entirely and there is nothing to notice. Re-read the version
+  out of the file after every rebase; do not trust that you set it once.
+- Run the three gates locally — they are the same ones CI runs:
+
+```bash
+bash scripts/validate-catalog.sh
+bash scripts/check-sensitive-terms.sh skills/<name>/
+python3 scripts/check-plugin-version-bumps.py origin/master
+```
+
+  `hooks/pre-push` runs all three, plus the private name-wordlist half that
+  cannot run in public CI. Install it once with
+  `git config core.hooksPath hooks`.
 
 ## Updating
 
