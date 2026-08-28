@@ -125,6 +125,8 @@ environments and older Codex versions.
 | [agent-traffic-log](./skills/agent-traffic-log/SKILL.md) | skill | Claude, Codex | Append-only JSONL log of agent-to-agent traffic + a live pane; lock-free concurrent appends, and `xs status` derives who is blocked from the events |
 | [terraform-noninteractive-prod-apply](./skills/terraform-noninteractive-prod-apply/SKILL.md) | skill | Claude, Codex | Non-interactive terraform **prod** apply when `apply.sh` has no `-auto-approve`: use `plan -out` + `apply <file>`, not `echo yes \|`, because a prompt-piped apply approves a plan terraform **recomputes** rather than the one you reviewed |
 | [cmux-config-silent-drop-triage](./skills/cmux-config-silent-drop-triage/SKILL.md) | skill | Claude, Codex | A cmux.json entry passes `config doctor` but never appears: doctor is syntax-only, so bisect the backups and read the `[CmuxConfig]` diagnostics and enum values off the binary's `strings` |
+| [alb-per-rule-traffic-attribution](./skills/alb-per-rule-traffic-attribution/SKILL.md) | skill | Claude, Codex | ALB publishes no per-listener-rule CloudWatch metric; access logs answer it, but `matched_rule_priority` is a position that renumbers when a rule is inserted - attribute by `request_url` + `user_agent` |
+| [`alb-per-rule-traffic-attribution` plugin](./plugins/alb-per-rule-traffic-attribution/) | plugin | Claude, Codex | Single-skill plugin: alb-per-rule-traffic-attribution |
 
 Machine-readable index: [`catalog.json`](./catalog.json). The
 installer and validation script both read from it, so new entries
