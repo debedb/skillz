@@ -700,33 +700,6 @@
         "codex"
       ],
       "summary": "Author-side PR iteration loop."
-    },
-    {
-      "name": "dashboard-query-preflight",
-      "path": "skills/dashboard-query-preflight/SKILL.md",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "summary": "Execute every query in a dashboard against its live datasource BEFORE shipping, then triage the empty results instead of guessing. Covers extracting targets from dashboard JSON, the three classes of legitimate emptiness (scale-to-zero, low-cadence, env-specific), the __name__ regex escape hatch when metric names embed environment or region, silently truncated list APIs, and reporting coverage as N/N. The trap: a panel with a wrong query and a panel with an idle workload are the same empty rectangle."
-    },
-    {
-      "name": "dropwizard-prometheus-scrape-endpoint",
-      "path": "skills/dropwizard-prometheus-scrape-endpoint/SKILL.md",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "summary": "Add a Prometheus scrape endpoint to a JVM service on Dropwizard Metrics without migrating to Micrometer. Covers picking the bridge artifact by registry PACKAGE (simpleclient_dropwizard for com.codahale.metrics vs prometheus-metrics-instrumentation-dropwizard5 for io.dropwizard.metrics5 - the mismatched pairing compiles, registers and exports NOTHING), exporting every registry, why the handler must not throw, metric-name sanitisation that bakes environment into the name, and verifying at the remote store rather than the endpoint."
-    },
-    {
-      "name": "jira-transition-and-sprint-mechanics",
-      "path": "skills/jira-transition-and-sprint-mechanics/SKILL.md",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "summary": "Move Jira issues through a customised workflow via the REST API. Covers why transition ids are per-SOURCE-status (the same destination has a different id from a different status), multi-hop walks when there is no direct edge, setting required fields at the right hop, sprint membership as an ordinary field entirely independent of status, why transition-screen allowedValues is a truncated subset rather than the vocabulary, and verifying by whole-batch read-back."
     }
   ],
   "collections": [
@@ -822,10 +795,7 @@
         "us-federal-open-data-claim-verification",
         "verbatim-social-post-retrieval",
         "wordpress-com-publish",
-        "work-on-pr",
-        "dashboard-query-preflight",
-        "dropwizard-prometheus-scrape-endpoint",
-        "jira-transition-and-sprint-mechanics"
+        "work-on-pr"
       ],
       "summary": "Bundle: every catalog skill in one plugin, except skills whose own plugin ships hooks - install those plugins directly."
     },
@@ -1661,45 +1631,6 @@
         "work-on-pr"
       ],
       "summary": "Single-skill plugin: work-on-pr."
-    },
-    {
-      "name": "dashboard-query-preflight",
-      "claude_manifest": "plugins/dashboard-query-preflight/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/dashboard-query-preflight/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "dashboard-query-preflight"
-      ],
-      "summary": "Single-skill plugin: dashboard-query-preflight."
-    },
-    {
-      "name": "dropwizard-prometheus-scrape-endpoint",
-      "claude_manifest": "plugins/dropwizard-prometheus-scrape-endpoint/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/dropwizard-prometheus-scrape-endpoint/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "dropwizard-prometheus-scrape-endpoint"
-      ],
-      "summary": "Single-skill plugin: dropwizard-prometheus-scrape-endpoint."
-    },
-    {
-      "name": "jira-transition-and-sprint-mechanics",
-      "claude_manifest": "plugins/jira-transition-and-sprint-mechanics/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/jira-transition-and-sprint-mechanics/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "jira-transition-and-sprint-mechanics"
-      ],
-      "summary": "Single-skill plugin: jira-transition-and-sprint-mechanics."
     }
   ],
   "defaults": {
