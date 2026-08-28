@@ -189,7 +189,7 @@
     {
       "name": "spa-request-capture-and-block",
       "source": "./plugins/spa-request-capture-and-block/",
-      "description": "Capture the exact outbound request body a single-page app sends and block it before it leaves the browser: patch window.fetch AND XMLHttpRequest together (the XHR half is the one usually missed, so a fetch-only wrapper lets the request through), read the parsed payload off window, and disarm with a reload \u2014 including why a hash-route change does not remove the patch. For actions whose side effect costs credits or creates an irreversible record."
+      "description": "Capture the exact outbound request body a single-page app sends and block it before it leaves the browser: patch window.fetch AND XMLHttpRequest together (the XHR half is the one usually missed, so a fetch-only wrapper lets the request through), read the parsed payload off window, and disarm with a reload — including why a hash-route change does not remove the patch. For actions whose side effect costs credits or creates an irreversible record."
     },
     {
       "name": "us-federal-open-data-claim-verification",
@@ -270,6 +270,11 @@
       "name": "alb-per-rule-traffic-attribution",
       "source": "./plugins/alb-per-rule-traffic-attribution/",
       "description": "ALB publishes no per-listener-rule metric; access logs answer it, but matched_rule_priority is a position that renumbers."
+    },
+    {
+      "name": "cmux-claude-codex-cross-runtime-messaging",
+      "source": "./plugins/cmux-claude-codex-cross-runtime-messaging/",
+      "description": "Claude Code <-> Codex CLI agents as messaging peers in cmux panes: keystroke-injection transport, self-named tabs, both sides in the traffic log."
     }
   ]
 }
