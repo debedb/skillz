@@ -66,7 +66,7 @@ environments and older Codex versions.
 | [terraform-state-version-apply-forensics](./skills/terraform-state-version-apply-forensics/SKILL.md) | skill | Claude, Codex | Prove a terraform change really was applied to an env: census versioned S3 tfstate objects (serial + resource-type counts) + cross-check CloudTrail; separates a real apply from a reverted one, identifies which variant of a stacked change ran, and tells untracked orphans from failed destroys |
 | [terraform-ecs-capacity-provider-staged-teardown](./skills/terraform-ecs-capacity-provider-staged-teardown/SKILL.md) | skill | Claude, Codex | Tear down an ECS-on-EC2 capacity-provider stack when one apply deadlocks on `ResourceInUseException`: destroy order is reverse-dependency, so compute tears down before the workload; split into two sequential untargeted applies, workload first |
 | [gh-pr-merge-delete-branch-closes-dependent-pr](./skills/gh-pr-merge-delete-branch-closes-dependent-pr/SKILL.md) | skill | Claude, Codex | Stacked PRs: merging the upstream PR with branch deletion auto-CLOSES the dependent PR instead of retargeting it, and `gh pr reopen` then fails because the base ref is gone; recover by recreating the ref, or prevent by retargeting downstream PRs first |
-| [`skillz` plugin](./plugins/skillz/) | plugin | Claude, Codex | Full repo bundle: every skill |
+| [`skillz` plugin](./plugins/skillz/) | plugin | Claude, Codex | Bundle: every skill except those of hooked plugins (`secrets-in-agent-sessions`, `tamarian`, `continuous-learning`) - install those plugins directly |
 | [`pr-loop` plugin](./plugins/pr-loop/) | plugin | Claude, Codex | Paired author + reviewer PR-loop skills |
 | [`work-on-pr` plugin](./plugins/work-on-pr/) | plugin | Claude, Codex | Single-skill plugin: work-on-pr |
 | [`review-pr-loop` plugin](./plugins/review-pr-loop/) | plugin | Claude, Codex | Single-skill plugin: review-pr-loop |
@@ -377,7 +377,7 @@ install exactly the subset you want. From inside Claude Code:
 ```text
 /plugin marketplace add voitta-ai/skillz
 
-# Full bundle (every skill):
+# Bundle (every skill except those of hooked plugins - see Plugins below):
 /plugin install skillz@skillz
 
 # Author + reviewer PR-loop pair:
@@ -420,8 +420,8 @@ plus two Codex-only entries:
 - `skillz` — full bundle (host-aware: the Claude manifest loads
   `skills-claude/`, the Codex manifest loads `skills-codex/`, so a
   claude-only skill like `claudeception` never lands in a Codex
-  install and a codex-only skill like `continuous-learning` never
-  lands in a Claude install)
+  install; skills whose own plugin ships hooks are left out of both
+  dirs - see [Plugins](#plugins))
 - `pr-loop` — work-on-pr + review-pr-loop
 - `work-on-pr` — single skill
 - `review-pr-loop` — single skill
@@ -738,6 +738,17 @@ intentionally NOT auto-approved (`git push origin master`,
 
 ## Plugins
 
+Rule: **a skill that ships inside a hooked plugin is not in the
+`skillz` bundle.** Installing the bundle plus such a plugin (the
+common case, since only the plugin carries the hooks) would expose
+the same skill twice, namespaced by plugin - `/skillz:tamarian` next
+to `/tamarian:tamarian` - and the bundle copy would be the lesser
+half anyway: the hooks that make the skill persist or fire ship only
+with its plugin. `validate-catalog.sh` enforces this by reading the
+plugin manifests, so a plugin that grows hooks later trips the check
+without any catalog edit. Currently: `secrets-in-agent-sessions`,
+`tamarian`, `codex-continuous-learning`.
+
 ### codex-continuous-learning (Codex only)
 
 A Codex-native counterpart of
@@ -783,6 +794,8 @@ breaks the user's session.
 This bundle is **Codex-only** and not exposed via the Claude Code
 plugin or the `pr-loop` collection. Claude Code users who want
 similar end-of-task behavior should install Claudeception directly.
+The `continuous-learning` skill ships only here, not in the `skillz`
+bundle (see the rule above).
 
 Install (when supported by the local Codex CLI):
 
@@ -852,11 +865,9 @@ hook reads `skills/tamarian/SKILL.md` at runtime, so the skill stays
 the single source of truth. Both hooks are plain bash with no
 dependencies and print `OK` when the mode is off.
 
-Install the `tamarian` plugin, not just the `skillz` bundle. The
-bundle ships the skill, so `/tamarian full` works there for the
-current session - but the bundle manifest carries no hooks, so nothing
-re-arms the level next session and there is no per-prompt reminder.
-The hooks live only in this plugin's manifest.
+The skill ships only with this plugin, not in the `skillz` bundle (see
+the rule above): the bundle manifest carries no hooks, so a bundle copy
+would speak Tamarian for one session and then forget.
 
 ```text
 /plugin marketplace update skillz
@@ -880,6 +891,8 @@ The script:
   `name:` and `description:`.
 - Confirms every collection references only known skills.
 - Confirms plugin-manifest paths declared in `catalog.json` exist.
+- Fails if a skill of a hooked plugin (inline `hooks` in a manifest, or
+  a `hooks/hooks.json`) is also listed in the `skillz` bundle.
 - Runs `install.sh --dry-run` for the no-arg default,
   `--collection pr-loop`, `--skill work-on-pr`, and `--all`.
 

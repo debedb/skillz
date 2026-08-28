@@ -235,6 +235,48 @@ for p in catalog.get("plugins", []):
                     f"{sorted(extra)}"
                 )
 
+# A skill that ships inside a hooked plugin stays out of the bundle. Installing
+# both is the common case (only the plugin carries the hooks), and it exposes
+# the same skill twice, namespaced by plugin - `/skillz:tamarian` next to
+# `/tamarian:tamarian` - with the bundle copy the lesser half, since the hooks
+# that make the skill persist or fire ship only with its plugin. Hooks are
+# detected from the manifests themselves (an inline `hooks` key, or a
+# hooks/hooks.json beside them), so a plugin that grows hooks later trips this
+# without any catalog edit.
+bundle_skills = set()
+for p in catalog.get("plugins", []):
+    if p.get("name") == "skillz":
+        bundle_skills = set(p.get("skills", []))
+for p in catalog.get("plugins", []):
+    pname = p.get("name", "<unnamed>")
+    if pname == "skillz":
+        continue
+    hooked = False
+    for key in ("claude_manifest", "codex_manifest"):
+        rel = p.get(key)
+        if not rel:
+            continue
+        manifest_path = os.path.join(root, rel)
+        plugin_root = os.path.dirname(os.path.dirname(manifest_path))
+        if os.path.isfile(os.path.join(plugin_root, "hooks", "hooks.json")):
+            hooked = True
+        try:
+            with open(manifest_path) as mf:
+                if "hooks" in json.load(mf):
+                    hooked = True
+        except (OSError, ValueError):
+            continue  # missing or invalid manifest is reported above
+    if not hooked:
+        continue
+    for sn in p.get("skills", []):
+        if sn in bundle_skills:
+            errors.append(
+                f"skill '{sn}' ships in hooked plugin '{pname}' and is also "
+                f"listed in the skillz bundle - remove it from the bundle "
+                f"(installing both exposes it twice; only the plugin has the "
+                f"hooks)"
+            )
+
 # The two root marketplace.json files are what a host actually reads for
 # `/plugin install <name>@skillz`, and nothing above has looked at them. Two
 # failures have already shipped green past this script: both files sat on a

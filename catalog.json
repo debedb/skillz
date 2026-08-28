@@ -653,7 +653,6 @@
         "work-on-pr",
         "review-pr-loop",
         "codex-adversarial-pr-review",
-        "continuous-learning",
         "cmux-search",
         "cmux-agent-tabs",
         "python-ast-static-analyzer-scoping",
@@ -684,7 +683,6 @@
         "aws-http-server-on-lambda-web-adapter",
         "slack-app-token-rotation",
         "agent-credential-leak-surfaces",
-        "secrets-in-agent-sessions",
         "prevent-committing-secrets",
         "agent-session-credential-audit",
         "claude-code-plugin-release-automation",
@@ -714,10 +712,9 @@
         "github-actions-startup-failure-triage",
         "cmux-config-silent-drop-triage",
         "alb-per-rule-traffic-attribution",
-        "cmux-claude-codex-cross-runtime-messaging",
-        "tamarian"
+        "cmux-claude-codex-cross-runtime-messaging"
       ],
-      "summary": "Full repo bundle: every skill in one plugin."
+      "summary": "Bundle: every catalog skill in one plugin, except skills whose own plugin ships hooks - install those plugins directly."
     },
     {
       "name": "agent-credential-leak-surfaces",

@@ -46,9 +46,8 @@ Nothing technical is ever lost to the poetry.
   ```
 
 The `tamarian` plugin's SessionStart hook re-arms the level from the
-state file each session. Installed without the hooks (e.g. via the
-`skillz` bundle), the level still applies for the current session once
-this skill is invoked - it just does not survive into the next one.
+state file each session. The skill ships only with that plugin (not in
+the `skillz` bundle), so the hooks are always installed alongside it.
 
 ## Persistence
 

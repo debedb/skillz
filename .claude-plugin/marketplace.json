@@ -9,7 +9,7 @@
     {
       "name": "skillz",
       "source": "./plugins/skillz/",
-      "description": "Full bundle: every skill in the catalog (see catalog.json)."
+      "description": "Bundle: every skill in the catalog except hooked-plugin skills (see catalog.json)."
     },
     {
       "name": "agent-credential-leak-surfaces",
