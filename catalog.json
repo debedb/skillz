@@ -53,6 +53,15 @@
       "summary": "An append-only JSONL event log of agent-to-agent traffic plus a live pane over it, giving a fleet an org-wide view instead of N private conversations. No daemon and no lock: concurrent appends are safe because a single write of under PIPE_BUF bytes to an O_APPEND descriptor cannot interleave, verified at 24 concurrent writers producing 960 lines with zero torn. Ships scripts/xs with log, tail, recent, status (who is waiting on whom, derived from events rather than tracked), and prune. Includes the acceptance test that only a real team run can satisfy."
     },
     {
+      "name": "alb-controller-custom-sg-narrowing-inert",
+      "path": "skills/alb-controller-custom-sg-narrowing-inert/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Recognize and fix the trap where supplying a custom security group to an AWS Load Balancer Controller ingress (annotation alb.ingress.kubernetes.io/security-groups) delivers NO security narrowing, because the controller's shared backend SG stays attached and security groups are additive. Use when: (1) a \"narrow the ALB's security groups\" change applied clean but the ALB still carries a controller-managed SG (tag elbv2.k8s.aws/resource=backend-sg) with all-protocol 0.0.0.0/0 egress, (2) you are reviewing a diff that adds a custom SG to an ingress while alb.ingress.kubernetes.io/manage-backend-security-group-rules is \"true\", (3) after doing the narrowing properly, new backends go \"unhealthy: Target.Timeout\" because the health-check port was never opened, (4) a terraform apply that flips the annotation and adds replacement node-SG rules could race and close the front door mid-apply. Core facts: effective SG posture is the UNION of attached SGs - adding a narrow SG beside a broad one changes nothing; the real fix is to stop the controller attaching/managing the backend SG and author the node-side rules yourself, with explicit depends_on ordering; measure the live SGs before and after, never trust the diff."
+    },
+    {
       "name": "alb-per-rule-traffic-attribution",
       "path": "skills/alb-per-rule-traffic-attribution/SKILL.md",
       "hosts": [
@@ -712,6 +721,7 @@
         "agent-session-credential-audit",
         "agent-team-orchestration",
         "agent-traffic-log",
+        "alb-controller-custom-sg-narrowing-inert",
         "alb-per-rule-traffic-attribution",
         "archive-today-fetcher-hierarchy",
         "aws-http-server-on-lambda-web-adapter",
@@ -830,6 +840,19 @@
         "agent-traffic-log"
       ],
       "summary": "Single-skill plugin: agent-traffic-log."
+    },
+    {
+      "name": "alb-controller-custom-sg-narrowing-inert",
+      "claude_manifest": "plugins/alb-controller-custom-sg-narrowing-inert/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/alb-controller-custom-sg-narrowing-inert/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "alb-controller-custom-sg-narrowing-inert"
+      ],
+      "summary": "Single-skill plugin: alb-controller-custom-sg-narrowing-inert."
     },
     {
       "name": "alb-per-rule-traffic-attribution",

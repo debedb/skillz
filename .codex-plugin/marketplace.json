@@ -315,6 +315,11 @@
       "name": "targetgroupbinding-unattached-tg-readiness-wedge",
       "source": "./plugins/targetgroupbinding-unattached-tg-readiness-wedge/",
       "description": "A TargetGroupBinding on a target group no listener forwards to wedges every future rollout: the readiness gate that can never pass, and the PDB fallout."
+    },
+    {
+      "name": "alb-controller-custom-sg-narrowing-inert",
+      "source": "./plugins/alb-controller-custom-sg-narrowing-inert/",
+      "description": "A custom SG on an ALB ingress narrows nothing while the controller'\\''s backend SG stays attached - SGs are additive; the real fix and its ordering traps."
     }
   ]
 }
