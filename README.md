@@ -147,6 +147,7 @@ environments and older Codex versions.
 | [rxjava-dofinally-terminal-then-finally-test-race](./skills/rxjava-dofinally-terminal-then-finally-test-race/SKILL.md) | skill | Claude, Codex | TestObserver.await returns before doFinally runs - the terminal-then-finally ordering that makes post-await gauge asserts racy, and the polling fix. |
 | [personal-skills-shadow-bundle-audit](./skills/personal-skills-shadow-bundle-audit/SKILL.md) | skill | Claude, Codex | Audit ~/.claude/skills copies that shadow plugin-bundle skills: the three-directory model, the drift table, and the delete-vs-fork decision tree. |
 | [session-transcript-mining](./skills/session-transcript-mining/SKILL.md) | skill | Claude, Codex | Mine all local Claude Code session transcripts for skills: inventory, condense 26-90x, fan out miners, tier the findings, ship serially. |
+| [pr-amend-force-push-lost-to-racing-merge](./skills/pr-amend-force-push-lost-to-racing-merge/SKILL.md) | skill | Claude, Codex | An amend force-pushed after the reviewer'\''s squash-merge vanishes silently - detection, recovery, and the auto-merge disarm. |
 
 Machine-readable index: [`catalog.json`](./catalog.json). The
 installer and validation script both read from it, so new entries

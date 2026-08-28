@@ -350,6 +350,11 @@
       "name": "session-transcript-mining",
       "source": "./plugins/session-transcript-mining/",
       "description": "Mine all local Claude Code session transcripts for skills: inventory, condense 26-90x, fan out miners, tier the findings, ship serially."
+    },
+    {
+      "name": "pr-amend-force-push-lost-to-racing-merge",
+      "source": "./plugins/pr-amend-force-push-lost-to-racing-merge/",
+      "description": "An amend force-pushed after the reviewer'\\''s squash-merge vanishes silently - detection, recovery, and the auto-merge disarm."
     }
   ]
 }
