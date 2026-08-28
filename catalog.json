@@ -190,6 +190,15 @@
       "summary": "Continuous-learning meta-skill for both hosts: extract verified, reusable knowledge. Repeatable procedures become catalog skills via PR; specific recollections go to memory (local or a shared git-backed vault). Owns the catalog Wiring procedure - catalog.json, per-host bundle symlinks, the optional single-skill plugin, and the version bumps CI requires. Invoked explicitly; the Codex hook-driven entry point is `continuous-learning`."
     },
     {
+      "name": "client-rendered-dashboard-data-blob",
+      "path": "skills/client-rendered-dashboard-data-blob/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Pull trustworthy numbers out of a dashboard that renders entirely client-side, by decoding the data blob it ships instead of scraping the DOM or driving a browser. Use when: (1) you want a dashboard's data as a feed for a report, a script, or another skill, (2) `curl` returns a big HTML page whose numbers are nowhere in the HTML, (3) you are about to reach for Playwright / headless Chrome just to read some totals, (4) you copied a rank or a percentage off the screen and want to know what it actually measures before quoting it, (5) numbers you derived from a decoded blob disagree with what the page displays. Covers finding the blob, decoding a positional-tuple event schema from the page's own render loop, porting derived-metric formulas rather than guessing them, and validating against a screenshot. Includes two traps that silently produce plausible-but-wrong numbers: a displayed rank that is really a row number under the active sort, and a \"velocity\"/delta that is intra-window rather than period-over-period."
+    },
+    {
       "name": "cloudwatch-per-host-stat-single-host-vs-fleet",
       "path": "skills/cloudwatch-per-host-stat-single-host-vs-fleet/SKILL.md",
       "hosts": [
@@ -687,6 +696,7 @@
         "claude-code-plugin-update-flow",
         "claude-json-mcp-migration-slice",
         "claudeception",
+        "client-rendered-dashboard-data-blob",
         "cloudwatch-per-host-stat-single-host-vs-fleet",
         "cmux-agent-tabs",
         "cmux-autoresume-after-reboot",
@@ -917,6 +927,19 @@
         "claude-json-mcp-migration-slice"
       ],
       "summary": "Single-skill plugin: claude-json-mcp-migration-slice."
+    },
+    {
+      "name": "client-rendered-dashboard-data-blob",
+      "claude_manifest": "plugins/client-rendered-dashboard-data-blob/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/client-rendered-dashboard-data-blob/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "client-rendered-dashboard-data-blob"
+      ],
+      "summary": "Single-skill plugin: client-rendered-dashboard-data-blob."
     },
     {
       "name": "cloudwatch-per-host-stat-single-host-vs-fleet",
