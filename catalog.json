@@ -435,6 +435,15 @@
       "summary": "Istio multi-cluster endpoint-less away-Service: use a decoy selector (not an omitted one) so an EndpointSlice anchor exists for the mesh to merge remote endpoints into; for cross-region write-routing / home-away Service topologies."
     },
     {
+      "name": "launchd-env-sync-session-leak",
+      "path": "skills/launchd-env-sync-session-leak/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Diagnose and undo a login-environment -> launchd sync that was run from inside a multiplexer pane or an AI-agent session, so PROMPT_COMMAND, CMUX_*, CLAUDECODE/CLAUDE_CODE_*, NODE_OPTIONS and TERMINFO became the user-domain environment of every Spotlight-launched app and every launchd service bootstrapped afterwards. Detection signature (`-bash: _cmux_prompt_command: command not found` in a plain terminal; leaked names in `launchctl print`), who is immune (multiplexer panes) and who is not (Spotlight apps, services), the SKIP denylist, the purge, and the bootout + bootstrap reload order with its I/O-error race."
+    },
+    {
       "name": "litellm-custom-provider-dispatch-order",
       "path": "skills/litellm-custom-provider-dispatch-order/SKILL.md",
       "hosts": [
@@ -823,6 +832,7 @@
         "github-actions-startup-failure-triage",
         "github-oidc-immutable-subject-claim",
         "istio-multicluster-endpointless-mesh-service",
+        "launchd-env-sync-session-leak",
         "litellm-custom-provider-dispatch-order",
         "llm-vendor-waterfall",
         "macos-sparkle-update-quarantine-relaunch",
