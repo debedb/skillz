@@ -1,0 +1,12 @@
+{
+  "name": "claude-code-plugin-publish-anthropic-marketplace",
+  "description": "Publish a Claude Code plugin to Anthropic's plugin marketplace, including the pre-submission validation pass.",
+  "version": "1.0.0",
+  "author": {
+    "name": "voitta-ai"
+  },
+  "homepage": "https://github.com/voitta-ai/skillz",
+  "repository": "https://github.com/voitta-ai/skillz",
+  "license": "MIT",
+  "skills": "./skills/"
+}

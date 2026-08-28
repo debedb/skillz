@@ -14,7 +14,7 @@ description: |
   provider's in-use check requires. Fix: split into two sequential applies (two stacked
   PRs), workload first, infra second. Each stays a clean untargeted apply.
 author: Claude Code
-version: 1.0.0
+version: 1.1.0
 date: 2026-07-27
 ---
 
@@ -126,7 +126,7 @@ pod restart count should still be 0 afterwards.
 - Resist `-target`. It hides the ordering problem for one run and leaves the next
   engineer with the same deadlock plus drift.
 
-## Related skills
+## Related
 
 - `terraform-state-version-apply-forensics` — prove which stage was actually applied.
 - `gh-pr-merge-delete-branch-closes-dependent-pr` — the stacked-PR merge cascade.

@@ -20,7 +20,7 @@ description: |
   on a 3-PR stack (#82 → #71 → #84) because the gh-merge of each PR's
   predecessor cascaded the close to the next.
 author: Claude Code
-version: 1.2.0
+version: 1.3.0
 date: 2026-08-26
 ---
 
@@ -199,7 +199,7 @@ which is usually expected on a stacked workflow anyway.
   against the correct base. The recovery procedure above is for when
   you *do* want the history.
 
-## Related skills
+## Related
 
 - `multi-phase-feature-pr-worktrees` — stacked-PR worktree
   conventions where this trap is most likely to appear.

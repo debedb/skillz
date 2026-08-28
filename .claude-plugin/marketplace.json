@@ -350,6 +350,81 @@
       "name": "pr-amend-force-push-lost-to-racing-merge",
       "source": "./plugins/pr-amend-force-push-lost-to-racing-merge/",
       "description": "An amend force-pushed after the reviewer'\\''s squash-merge vanishes silently - detection, recovery, and the auto-merge disarm."
+    },
+    {
+      "name": "agent-host-skill-loading",
+      "source": "./plugins/agent-host-skill-loading/",
+      "description": "Make a non-Claude, non-Codex agent host load skillz-format SKILL.md files:"
+    },
+    {
+      "name": "archive-today-fetcher-hierarchy",
+      "source": "./plugins/archive-today-fetcher-hierarchy/",
+      "description": "Reach archive.today when automation is refused, cite it reproducibly, and send a truthful user agent."
+    },
+    {
+      "name": "aws-http-server-on-lambda-web-adapter",
+      "source": "./plugins/aws-http-server-on-lambda-web-adapter/",
+      "description": "Host an unmodified HTTP server (incl."
+    },
+    {
+      "name": "claude-code-plugin-publish-anthropic-marketplace",
+      "source": "./plugins/claude-code-plugin-publish-anthropic-marketplace/",
+      "description": "Publish a Claude Code plugin to Anthropic's plugin marketplace, including the pre-submission validation pass."
+    },
+    {
+      "name": "claudeception",
+      "source": "./plugins/claudeception/",
+      "description": "Continuous-learning meta-skill for both hosts:"
+    },
+    {
+      "name": "cmux-autoresume-after-reboot",
+      "source": "./plugins/cmux-autoresume-after-reboot/",
+      "description": "Diagnose why cmux does not resume agent sessions after a macOS reboot even though terminal.autoResumeAgentSessions is enabled."
+    },
+    {
+      "name": "confluence-rovo-mcp-readonly-rest-fallback",
+      "source": "./plugins/confluence-rovo-mcp-readonly-rest-fallback/",
+      "description": "Create or update a Confluence Cloud page when the Atlassian Rovo connector is read-only - but check first that it still is, since the connector gets re-authorized and a..."
+    },
+    {
+      "name": "git-pr-merge-unblock",
+      "source": "./plugins/git-pr-merge-unblock/",
+      "description": "Work out why a pull request will not merge and who can actually unblock it, on github.com or self-hosted GitHub Enterprise."
+    },
+    {
+      "name": "git-simulate-sequential-merges",
+      "source": "./plugins/git-simulate-sequential-merges/",
+      "description": "Determine which merges in a queue of N branches actually conflict, and preview the fully-merged file content, using merge-tree --write-tree chained through commit-tree - no..."
+    },
+    {
+      "name": "github-actions-startup-failure-triage",
+      "source": "./plugins/github-actions-startup-failure-triage/",
+      "description": "Tell a GitHub Actions outage apart from a workflow file you broke, and get the PR unstuck without bypassing branch protection."
+    },
+    {
+      "name": "litellm-custom-provider-dispatch-order",
+      "source": "./plugins/litellm-custom-provider-dispatch-order/",
+      "description": "A LiteLLM CustomLLM provider that is registered correctly and still never runs:"
+    },
+    {
+      "name": "macos-sparkle-update-quarantine-relaunch",
+      "source": "./plugins/macos-sparkle-update-quarantine-relaunch/",
+      "description": "Fix macOS Sparkle updater error 4005 / 'Failed to create installation cache directory' that persists after stripping quarantine:"
+    },
+    {
+      "name": "launchd-env-sync-session-leak",
+      "source": "./plugins/launchd-env-sync-session-leak/",
+      "description": "Diagnose and undo a login-environment -> launchd sync that was run from inside a multiplexer pane or an AI-agent session, so PROMPT_COMMAND, CMUX_*, CLAUDECODE/CLAUDE_CODE_*,..."
+    },
+    {
+      "name": "claude-transcript-permission-mining",
+      "source": "./plugins/claude-transcript-permission-mining/",
+      "description": "Count permission outcomes (auto-mode refusals, operator rejections) from Claude Code transcripts without the traps that corrupt the number while leaving the output plausible:"
+    },
+    {
+      "name": "codex-hook-wire-schema-from-binary",
+      "source": "./plugins/codex-hook-wire-schema-from-binary/",
+      "description": "Read the Codex CLI hook contract out of the shipped native binary with strings rather than a live probe turn:"
     }
   ]
 }

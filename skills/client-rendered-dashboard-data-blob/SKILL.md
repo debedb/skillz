@@ -16,7 +16,7 @@ description: |
   that is really a row number under the active sort, and a "velocity"/delta
   that is intra-window rather than period-over-period.
 author: Claude Code
-version: 1.0.0
+version: 1.1.0
 date: 2026-08-20
 ---
 
@@ -214,9 +214,9 @@ one GET -- including entities the page's default filters hide. That last part is
 usually where the value is: rows that a filtered UI view, or an
 authored-content API query, would never surface.
 
-A worked implementation of exactly this lives in the `daily-activity-log`
-skill (`leaderboard.py`), which uses it both for a standing header and to find
-days that should have a log page but do not.
+A worked implementation of exactly this pattern reads the blob once and uses
+it for two things at once: rendering a standing header, and finding the days
+that should have a page but do not.
 
 ## Notes
 
@@ -238,11 +238,10 @@ days that should have a log page but do not.
   does **not** cover is everything after you have the data: derived metrics are
   where the wrong answers come from.
 
-## Related skills
+## Related
 
 - `spa-request-capture-and-block` -- the outbound direction: capturing the
   request body an app *sends*, when you need the payload rather than the view.
-- `daily-activity-log` -- a concrete consumer of this technique.
 
 ## References
 
