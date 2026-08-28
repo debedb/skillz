@@ -9,10 +9,12 @@ description: |
   manual copy-into-project install, (2) you want to add plugin install
   without breaking the manual install path, (3) confused about where
   marketplace.json vs plugin.json live, (4) confused about which env var
-  the plugin's hooks should reference. Covers coexistence of manual and
+  the plugin's hooks should reference, (5) the installed plugin shows
+  "failed to load" with `Duplicate hooks file detected` after you declared
+  a `hooks` pointer in plugin.json. Covers coexistence of manual and
   plugin install via a shared source directory.
 author: Claude Code
-version: 1.1.0
+version: 1.2.0
 date: 2026-05-10
 ---
 
@@ -131,6 +133,28 @@ registration here BUT swap the env var:
 Hook **scripts themselves** typically read `CLAUDE_PROJECT_DIR` to find files
 in the user's project root (e.g. `GOAL.md`) — that still works under plugin
 install because Claude Code sets it for both install modes.
+
+### Do NOT also declare `hooks` in plugin.json when the file is at the auto-load path
+
+`<source>/hooks/hooks.json` is discovered automatically. Declaring it a second
+time in `plugin.json`:
+
+```json
+"hooks": "./hooks/hooks.json"
+```
+
+makes the loader resolve the same file twice, and the whole plugin fails to
+load — `claude plugin list` shows it as failed, with:
+
+```
+Duplicate hooks file detected: ./hooks/hooks.json resolves to already-loaded file
+```
+
+The failure is easy to misread as a marketplace or update problem because it
+surfaces after an install/update, but it is the manifest: delete the `hooks`
+line from `plugin.json`. Reserve that field for a hooks file at a
+NON-default path; when the file already sits at `<source>/hooks/hooks.json`,
+the pointer is not merely redundant, it is fatal.
 
 ## Verification
 
