@@ -534,6 +534,15 @@
       "summary": "Upload a file via Playwright MCP when the input is hidden: unhide+tag via evaluate, upload by id, verify via CDN/S3 URL."
     },
     {
+      "name": "pr-amend-force-push-lost-to-racing-merge",
+      "path": "skills/pr-amend-force-push-lost-to-racing-merge/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "A review-fix amend + force-push that lands after the reviewer's squash-merge succeeds silently and never reaches the default branch: the merge snapshots the head GitHub had when the merge ran, the later force-push still updates the branch ref without any warning, and the default branch keeps the pre-review version. Use when: (1) you force-pushed to a PR branch while the PR was under active review or had auto-merge armed, (2) a merged PR's requested change is mysteriously absent from the default branch though your branch has it, (3) a stacked follow-up branch starts failing validation after a rebase on something the amendment fixed (e.g. terraform's `Error: Reference to undeclared resource`), (4) `git show origin/<default>:<file>` shows the pre-amendment shape of a file you know you fixed. Covers the post-push detection check, the tree-diff test that works despite squash-merge ancestry breakage, and the carry-the-fix-forward recovery."
+    },
+    {
       "name": "pre-open-source-credential-audit",
       "path": "skills/pre-open-source-credential-audit/SKILL.md",
       "hosts": [
@@ -825,6 +834,7 @@
         "parallel-agent-session-collisions",
         "personal-skills-shadow-bundle-audit",
         "playwright-mcp-upload-hidden-file-input",
+        "pr-amend-force-push-lost-to-racing-merge",
         "pre-open-source-credential-audit",
         "prevent-committing-secrets",
         "python-ast-static-analyzer-scoping",
@@ -1429,6 +1439,19 @@
         "playwright-mcp-upload-hidden-file-input"
       ],
       "summary": "Single-skill plugin: playwright-mcp-upload-hidden-file-input."
+    },
+    {
+      "name": "pr-amend-force-push-lost-to-racing-merge",
+      "claude_manifest": "plugins/pr-amend-force-push-lost-to-racing-merge/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/pr-amend-force-push-lost-to-racing-merge/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "pr-amend-force-push-lost-to-racing-merge"
+      ],
+      "summary": "Single-skill plugin: pr-amend-force-push-lost-to-racing-merge."
     },
     {
       "name": "pr-loop",
