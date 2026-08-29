@@ -1,0 +1,105 @@
+name: catalog-health
+
+# Advisory half of issue #222. The blocking half runs in checks.yml on every
+# PR; this reports the numbers that cannot block yet (mainly `## Related`
+# coverage, currently ~47% - gating it would fail every PR until the work that
+# raises it is done).
+#
+# Two scheduling traps, both of which fail SILENTLY:
+#
+#  1. A `schedule:` trigger only ever runs from the DEFAULT BRANCH's copy of
+#     this file. Editing it on a branch changes nothing until it lands on
+#     master, and the run you are waiting for is the old file's run. See the
+#     gha-dispatch-schedule-needs-default-branch skill.
+#  2. Scheduled workflows are auto-disabled after 60 days of repository
+#     inactivity. GitHub emails the repo admins; nothing appears here. If the
+#     report simply stops, check that before debugging the script.
+on:
+  schedule:
+    - cron: "17 8 * * 1"   # Mondays, 08:17 UTC; off the hour to avoid the
+                           # top-of-hour queue where scheduled runs pile up
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The report reads the whole catalog, and `git rev-parse` in the
+          # footer wants real history, not a grafted shallow HEAD.
+          fetch-depth: 0
+
+      - name: Generate report
+        run: python3 scripts/catalog-health.py > /tmp/report.md
+
+      # One long-lived issue whose body is rewritten in place. A fresh issue
+      # every Monday is unread by week three, and a comment every Monday is the
+      # same thing with extra steps - so a comment is posted ONLY when a number
+      # has moved the wrong way since the last run.
+      - name: Upsert the catalog-health issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TITLE: "catalog-health"
+        run: |
+          set -euo pipefail
+          number=$(gh issue list --state open --limit 100 \
+            --json number,title \
+            --jq ".[] | select(.title == \"$TITLE\") | .number" | head -1)
+
+          if [ -z "$number" ]; then
+            gh issue create --title "$TITLE" --body-file /tmp/report.md \
+              --label catalog-health 2>/dev/null \
+              || gh issue create --title "$TITLE" --body-file /tmp/report.md
+            echo "created the catalog-health issue"
+            exit 0
+          fi
+
+          gh issue view "$number" --json body --jq .body > /tmp/previous.md
+          gh issue edit "$number" --body-file /tmp/report.md
+          echo "rewrote #$number in place"
+
+          # Regressions only. Coverage falling or isolation rising means a
+          # skill landed without the section; anything else is noise.
+          python3 - "$number" <<'PY'
+          import re, subprocess, sys
+
+          def nums(text):
+              cov = re.search(r"`## Related` sections \| (\d+)/(\d+)", text)
+              iso = re.search(r"isolated skills \| (\d+)", text)
+              pairs = re.search(r"overlapping pairs not cross-referenced \| (\d+)", text)
+              return (
+                  int(cov.group(1)) / int(cov.group(2)) if cov else None,
+                  int(iso.group(1)) if iso else None,
+                  int(pairs.group(1)) if pairs else None,
+              )
+
+          old = nums(open("/tmp/previous.md").read())
+          new = nums(open("/tmp/report.md").read())
+          bad = []
+          if old[0] is not None and new[0] is not None and new[0] < old[0] - 1e-9:
+              bad.append(f"`## Related` coverage fell from {old[0]:.0%} to {new[0]:.0%}")
+          if old[1] is not None and new[1] is not None and new[1] > old[1]:
+              bad.append(f"isolated skills rose from {old[1]} to {new[1]}")
+          if old[2] is not None and new[2] is not None and new[2] > old[2]:
+              bad.append(f"un-cross-referenced overlapping pairs rose from {old[2]} to {new[2]}")
+
+          if not bad:
+              print("no regression; body updated silently")
+              sys.exit(0)
+
+          body = ("A number moved the wrong way since the last run:\n\n"
+                  + "\n".join(f"- {b}" for b in bad)
+                  + "\n\nUsually this means a skill landed without a "
+                    "`## Related` section. The blocking checks in "
+                    "`validate-catalog.sh` cannot catch that one — a missing "
+                    "section is not an error, an unresolvable reference is.")
+          subprocess.run(
+              ["gh", "issue", "comment", sys.argv[1], "--body", body], check=True
+          )
+          print("commented: " + "; ".join(bad))
+          PY
