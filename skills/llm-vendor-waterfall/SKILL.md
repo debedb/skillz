@@ -15,7 +15,7 @@ description: |
   why, the ones to leave alone, what must not be waterfalled, and how to
   prove failover actually happens.
 author: Claude Code
-version: 1.0.0
+version: 1.1.0
 date: 2026-08-24
 source: Extracted from voitta-ai/shmobster (shmobster/llm.py, README "Own / rent / delegate", issues #5 and #51). Second consumer tracked as voitta-ai/agents #9.
 source_file: skills/llm-vendor-waterfall/SKILL.md
@@ -175,3 +175,15 @@ different config shapes get a shared dependency plus two adapters, which is
 more moving parts than a copy. The transferable asset is this document — the
 knob rationale, the skip list, and the dead-fallback failure mode — not the
 code.
+
+## Related
+
+- `litellm-custom-provider-dispatch-order` — read it before adding a
+  `CustomLLM` rung to the Router this skill builds. A provider registered
+  correctly can still never run: the call goes to a built-in provider instead
+  and is billed to whatever key that provider finds in the environment, which
+  is the dead-rung failure above with a bill attached. It also covers the
+  Router refusing such a deployment at construction time.
+- `openclaw-model-cascade-debugging` — the same waterfall seen from the other
+  end, when the cascade is someone else's and you are working out which rung
+  actually served a call.
