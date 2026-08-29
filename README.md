@@ -38,6 +38,8 @@ environments and older Codex versions.
 
 | Name | Type | Hosts | Purpose |
 |---|---|---|---|
+| [experimental-upstream-for-gated-integration-repo](./skills/experimental-upstream-for-gated-integration-repo/SKILL.md) | skill | Claude, Codex | Keep a high-velocity development loop alive when the repository you integrate into gains a merge gate you cannot satisfy and forking is disabled: experimental upstream, one reviewed fork-sync PR, pre-push guard, change-management issue framing |
+| [`experimental-upstream-for-gated-integration-repo` plugin](./plugins/experimental-upstream-for-gated-integration-repo/) | plugin | Claude, Codex | Single-skill plugin: experimental-upstream-for-gated-integration-repo |
 | [work-on-pr](./skills/work-on-pr/SKILL.md) | skill | Claude, Codex | Author-side PR iteration loop |
 | [review-pr-loop](./skills/review-pr-loop/SKILL.md) | skill | Claude, Codex | Reviewer-side PR iteration loop |
 | [codex-adversarial-pr-review](./skills/codex-adversarial-pr-review/SKILL.md) | skill | Claude, Codex | Post /codex:adversarial-review findings as a batched GitHub PR review (inline + out-of-diff rollup) |
