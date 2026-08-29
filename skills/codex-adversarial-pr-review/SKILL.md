@@ -20,7 +20,7 @@ description: |
   degenerate-output shapes (plan-only "zero findings", quiet background-launch
   failure) to judge before posting.
 author: Claude Code
-version: 1.2.0
+version: 1.3.0
 date: 2026-08-24
 source: https://github.com/voitta-ai/skillz
 source_file: skills/codex-adversarial-pr-review/SKILL.md
@@ -267,6 +267,19 @@ costs the author more time than the review saves.
    under their own job control), treat a missing or zero-byte payload with a
    silent log as a launch failure to retry, never as a clean empty review —
    the same `-s` rule batch mode's resume logic applies.
+
+10. **Every inline finding is a review thread, and a conversation-resolution
+    branch rule blocks the merge on each one.** Posting the review is not the
+    end of its lifecycle. On a repo whose branch protection requires
+    conversation resolution, one posted finding left the PR with
+    `mergeStateStatus: BLOCKED` and every check green, `gh pr merge` refused
+    with `the base branch policy prohibits the merge`, and the UI showed
+    `All comments must be resolved` — after the author had already fixed and
+    replied. A reply does not resolve a thread; only the GraphQL
+    `resolveReviewThread` mutation (or the Resolve button) does. The author
+    side's `work-on-pr` step 6g does that for each finding it addresses;
+    if you post from a reviewer identity, resolve the threads you accept as
+    addressed, or the review you wrote is what stops the merge.
 
 ## Requirements
 
