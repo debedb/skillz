@@ -56,10 +56,14 @@ cut -f1 "$OUT/meta.tsv" > "$OUT/prs.txt"
 echo "resolved $(wc -l < "$OUT/prs.txt" | tr -d ' ') PRs"
 
 # One fetch of every head ref, so the per-PR checkouts are local and offline.
-mapfile -t HEADREFS < <(cut -f3 "$OUT/meta.tsv")
-if [ ${#HEADREFS[@]} -gt 0 ]; then
-  SPECS=()
-  for h in "${HEADREFS[@]}"; do SPECS+=("+refs/heads/$h:refs/remotes/origin/$h"); done
+# A while-read loop, not mapfile: macOS /bin/bash is 3.2, where mapfile does not
+# exist. Under `set -u` that failure used to leave HEADREFS unset, the fetch was
+# skipped, and every PR head pushed after the clone died with "FAIL checkout".
+SPECS=()
+while IFS= read -r h; do
+  [ -n "$h" ] && SPECS+=("+refs/heads/$h:refs/remotes/origin/$h")
+done < <(cut -f3 "$OUT/meta.tsv")
+if [ ${#SPECS[@]} -gt 0 ]; then
   git -C "$REPO_DIR" fetch origin "${SPECS[@]}" >/dev/null 2>&1
 fi
 

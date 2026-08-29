@@ -20,8 +20,8 @@ description: |
   degenerate-output shapes (plan-only "zero findings", quiet background-launch
   failure) to judge before posting.
 author: Claude Code
-version: 1.2.0
-date: 2026-08-24
+version: 1.3.0
+date: 2026-08-29
 source: https://github.com/voitta-ai/skillz
 source_file: skills/codex-adversarial-pr-review/SKILL.md
 ---
@@ -190,6 +190,38 @@ git diff --stat origin/main...refs/remotes/pr/N   # three dots: merge-base diff
 If that diffstat and the finding disagree, the finding is describing branch
 staleness, not the PR — drop it, and consider telling the author to rebase
 instead.
+
+The same artifact also arrives one file at a time, and then nothing about it
+looks like staleness. On a docs-only PR one commit behind `main`, the sole
+finding was `critical` 0.93: "observability safety net removed:
+`MeterCatalogCompletenessTest` deleted (141 lines)". The branch never touched
+the file — it had been *added* to `main` by the previous PR, minutes earlier.
+A single-file deletion reads as a deliberate act, so a diffstat sanity check
+does not flag it; list the phantom deletions explicitly instead:
+
+```bash
+# files "deleted" only because the branch predates their arrival on main
+git diff --name-only --diff-filter=D origin/main..refs/remotes/pr/N     # two dots
+git diff --name-only --diff-filter=D origin/main...refs/remotes/pr/N    # three dots
+```
+
+Any file in the first list and not the second is a phantom; a finding that
+names it is describing `main`, not the PR. On a fast-moving base (an author
+merging every few minutes) expect this on *every* unrebased PR in the sweep.
+
+A fourth shape: **"the cited file does not exist in this repo"**. Codex's
+sandbox search skips dot-directories and can miss ordinary source files too.
+It reported, at 0.82 inline, that a doc's citations were "unverifiable — the
+Java file and the `.deploy/` overlays are not in this repo"; `git ls-files`
+listed all of them, at the cited lines. Before accepting any
+existence/citation finding, check the path yourself:
+
+```bash
+git ls-files -- src/main/java/**/AnalyticsProperties.java .deploy/  # empty ⇒ truly absent
+```
+
+A non-empty listing refutes the finding outright — it is a tooling gap, not a
+doc error.
 
 Spot-check at least every `critical` finding against the existing tree before
 posting; drop the bad ones with the `jq` filter above. Posting a wrong critical
