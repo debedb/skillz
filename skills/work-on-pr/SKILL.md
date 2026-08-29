@@ -3,7 +3,7 @@ name: work-on-pr
 description: |
   Iteratively work on a GitHub pull request as the author. Watch for new review comments, issue comments, and inline threads; if nothing new exists yet, wait and re-check instead of exiting. For each actionable item, implement the fix in the PR worktree, run relevant tests, commit and push, then reply with a summary and commit SHA. Continue until the PR is approved, merged or closed, or the user stops the loop. Also accepts an issue reference instead of a PR: in that case the skill creates the PR (if absent), guarantees the PR body contains `Closes #<issue>`, and then enters the watch loop. A bare problem statement works too — the skill opens the issue first, then takes the issue path. Optionally drives its own reviewer by running `codex-adversarial-pr-review` on the PR each round, so the loop closes without a second human. Use when you want the agent to own the start-PR or address-test-push-reply-wait cycle across multiple review rounds rather than handling a single review comment.
 author: Claude Code
-version: 1.12.0
+version: 1.13.0
 date: 2026-06-22
 source: https://github.com/voitta-ai/skillz
 source_file: skills/work-on-pr/SKILL.md
@@ -383,6 +383,33 @@ command (see "Hosts that cannot self-schedule").
       rule in `review-pr-loop` so the reader can tell who/what
       generated each post in a multi-round thread.
 
+   g. **Resolve the thread you just addressed.** A reply is not a
+      resolution. Under a branch rule that requires conversation
+      resolution (classic protection "Require conversation resolution
+      before merging", or the ruleset equivalent) every unresolved
+      review thread blocks the merge: `gh pr merge` fails with the
+      unhelpful `the base branch policy prohibits the merge`, and the
+      web UI says `All comments must be resolved`. That includes the
+      threads this loop opened itself in step 7 — a codex round with
+      one inline finding leaves the PR unmergeable until someone clicks
+      Resolve. There is no REST endpoint for it; it is GraphQL only.
+      Map the inline comment's REST id (`databaseId`) to its thread id,
+      then resolve:
+      ```
+      gh api graphql -f query='query { repository(owner:"<owner>", name:"<repo>") {
+        pullRequest(number:<N>) { reviewThreads(first:50) { nodes {
+          id isResolved comments(first:1) { nodes { databaseId } } } } } } }'
+      gh api graphql -f query='mutation {
+        resolveReviewThread(input:{threadId:"<PRRT_...>"}) { thread { isResolved } } }'
+      ```
+      Resolve only the threads you addressed in this round, after the
+      SHA reply is posted, so the thread's last word says what changed.
+      A human reviewer's thread that asked a question you could not
+      answer stays open — that is step 8, not a click. Before reporting
+      the human exit in step 9, confirm `reviewThreads` has no
+      `isResolved: false` left; `mergeStateStatus == BLOCKED` with every
+      check green is the signature of a forgotten thread.
+
 7. **Adversarial self-review (codex side).** Optional. Run it once
    per round *after* the round's fixes are pushed — once per round,
    not once per addressed item.
@@ -413,7 +440,11 @@ command (see "Hosts that cannot self-schedule").
       picks them up on the next round with no extra machinery. Tag the
       body `[codex]` per "Reply convention" below — under a shared
       GitHub identity that tag, not the login, is what step 4's filter
-      discriminates on.
+      discriminates on. Each inline finding is also a review thread,
+      and under a conversation-resolution rule each one blocks the
+      merge until resolved — so every finding the next round addresses
+      ends with step 6g, and a finding you decide not to act on gets a
+      reply saying why and then the same resolve.
 
    d. **Zero findings is suspicious, not a pass.** An empty result is
       indistinguishable on the wire from a clean review, and this has
@@ -991,6 +1022,14 @@ User: "/work-on-pr Issue https://github.com/foo/bar/issues/42"
 - **Inline review comments** (`pulls/N/comments`) are threaded;
   replying requires `--in-reply-to` or the dedicated `/replies`
   endpoint. Issue comments use `gh pr comment` / `gh issue comment`.
+- **An unresolved thread is a merge blocker, and the loop's own review
+  creates threads.** Seen on a PR whose only review was the step-7 codex
+  round: one inline finding, addressed and replied to, still left the
+  merge button reading `All comments must be resolved`, because the
+  repo's branch protection requires conversation resolution and a reply
+  does not resolve. Step 6g exists for that. The rule is invisible to
+  non-admins through REST (`branches/<b>/protection` returns 404); read
+  it through GraphQL `ref.refUpdateRule.requiresConversationResolution`.
 - **Worktree cleanup**: don't remove the worktree until the PR
   merges. After merge, `git worktree remove <path> && git branch -D
   <branch>`.
