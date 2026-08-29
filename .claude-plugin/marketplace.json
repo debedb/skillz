@@ -440,6 +440,11 @@
       "name": "macos-sandbox-exec-agent-command-confinement",
       "source": "./plugins/macos-sandbox-exec-agent-command-confinement/",
       "description": "Confine agent-run shell commands to one tree with macOS sandbox-exec: reads, writes, symlinks, runtime paths."
+    },
+    {
+      "name": "experimental-upstream-for-gated-integration-repo",
+      "source": "./plugins/experimental-upstream-for-gated-integration-repo/",
+      "description": "Keep a high-velocity development loop alive when the repository you integrate into gains a merge gate you cannot satisfy and forking is disabled: an experimental upstream repo, one reviewed fork-sync PR into the integration repo, a pre-push guard, and change-management issue framing."
     }
   ]
 }

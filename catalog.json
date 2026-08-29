@@ -363,6 +363,24 @@
       "summary": "Run the end-of-task retrospective that Codex's `Stop` and `UserPromptSubmit` hooks demand, and decide what the session actually produced. Most turns end with `No reusable learning.` Of the rest, most are **memory** \u2014 a single cause->fix, an API gotcha, a config detail \u2014 and must NOT become a `SKILL.md`; only a repeatable procedure does. Use when a `Stop` hook fires at end-of-task, when a debugging-heavy session ends, or when the user asks \"what did we learn?\". Covers the four gates (discovery cost, recurrence, verifiable trigger, verified result), the skill-vs-memory classification, the install-location choice, and the `No reusable learning.` escape hatch. For an explicitly invoked retrospective, and for the wiring that promotes a skill into the `voitta-ai/skillz` catalog, see `claudeception` \u2014 this skill defers to it rather than restating it."
     },
     {
+      "name": "credential-redactor-audit",
+      "path": "skills/credential-redactor-audit/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Audit a credential-redaction layer you own: find the holes a normal test suite misses (fixtures that hide the bug, patterns that bypass the value guard, dropped overlap spans, non-idempotence, backwards allow-lists, fail-open imports), then scrub what already leaked."
+    },
+    {
+      "name": "experimental-upstream-for-gated-integration-repo",
+      "path": "skills/experimental-upstream-for-gated-integration-repo/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Keep a high-velocity development loop alive when the repository you integrate into gains a merge gate you cannot satisfy - required reviews, conversation resolution, lost admin - and forking is disabled: an experimental upstream repo, one reviewed fork-sync PR into the integration repo, a pre-push guard, and the issue framing that keeps it change management rather than a revolt."
+    },
+    {
       "name": "gh-pr-merge-delete-branch-closes-dependent-pr",
       "path": "skills/gh-pr-merge-delete-branch-closes-dependent-pr/SKILL.md",
       "hosts": [
@@ -379,6 +397,15 @@
         "codex"
       ],
       "summary": "Migrate a gist's full revision history into a real git repo, preserving commits."
+    },
+    {
+      "name": "git-default-branch-detection",
+      "path": "skills/git-default-branch-detection/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Determine a repo's actual default branch: init.defaultBranch is a preference for repos that do not exist yet, not a fact about this one, and origin/HEAD is often absent; treat every source as a candidate verified against a real ref."
     },
     {
       "name": "git-graft-worktree-onto-remote",
@@ -478,6 +505,15 @@
         "codex"
       ],
       "summary": "Serve one LLM call from an ordered list of vendors so a rate limit, a dead key, or an out-of-credits account fails over instead of failing the request. Covers the ordered-config to LiteLLM Router mapping, which Router knobs earn their keep (cooldown_time, allowed_fails, context_window_fallbacks, per-deployment budgets) and which to leave alone, the invisible dead fallback that reads as random flakiness, what must not be waterfalled, and how to prove failover actually happens."
+    },
+    {
+      "name": "macos-sandbox-exec-agent-command-confinement",
+      "path": "skills/macos-sandbox-exec-agent-command-confinement/SKILL.md",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Confine agent-run shell commands to one tree with macOS sandbox-exec: reads, writes, symlinks, runtime paths."
     },
     {
       "name": "macos-sparkle-update-quarantine-relaunch",
@@ -781,33 +817,6 @@
         "codex"
       ],
       "summary": "Author-side PR iteration loop."
-    },
-    {
-      "name": "credential-redactor-audit",
-      "path": "skills/credential-redactor-audit/SKILL.md",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "summary": "Audit a credential-redaction layer you own: find the holes a normal test suite misses (fixtures that hide the bug, patterns that bypass the value guard, dropped overlap spans, non-idempotence, backwards allow-lists, fail-open imports), then scrub what already leaked."
-    },
-    {
-      "name": "git-default-branch-detection",
-      "path": "skills/git-default-branch-detection/SKILL.md",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "summary": "Determine a repo's actual default branch: init.defaultBranch is a preference for repos that do not exist yet, not a fact about this one, and origin/HEAD is often absent; treat every source as a candidate verified against a real ref."
-    },
-    {
-      "name": "macos-sandbox-exec-agent-command-confinement",
-      "path": "skills/macos-sandbox-exec-agent-command-confinement/SKILL.md",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "summary": "Confine agent-run shell commands to one tree with macOS sandbox-exec: reads, writes, symlinks, runtime paths."
     }
   ],
   "collections": [
@@ -823,103 +832,6 @@
   ],
   "plugins": [
     {
-      "name": "skillz",
-      "claude_manifest": "plugins/skillz/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/skillz/.codex-plugin/plugin.json",
-      "claude_marketplace": ".claude-plugin/marketplace.json",
-      "codex_marketplace": ".codex-plugin/marketplace.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "agent-credential-leak-surfaces",
-        "agent-host-skill-loading",
-        "agent-session-credential-audit",
-        "agent-team-orchestration",
-        "agent-traffic-log",
-        "alb-controller-custom-sg-narrowing-inert",
-        "alb-per-rule-traffic-attribution",
-        "archive-today-fetcher-hierarchy",
-        "aws-http-server-on-lambda-web-adapter",
-        "chrome-localhost-mic-autoblock",
-        "chrome-not-secure-tls-interception",
-        "claude-ai-conversation-history-search",
-        "claude-code-codex-plugin-parity",
-        "claude-code-cross-session-messaging",
-        "claude-code-plugin-from-existing-repo",
-        "claude-code-plugin-publish-anthropic-marketplace",
-        "claude-code-plugin-python-bootstrap",
-        "claude-code-plugin-release-automation",
-        "claude-code-plugin-update-flow",
-        "claude-json-mcp-migration-slice",
-        "claude-transcript-permission-mining",
-        "claudeception",
-        "client-rendered-dashboard-data-blob",
-        "cloudwatch-metric-filter-dimensions-default-value-exclusive",
-        "cloudwatch-per-host-stat-single-host-vs-fleet",
-        "cmux-agent-tabs",
-        "cmux-autoresume-after-reboot",
-        "cmux-claude-codex-cross-runtime-messaging",
-        "cmux-config-silent-drop-triage",
-        "cmux-cross-session-visibility",
-        "cmux-search",
-        "cmux-session-restore-forensics",
-        "cmux-session-self-identity",
-        "codex-adversarial-pr-review",
-        "codex-hook-wire-schema-from-binary",
-        "confluence-rovo-mcp-readonly-rest-fallback",
-        "credential-redactor-audit",
-        "gh-pr-merge-delete-branch-closes-dependent-pr",
-        "gist-to-repo-migration",
-        "git-default-branch-detection",
-        "git-graft-worktree-onto-remote",
-        "git-pr-merge-unblock",
-        "git-simulate-sequential-merges",
-        "git-worktree-add-relative-path-nests-inside-repo",
-        "git-worktree-convention",
-        "github-actions-startup-failure-triage",
-        "github-oidc-immutable-subject-claim",
-        "istio-multicluster-endpointless-mesh-service",
-        "launchd-env-sync-session-leak",
-        "litellm-custom-provider-dispatch-order",
-        "llm-vendor-waterfall",
-        "macos-sandbox-exec-agent-command-confinement",
-        "macos-sparkle-update-quarantine-relaunch",
-        "mcp-language-server-orphan-fd-exhaustion",
-        "metrics-zero-provenance-audit",
-        "multi-phase-feature-pr-worktrees",
-        "neon-vercel-db-identify-and-migrate",
-        "openclaw-model-cascade-debugging",
-        "parallel-agent-session-collisions",
-        "personal-skills-shadow-bundle-audit",
-        "playwright-mcp-upload-hidden-file-input",
-        "pr-amend-force-push-lost-to-racing-merge",
-        "pre-open-source-credential-audit",
-        "prevent-committing-secrets",
-        "python-ast-static-analyzer-scoping",
-        "review-pr-loop",
-        "rxjava-dofinally-terminal-then-finally-test-race",
-        "secretsmanager-prove-no-consumer-before-destroy",
-        "session-transcript-mining",
-        "slack-app-token-rotation",
-        "slack-xoxc-session-client",
-        "spa-request-capture-and-block",
-        "spring-profile-config-overlay-dedupe",
-        "subagent-no-report-channel",
-        "targetgroupbinding-unattached-tg-readiness-wedge",
-        "terraform-check-block-warn-only-ci-gate",
-        "terraform-ecs-capacity-provider-staged-teardown",
-        "terraform-noninteractive-prod-apply",
-        "terraform-state-version-apply-forensics",
-        "us-federal-open-data-claim-verification",
-        "verbatim-social-post-retrieval",
-        "wordpress-com-publish",
-        "work-on-pr"
-      ],
-      "summary": "Bundle: every catalog skill in one plugin, except skills whose own plugin ships hooks - install those plugins directly."
-    },
-    {
       "name": "agent-credential-leak-surfaces",
       "claude_manifest": "plugins/agent-credential-leak-surfaces/.claude-plugin/plugin.json",
       "codex_manifest": "plugins/agent-credential-leak-surfaces/.codex-plugin/plugin.json",
@@ -931,6 +843,19 @@
         "agent-credential-leak-surfaces"
       ],
       "summary": "Single-skill plugin: agent-credential-leak-surfaces."
+    },
+    {
+      "name": "agent-host-skill-loading",
+      "claude_manifest": "plugins/agent-host-skill-loading/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/agent-host-skill-loading/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "agent-host-skill-loading"
+      ],
+      "summary": "Single-skill plugin: agent-host-skill-loading."
     },
     {
       "name": "agent-session-credential-audit",
@@ -996,6 +921,32 @@
         "alb-per-rule-traffic-attribution"
       ],
       "summary": "Single-skill plugin: alb-per-rule-traffic-attribution."
+    },
+    {
+      "name": "archive-today-fetcher-hierarchy",
+      "claude_manifest": "plugins/archive-today-fetcher-hierarchy/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/archive-today-fetcher-hierarchy/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "archive-today-fetcher-hierarchy"
+      ],
+      "summary": "Single-skill plugin: archive-today-fetcher-hierarchy."
+    },
+    {
+      "name": "aws-http-server-on-lambda-web-adapter",
+      "claude_manifest": "plugins/aws-http-server-on-lambda-web-adapter/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/aws-http-server-on-lambda-web-adapter/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "aws-http-server-on-lambda-web-adapter"
+      ],
+      "summary": "Single-skill plugin: aws-http-server-on-lambda-web-adapter."
     },
     {
       "name": "chrome-localhost-mic-autoblock",
@@ -1076,6 +1027,19 @@
       "summary": "Single-skill plugin: claude-code-plugin-from-existing-repo."
     },
     {
+      "name": "claude-code-plugin-publish-anthropic-marketplace",
+      "claude_manifest": "plugins/claude-code-plugin-publish-anthropic-marketplace/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/claude-code-plugin-publish-anthropic-marketplace/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "claude-code-plugin-publish-anthropic-marketplace"
+      ],
+      "summary": "Single-skill plugin: claude-code-plugin-publish-anthropic-marketplace."
+    },
+    {
       "name": "claude-code-plugin-python-bootstrap",
       "claude_manifest": "plugins/claude-code-plugin-python-bootstrap/.claude-plugin/plugin.json",
       "codex_manifest": "plugins/claude-code-plugin-python-bootstrap/.codex-plugin/plugin.json",
@@ -1128,6 +1092,32 @@
       "summary": "Single-skill plugin: claude-json-mcp-migration-slice."
     },
     {
+      "name": "claude-transcript-permission-mining",
+      "claude_manifest": "plugins/claude-transcript-permission-mining/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/claude-transcript-permission-mining/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "claude-transcript-permission-mining"
+      ],
+      "summary": "Single-skill plugin: claude-transcript-permission-mining."
+    },
+    {
+      "name": "claudeception",
+      "claude_manifest": "plugins/claudeception/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/claudeception/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "claudeception"
+      ],
+      "summary": "Single-skill plugin: claudeception."
+    },
+    {
       "name": "client-rendered-dashboard-data-blob",
       "claude_manifest": "plugins/client-rendered-dashboard-data-blob/.claude-plugin/plugin.json",
       "codex_manifest": "plugins/client-rendered-dashboard-data-blob/.codex-plugin/plugin.json",
@@ -1178,6 +1168,19 @@
         "cmux-agent-tabs"
       ],
       "summary": "Single-skill plugin: cmux-agent-tabs."
+    },
+    {
+      "name": "cmux-autoresume-after-reboot",
+      "claude_manifest": "plugins/cmux-autoresume-after-reboot/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/cmux-autoresume-after-reboot/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "cmux-autoresume-after-reboot"
+      ],
+      "summary": "Single-skill plugin: cmux-autoresume-after-reboot."
     },
     {
       "name": "cmux-claude-codex-cross-runtime-messaging",
@@ -1282,6 +1285,32 @@
       "summary": "Codex-only plugin bundle: continuous-learning skill plus UserPromptSubmit + Stop hooks that drive an end-of-task retrospective."
     },
     {
+      "name": "codex-hook-wire-schema-from-binary",
+      "claude_manifest": "plugins/codex-hook-wire-schema-from-binary/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/codex-hook-wire-schema-from-binary/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "codex-hook-wire-schema-from-binary"
+      ],
+      "summary": "Single-skill plugin: codex-hook-wire-schema-from-binary."
+    },
+    {
+      "name": "confluence-rovo-mcp-readonly-rest-fallback",
+      "claude_manifest": "plugins/confluence-rovo-mcp-readonly-rest-fallback/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/confluence-rovo-mcp-readonly-rest-fallback/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "confluence-rovo-mcp-readonly-rest-fallback"
+      ],
+      "summary": "Single-skill plugin: confluence-rovo-mcp-readonly-rest-fallback."
+    },
+    {
       "name": "continuous-learning",
       "codex_manifest": "plugins/continuous-learning/.codex-plugin/plugin.json",
       "hosts": [
@@ -1291,6 +1320,32 @@
         "continuous-learning"
       ],
       "summary": "Codex-only single-skill plugin: continuous-learning (no hooks)."
+    },
+    {
+      "name": "credential-redactor-audit",
+      "claude_manifest": "plugins/credential-redactor-audit/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/credential-redactor-audit/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "credential-redactor-audit"
+      ],
+      "summary": "Single-skill plugin: credential-redactor-audit."
+    },
+    {
+      "name": "experimental-upstream-for-gated-integration-repo",
+      "claude_manifest": "plugins/experimental-upstream-for-gated-integration-repo/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/experimental-upstream-for-gated-integration-repo/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "experimental-upstream-for-gated-integration-repo"
+      ],
+      "summary": "Keep a high-velocity development loop alive when the repository you integrate into gains a merge gate you cannot satisfy and forking is disabled: an experimental upstream repo, one reviewed fork-sync PR into the integration repo, a pre-push guard, and change-management issue framing."
     },
     {
       "name": "gh-pr-merge-delete-branch-closes-dependent-pr",
@@ -1319,6 +1374,19 @@
       "summary": "Single-skill plugin: gist-to-repo-migration."
     },
     {
+      "name": "git-default-branch-detection",
+      "claude_manifest": "plugins/git-default-branch-detection/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/git-default-branch-detection/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "git-default-branch-detection"
+      ],
+      "summary": "Single-skill plugin: git-default-branch-detection."
+    },
+    {
       "name": "git-graft-worktree-onto-remote",
       "claude_manifest": "plugins/git-graft-worktree-onto-remote/.claude-plugin/plugin.json",
       "codex_manifest": "plugins/git-graft-worktree-onto-remote/.codex-plugin/plugin.json",
@@ -1330,6 +1398,32 @@
         "git-graft-worktree-onto-remote"
       ],
       "summary": "Single-skill plugin: git-graft-worktree-onto-remote."
+    },
+    {
+      "name": "git-pr-merge-unblock",
+      "claude_manifest": "plugins/git-pr-merge-unblock/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/git-pr-merge-unblock/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "git-pr-merge-unblock"
+      ],
+      "summary": "Single-skill plugin: git-pr-merge-unblock."
+    },
+    {
+      "name": "git-simulate-sequential-merges",
+      "claude_manifest": "plugins/git-simulate-sequential-merges/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/git-simulate-sequential-merges/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "git-simulate-sequential-merges"
+      ],
+      "summary": "Single-skill plugin: git-simulate-sequential-merges."
     },
     {
       "name": "git-worktree-add-relative-path-nests-inside-repo",
@@ -1358,6 +1452,19 @@
       "summary": "Single-skill plugin: git-worktree-convention."
     },
     {
+      "name": "github-actions-startup-failure-triage",
+      "claude_manifest": "plugins/github-actions-startup-failure-triage/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/github-actions-startup-failure-triage/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "github-actions-startup-failure-triage"
+      ],
+      "summary": "Single-skill plugin: github-actions-startup-failure-triage."
+    },
+    {
       "name": "github-oidc-immutable-subject-claim",
       "claude_manifest": "plugins/github-oidc-immutable-subject-claim/.claude-plugin/plugin.json",
       "codex_manifest": "plugins/github-oidc-immutable-subject-claim/.codex-plugin/plugin.json",
@@ -1384,6 +1491,32 @@
       "summary": "Single-skill plugin: istio-multicluster-endpointless-mesh-service."
     },
     {
+      "name": "launchd-env-sync-session-leak",
+      "claude_manifest": "plugins/launchd-env-sync-session-leak/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/launchd-env-sync-session-leak/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "launchd-env-sync-session-leak"
+      ],
+      "summary": "Single-skill plugin: launchd-env-sync-session-leak."
+    },
+    {
+      "name": "litellm-custom-provider-dispatch-order",
+      "claude_manifest": "plugins/litellm-custom-provider-dispatch-order/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/litellm-custom-provider-dispatch-order/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "litellm-custom-provider-dispatch-order"
+      ],
+      "summary": "Single-skill plugin: litellm-custom-provider-dispatch-order."
+    },
+    {
       "name": "llm-vendor-waterfall",
       "claude_manifest": "plugins/llm-vendor-waterfall/.claude-plugin/plugin.json",
       "codex_manifest": "plugins/llm-vendor-waterfall/.codex-plugin/plugin.json",
@@ -1395,6 +1528,32 @@
         "llm-vendor-waterfall"
       ],
       "summary": "Single-skill plugin: llm-vendor-waterfall."
+    },
+    {
+      "name": "macos-sandbox-exec-agent-command-confinement",
+      "claude_manifest": "plugins/macos-sandbox-exec-agent-command-confinement/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/macos-sandbox-exec-agent-command-confinement/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "macos-sandbox-exec-agent-command-confinement"
+      ],
+      "summary": "Single-skill plugin: macos-sandbox-exec-agent-command-confinement."
+    },
+    {
+      "name": "macos-sparkle-update-quarantine-relaunch",
+      "claude_manifest": "plugins/macos-sparkle-update-quarantine-relaunch/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/macos-sparkle-update-quarantine-relaunch/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "macos-sparkle-update-quarantine-relaunch"
+      ],
+      "summary": "Single-skill plugin: macos-sparkle-update-quarantine-relaunch."
     },
     {
       "name": "mcp-language-server-orphan-fd-exhaustion",
@@ -1831,238 +1990,102 @@
       "summary": "Single-skill plugin: work-on-pr."
     },
     {
-      "name": "agent-host-skill-loading",
-      "claude_manifest": "plugins/agent-host-skill-loading/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/agent-host-skill-loading/.codex-plugin/plugin.json",
+      "name": "skillz",
+      "claude_manifest": "plugins/skillz/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/skillz/.codex-plugin/plugin.json",
+      "claude_marketplace": ".claude-plugin/marketplace.json",
+      "codex_marketplace": ".codex-plugin/marketplace.json",
       "hosts": [
         "claude",
         "codex"
       ],
       "skills": [
-        "agent-host-skill-loading"
+        "agent-credential-leak-surfaces",
+        "agent-host-skill-loading",
+        "agent-session-credential-audit",
+        "agent-team-orchestration",
+        "agent-traffic-log",
+        "alb-controller-custom-sg-narrowing-inert",
+        "alb-per-rule-traffic-attribution",
+        "archive-today-fetcher-hierarchy",
+        "aws-http-server-on-lambda-web-adapter",
+        "chrome-localhost-mic-autoblock",
+        "chrome-not-secure-tls-interception",
+        "claude-ai-conversation-history-search",
+        "claude-code-codex-plugin-parity",
+        "claude-code-cross-session-messaging",
+        "claude-code-plugin-from-existing-repo",
+        "claude-code-plugin-publish-anthropic-marketplace",
+        "claude-code-plugin-python-bootstrap",
+        "claude-code-plugin-release-automation",
+        "claude-code-plugin-update-flow",
+        "claude-json-mcp-migration-slice",
+        "claude-transcript-permission-mining",
+        "claudeception",
+        "client-rendered-dashboard-data-blob",
+        "cloudwatch-metric-filter-dimensions-default-value-exclusive",
+        "cloudwatch-per-host-stat-single-host-vs-fleet",
+        "cmux-agent-tabs",
+        "cmux-autoresume-after-reboot",
+        "cmux-claude-codex-cross-runtime-messaging",
+        "cmux-config-silent-drop-triage",
+        "cmux-cross-session-visibility",
+        "cmux-search",
+        "cmux-session-restore-forensics",
+        "cmux-session-self-identity",
+        "codex-adversarial-pr-review",
+        "codex-hook-wire-schema-from-binary",
+        "confluence-rovo-mcp-readonly-rest-fallback",
+        "credential-redactor-audit",
+        "experimental-upstream-for-gated-integration-repo",
+        "gh-pr-merge-delete-branch-closes-dependent-pr",
+        "gist-to-repo-migration",
+        "git-default-branch-detection",
+        "git-graft-worktree-onto-remote",
+        "git-pr-merge-unblock",
+        "git-simulate-sequential-merges",
+        "git-worktree-add-relative-path-nests-inside-repo",
+        "git-worktree-convention",
+        "github-actions-startup-failure-triage",
+        "github-oidc-immutable-subject-claim",
+        "istio-multicluster-endpointless-mesh-service",
+        "launchd-env-sync-session-leak",
+        "litellm-custom-provider-dispatch-order",
+        "llm-vendor-waterfall",
+        "macos-sandbox-exec-agent-command-confinement",
+        "macos-sparkle-update-quarantine-relaunch",
+        "mcp-language-server-orphan-fd-exhaustion",
+        "metrics-zero-provenance-audit",
+        "multi-phase-feature-pr-worktrees",
+        "neon-vercel-db-identify-and-migrate",
+        "openclaw-model-cascade-debugging",
+        "parallel-agent-session-collisions",
+        "personal-skills-shadow-bundle-audit",
+        "playwright-mcp-upload-hidden-file-input",
+        "pr-amend-force-push-lost-to-racing-merge",
+        "pre-open-source-credential-audit",
+        "prevent-committing-secrets",
+        "python-ast-static-analyzer-scoping",
+        "review-pr-loop",
+        "rxjava-dofinally-terminal-then-finally-test-race",
+        "secretsmanager-prove-no-consumer-before-destroy",
+        "session-transcript-mining",
+        "slack-app-token-rotation",
+        "slack-xoxc-session-client",
+        "spa-request-capture-and-block",
+        "spring-profile-config-overlay-dedupe",
+        "subagent-no-report-channel",
+        "targetgroupbinding-unattached-tg-readiness-wedge",
+        "terraform-check-block-warn-only-ci-gate",
+        "terraform-ecs-capacity-provider-staged-teardown",
+        "terraform-noninteractive-prod-apply",
+        "terraform-state-version-apply-forensics",
+        "us-federal-open-data-claim-verification",
+        "verbatim-social-post-retrieval",
+        "wordpress-com-publish",
+        "work-on-pr"
       ],
-      "summary": "Single-skill plugin: agent-host-skill-loading."
-    },
-    {
-      "name": "archive-today-fetcher-hierarchy",
-      "claude_manifest": "plugins/archive-today-fetcher-hierarchy/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/archive-today-fetcher-hierarchy/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "archive-today-fetcher-hierarchy"
-      ],
-      "summary": "Single-skill plugin: archive-today-fetcher-hierarchy."
-    },
-    {
-      "name": "aws-http-server-on-lambda-web-adapter",
-      "claude_manifest": "plugins/aws-http-server-on-lambda-web-adapter/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/aws-http-server-on-lambda-web-adapter/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "aws-http-server-on-lambda-web-adapter"
-      ],
-      "summary": "Single-skill plugin: aws-http-server-on-lambda-web-adapter."
-    },
-    {
-      "name": "claude-code-plugin-publish-anthropic-marketplace",
-      "claude_manifest": "plugins/claude-code-plugin-publish-anthropic-marketplace/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/claude-code-plugin-publish-anthropic-marketplace/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "claude-code-plugin-publish-anthropic-marketplace"
-      ],
-      "summary": "Single-skill plugin: claude-code-plugin-publish-anthropic-marketplace."
-    },
-    {
-      "name": "claudeception",
-      "claude_manifest": "plugins/claudeception/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/claudeception/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "claudeception"
-      ],
-      "summary": "Single-skill plugin: claudeception."
-    },
-    {
-      "name": "cmux-autoresume-after-reboot",
-      "claude_manifest": "plugins/cmux-autoresume-after-reboot/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/cmux-autoresume-after-reboot/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "cmux-autoresume-after-reboot"
-      ],
-      "summary": "Single-skill plugin: cmux-autoresume-after-reboot."
-    },
-    {
-      "name": "confluence-rovo-mcp-readonly-rest-fallback",
-      "claude_manifest": "plugins/confluence-rovo-mcp-readonly-rest-fallback/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/confluence-rovo-mcp-readonly-rest-fallback/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "confluence-rovo-mcp-readonly-rest-fallback"
-      ],
-      "summary": "Single-skill plugin: confluence-rovo-mcp-readonly-rest-fallback."
-    },
-    {
-      "name": "git-pr-merge-unblock",
-      "claude_manifest": "plugins/git-pr-merge-unblock/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/git-pr-merge-unblock/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "git-pr-merge-unblock"
-      ],
-      "summary": "Single-skill plugin: git-pr-merge-unblock."
-    },
-    {
-      "name": "git-simulate-sequential-merges",
-      "claude_manifest": "plugins/git-simulate-sequential-merges/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/git-simulate-sequential-merges/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "git-simulate-sequential-merges"
-      ],
-      "summary": "Single-skill plugin: git-simulate-sequential-merges."
-    },
-    {
-      "name": "github-actions-startup-failure-triage",
-      "claude_manifest": "plugins/github-actions-startup-failure-triage/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/github-actions-startup-failure-triage/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "github-actions-startup-failure-triage"
-      ],
-      "summary": "Single-skill plugin: github-actions-startup-failure-triage."
-    },
-    {
-      "name": "litellm-custom-provider-dispatch-order",
-      "claude_manifest": "plugins/litellm-custom-provider-dispatch-order/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/litellm-custom-provider-dispatch-order/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "litellm-custom-provider-dispatch-order"
-      ],
-      "summary": "Single-skill plugin: litellm-custom-provider-dispatch-order."
-    },
-    {
-      "name": "macos-sparkle-update-quarantine-relaunch",
-      "claude_manifest": "plugins/macos-sparkle-update-quarantine-relaunch/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/macos-sparkle-update-quarantine-relaunch/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "macos-sparkle-update-quarantine-relaunch"
-      ],
-      "summary": "Single-skill plugin: macos-sparkle-update-quarantine-relaunch."
-    },
-    {
-      "name": "launchd-env-sync-session-leak",
-      "claude_manifest": "plugins/launchd-env-sync-session-leak/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/launchd-env-sync-session-leak/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "launchd-env-sync-session-leak"
-      ],
-      "summary": "Single-skill plugin: launchd-env-sync-session-leak."
-    },
-    {
-      "name": "claude-transcript-permission-mining",
-      "claude_manifest": "plugins/claude-transcript-permission-mining/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/claude-transcript-permission-mining/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "claude-transcript-permission-mining"
-      ],
-      "summary": "Single-skill plugin: claude-transcript-permission-mining."
-    },
-    {
-      "name": "codex-hook-wire-schema-from-binary",
-      "claude_manifest": "plugins/codex-hook-wire-schema-from-binary/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/codex-hook-wire-schema-from-binary/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "codex-hook-wire-schema-from-binary"
-      ],
-      "summary": "Single-skill plugin: codex-hook-wire-schema-from-binary."
-    },
-    {
-      "name": "credential-redactor-audit",
-      "claude_manifest": "plugins/credential-redactor-audit/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/credential-redactor-audit/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "credential-redactor-audit"
-      ],
-      "summary": "Single-skill plugin: credential-redactor-audit."
-    },
-    {
-      "name": "git-default-branch-detection",
-      "claude_manifest": "plugins/git-default-branch-detection/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/git-default-branch-detection/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "git-default-branch-detection"
-      ],
-      "summary": "Single-skill plugin: git-default-branch-detection."
-    },
-    {
-      "name": "macos-sandbox-exec-agent-command-confinement",
-      "claude_manifest": "plugins/macos-sandbox-exec-agent-command-confinement/.claude-plugin/plugin.json",
-      "codex_manifest": "plugins/macos-sandbox-exec-agent-command-confinement/.codex-plugin/plugin.json",
-      "hosts": [
-        "claude",
-        "codex"
-      ],
-      "skills": [
-        "macos-sandbox-exec-agent-command-confinement"
-      ],
-      "summary": "Single-skill plugin: macos-sandbox-exec-agent-command-confinement."
+      "summary": "Bundle: every catalog skill in one plugin, except skills whose own plugin ships hooks - install those plugins directly."
     }
   ],
   "defaults": {
