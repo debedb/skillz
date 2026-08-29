@@ -3,7 +3,7 @@ name: work-on-pr
 description: |
   Iteratively work on a GitHub pull request as the author. Watch for new review comments, issue comments, and inline threads; if nothing new exists yet, wait and re-check instead of exiting. For each actionable item, implement the fix in the PR worktree, run relevant tests, commit and push, then reply with a summary and commit SHA. Continue until the PR is approved, merged or closed, or the user stops the loop. Also accepts an issue reference instead of a PR: in that case the skill creates the PR (if absent), guarantees the PR body contains `Closes #<issue>`, and then enters the watch loop. A bare problem statement works too — the skill opens the issue first, then takes the issue path. Optionally drives its own reviewer by running `codex-adversarial-pr-review` on the PR each round, so the loop closes without a second human. Use when you want the agent to own the start-PR or address-test-push-reply-wait cycle across multiple review rounds rather than handling a single review comment.
 author: Claude Code
-version: 1.11.0
+version: 1.12.0
 date: 2026-06-22
 source: https://github.com/voitta-ai/skillz
 source_file: skills/work-on-pr/SKILL.md
@@ -253,7 +253,7 @@ command (see "Hosts that cannot self-schedule").
      login. (Detect shared identity by checking whether the reviewer's
      posts carry the *other* tag under your own login.) Reserve the
      login-based `author != self` filter for genuinely separate
-     identities. See [[review-pr-loop]] and the
+     identities. See `review-pr-loop` and the
      `docs/pr-review-workflow.md` "GitHub identity caveat".
    - Approval-only reviews (no body, state=APPROVED) → handled in
      step 2; otherwise treat the body as actionable.
@@ -402,7 +402,7 @@ command (see "Hosts that cannot self-schedule").
       produces confident, well-written, wrong findings, and the
       confidence score does not separate them. Drop the ones you
       verified are wrong by editing the saved payload with `jq`, keep
-      the rest. See [[codex-adversarial-pr-review]] for the pattern.
+      the rest. See `codex-adversarial-pr-review` for the pattern.
 
    c. **Post the judged payload:**
       ```
@@ -584,7 +584,7 @@ follow-up commits to its feature branch. None of them touch shared
 infrastructure or master directly. Static `Bash(...)` entries in
 `permissions.allow` short-circuit CC's native permission layer and
 its PreToolUse hooks (see
-[[claude-code-static-allow-bypasses-hook]]), so once these are in
+`claude-code-static-allow-bypasses-hook`), so once these are in
 place the loop runs without prompts **from CC's own permission
 matcher**. A separately-installed PreToolUse hook may still
 intercept — see "YOLT-specific gotcha" below for the one case we
@@ -832,7 +832,7 @@ the watch just because a few polls were idle is still forbidden;
 suspending because the host physically cannot carry the loop forward,
 while handing back an exact resume command, is the honest behavior for
 this host class. This mirrors the reviewer-side protocol in
-[[review-pr-loop]].
+`review-pr-loop`.
 
 ### Reply convention
 
@@ -846,7 +846,7 @@ this host class. This mirrors the reviewer-side protocol in
   a short tag such as `[codex]` or `[claude]` (e.g.
   `[claude] Addressed in 6f23a45.`). If the identity cannot be
   determined, omit the tag rather than guessing. This mirrors the
-  reviewer-side rule in [[review-pr-loop]] — once a PR has several
+  reviewer-side rule in `review-pr-loop` — once a PR has several
   rounds the tag is the fastest way to scan who-said-what without
   opening every comment.
 
@@ -859,7 +859,7 @@ this host class. This mirrors the reviewer-side protocol in
 - Don't skip hooks (no `--no-verify`).
 - Use `--body-file` everywhere (`gh pr create`, `gh pr comment`,
   `gh issue comment`) to avoid quoting traps. See
-  [[gh-git-heredoc-body-file]].
+  `gh-git-heredoc-body-file`.
 
 ## Verification
 
@@ -1070,11 +1070,21 @@ User: "/work-on-pr Issue https://github.com/foo/bar/issues/42"
 - [GitHub REST: list issue comments](https://docs.github.com/en/rest/issues/comments)
 - [GitHub REST: list review comments on a PR](https://docs.github.com/en/rest/pulls/comments)
 - [gh pr view / gh pr comment](https://cli.github.com/manual/gh_pr)
-- Related skills: [[codex-adversarial-pr-review]] (the step-7
-  reviewer; preferred over [[review-pr-loop]] when both sides run
-  under one operator and one GitHub identity),
-  [[review-pr-loop]] (reviewer side, for a genuinely separate
-  reviewer or a conversational multi-round review),
-  [[gh-git-heredoc-body-file]] (body-file pattern),
-  [[python-ast-static-analyzer-scoping]] (worked example of an
-  iterative review cycle this skill drove).
+
+## Related
+
+- `review-pr-loop` — the reviewer side of the same loop. Use it when the
+  reviewer is a genuinely separate person, or when the review is a
+  conversational multi-round exchange rather than a findings dump.
+- `codex-adversarial-pr-review` — the step-7 reviewer this skill can drive
+  itself. Preferred over `review-pr-loop` when both sides run under one
+  operator and one GitHub identity, because a login-based "is this mine?"
+  filter cannot tell the two apart.
+- `parallel-agent-session-collisions` — before claiming the branch or worktree
+  this loop works in, and the shared-counter trap if the repo has one.
+- `git-worktree-convention` — the layout this skill's worktrees follow.
+- `python-ast-static-analyzer-scoping` — a worked example of an iterative
+  review cycle this skill drove.
+
+The body-file pattern for `gh` bodies lives in `gh-git-heredoc-body-file`, in
+the sibling `skillz-memory` repo rather than this catalog.

@@ -18,7 +18,7 @@ description: |
   other multiplexers. Also use when (5) a spawned wave produces no commits, no
   dirty files and no replies - agents that are visible but wedged.
 author: Claude Code
-version: 1.5.0
+version: 1.6.0
 date: 2026-08-21
 source: https://github.com/voitta-ai/skillz
 source_file: skills/agent-team-orchestration/SKILL.md
@@ -305,8 +305,8 @@ Distinguish the two kinds of collision before designing around them: a shared
 
 The responsible agent has to know what is in flight in order to batch it, which
 means the run needs agent-to-agent messaging, not just parallel spawns. See
-[[claude-code-cross-session-messaging]] for the transport and
-[[cmux-cross-session-visibility]] for making that traffic visible to the human
+`claude-code-cross-session-messaging` for the transport and
+`cmux-cross-session-visibility` for making that traffic visible to the human
 supervising the wave.
 
 ## Idempotency pre-flight (before creating any issue or PR)

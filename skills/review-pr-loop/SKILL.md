@@ -3,7 +3,7 @@ name: review-pr-loop
 description: |
   Iteratively review a GitHub pull request across multiple rounds. Each round, read the linked issue(s), prior review comments, issue comments, and inline threads before reviewing only the new diff or the author's latest response. If no author response exists yet, wait and re-check instead of exiting. Leave structured feedback (REQUEST_CHANGES, COMMENT, or APPROVE) and continue until you approve, the PR is merged or closed, or the user stops the loop. Use when you are the reviewer on a non-trivial PR and want the agent to own the back-and-forth review cycle rather than doing a one-shot review.
 author: Claude Code
-version: 1.7.0
+version: 1.8.0
 date: 2026-06-22
 source: https://github.com/voitta-ai/skillz
 source_file: skills/review-pr-loop/SKILL.md
@@ -184,7 +184,7 @@ iteration:
      newer than your anchor that you did not just post is an author
      response. Reserve the login-based filter for genuinely separate
      identities. See the `docs/pr-review-workflow.md` "GitHub identity
-     caveat" and [[work-on-pr]].
+     caveat" and `work-on-pr`.
    - If there are no new commits and no new author responses since
      `anchor`, skip the review steps for this pass and go to step 10.
 
@@ -241,7 +241,7 @@ iteration:
      in the current diff. A single review pass may therefore submit one
      top-level review body plus several inline file comments.
    - Use `--body-file`, not `-b`, to dodge shell quoting (see
-     [[gh-git-heredoc-body-file]]).
+     `gh-git-heredoc-body-file`).
    - In approval-gated sandboxes, preflight the write operations
      likely to recur in this loop: `gh pr review` and any inline
      `gh api .../reviews` posts. Reuse already-approved prefixes when
@@ -462,7 +462,7 @@ these patterns to `~/.claude/settings.json#permissions.allow`:
   `--request-changes`, `--comment`. The default voitta-yolt
   bundle classifies it as UNSAFE; on yolt builds containing
   voitta-ai/voitta-yolt#36 the explicit allow pattern is
-  honored (see [[work-on-pr]] for the equivalent author-side
+  honored (see `work-on-pr` for the equivalent author-side
   notes).
 - The `/reviews` POST and `/comments/<id>/replies` POST entries
   cover the inline-comment path when `gh pr review` is not
@@ -696,8 +696,17 @@ Iteration 7:
 - [GitHub REST: pulls/comments (inline)](https://docs.github.com/en/rest/pulls/comments)
 - [GitHub REST: issues/comments (top-level)](https://docs.github.com/en/rest/issues/comments)
 - [gh pr review](https://cli.github.com/manual/gh_pr_review)
-- Related skills: [[work-on-pr]] (author side of the same loop),
-  [[codex-adversarial-pr-review]] (preferred over this skill when one
-  operator drives both sides under one GitHub identity),
-  [[pr-review-toolkit:review-pr]] (one-shot review),
-  [[gh-git-heredoc-body-file]] (body-file pattern).
+
+## Related
+
+- `work-on-pr` — the author side of the same loop, and the skill that decides
+  what this one is reviewing.
+- `codex-adversarial-pr-review` — preferred over this skill when one operator
+  drives both sides under one GitHub identity; that same-login case is the one
+  this skill cannot filter by author.
+- `parallel-agent-session-collisions` — when a second session is reviewing or
+  pushing to the same PR.
+
+For a one-shot review rather than a loop, the `pr-review-toolkit` plugin ships
+`review-pr`. The body-file pattern for `gh` bodies lives in
+`gh-git-heredoc-body-file`, in the sibling `skillz-memory` repo.
