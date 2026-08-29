@@ -808,6 +808,18 @@
         "codex"
       ],
       "summary": "Confine agent-run shell commands to one tree with macOS sandbox-exec: reads, writes, symlinks, runtime paths."
+    },
+    {
+      "name": "cmux-runbook-in-sibling-tab",
+      "path": "skills/cmux-runbook-in-sibling-tab/SKILL.md",
+      "files": [
+        "scripts/cmux-step"
+      ],
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "summary": "Drive a runbook one step at a time in a real terminal tab beside the agent's own cmux tab: an exit-code receipt per step via a step file + cmux wait-for (no screen scraping, no polling), irreversible or in-session-denied steps staged at the prompt for a human Enter and never fired through the keystroke channel. Ships scripts/cmux-step (open/run/stage/wait/show/close) and the YOLT rule that turns an agent's `cmux send-key enter` into a confirmation. Covers the escape-mangling trap in cmux send, retained wait-for signals, why a sibling tab does not satisfy 'quit every interactive session', and why a driven tab's output is still transcribed."
     }
   ],
   "collections": [
@@ -915,7 +927,8 @@
         "us-federal-open-data-claim-verification",
         "verbatim-social-post-retrieval",
         "wordpress-com-publish",
-        "work-on-pr"
+        "work-on-pr",
+        "cmux-runbook-in-sibling-tab"
       ],
       "summary": "Bundle: every catalog skill in one plugin, except skills whose own plugin ships hooks - install those plugins directly."
     },
@@ -2063,6 +2076,19 @@
         "macos-sandbox-exec-agent-command-confinement"
       ],
       "summary": "Single-skill plugin: macos-sandbox-exec-agent-command-confinement."
+    },
+    {
+      "name": "cmux-runbook-in-sibling-tab",
+      "claude_manifest": "plugins/cmux-runbook-in-sibling-tab/.claude-plugin/plugin.json",
+      "codex_manifest": "plugins/cmux-runbook-in-sibling-tab/.codex-plugin/plugin.json",
+      "hosts": [
+        "claude",
+        "codex"
+      ],
+      "skills": [
+        "cmux-runbook-in-sibling-tab"
+      ],
+      "summary": "Single-skill plugin: cmux-runbook-in-sibling-tab."
     }
   ],
   "defaults": {

@@ -440,6 +440,11 @@
       "name": "macos-sandbox-exec-agent-command-confinement",
       "source": "./plugins/macos-sandbox-exec-agent-command-confinement/",
       "description": "Confine agent-run shell commands to one tree with macOS sandbox-exec: reads, writes, symlinks, runtime paths."
+    },
+    {
+      "name": "cmux-runbook-in-sibling-tab",
+      "source": "./plugins/cmux-runbook-in-sibling-tab/",
+      "description": "Run a runbook step by step in a sibling cmux terminal tab with exit-code receipts; stage irreversible steps for a human Enter (scripts/cmux-step + YOLT rule)."
     }
   ]
 }
