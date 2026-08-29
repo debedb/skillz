@@ -214,6 +214,8 @@ environments and older Codex versions.
 | [`git-default-branch-detection` plugin](./plugins/git-default-branch-detection/) | plugin | Claude, Codex | Single-skill plugin: git-default-branch-detection |
 | [macos-sandbox-exec-agent-command-confinement](./skills/macos-sandbox-exec-agent-command-confinement/SKILL.md) | skill | Claude, Codex | Confine agent-run commands to one tree with macOS sandbox-exec |
 | [`macos-sandbox-exec-agent-command-confinement` plugin](./plugins/macos-sandbox-exec-agent-command-confinement/) | plugin | Claude, Codex | Single-skill plugin: macos-sandbox-exec-agent-command-confinement |
+| [cmux-runbook-in-sibling-tab](./skills/cmux-runbook-in-sibling-tab/SKILL.md) | skill | Claude, Codex | Drive a runbook step by step in a sibling cmux terminal tab: receipts per step, irreversible steps staged for a human Enter; ships `cmux-step` + the YOLT rule |
+| [`cmux-runbook-in-sibling-tab` plugin](./plugins/cmux-runbook-in-sibling-tab/) | plugin | Claude, Codex | Single-skill plugin: cmux-runbook-in-sibling-tab |
 
 Machine-readable index: [`catalog.json`](./catalog.json). The
 installer and validation script both read from it, so new entries
