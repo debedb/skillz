@@ -12,14 +12,17 @@ description: |
   not permitted` on `~/.gitconfig`, or a write to `/tmp` is denied although
   `/tmp` was allowed (realpath is `/private/tmp`); (4) deciding what under
   `$HOME` a git/gh/node toolchain must still read; (5) auto-approving an
-  agent's in-tree writes and needing the containment that makes that sound.
+  agent's in-tree writes and needing the containment that makes that sound;
+  (6) `git push` must work inside the sandbox but `~/.ssh` must not be
+  readable -- or `git ls-remote` hangs silently inside the profile (Homebrew's
+  `credential.helper osxkeychain` waiting on a keychain prompt).
   Encodes the profile shape (allow-default + global write deny + read deny
   under /Users and /Volumes + carve-outs), the ancestor `file-read-metadata`
   rule that traversal needs, realpath everywhere, per-tenant allowances, the
   fail-closed wrapper, the argv-in-logs trap, and the live tests that prove
   it.
 author: Claude Code
-version: 1.0.0
+version: 1.1.0
 date: 2026-08-28
 source: Built for voitta-ai/shmobster #116 (sandbox per Slack channel), verified live on Darwin 25 against a real git worktree.
 source_file: skills/macos-sandbox-exec-agent-command-confinement/SKILL.md
@@ -142,7 +145,48 @@ one moment the confinement matters most. And: the profile is now *in argv*.
 line becomes a screenful; log the fact ("timed out after Ns") and the
 scrubbed command, not `str(exc)`.
 
-### 4. CI without macOS
+### 4. Git without `~/.ssh` (do not grant the key directory)
+
+The first instinct -- "the channel that pushes needs `~/.ssh` readable" --
+hands a read-only `cat ~/.ssh/id_*` to whatever auto-runs read-only
+commands. ssh needs `config`, `known_hosts` (0600 by convention, and host
+verification is mandatory without a tty) and a key or an agent; a mode-based
+"deny 0600 files" rule breaks it on `known_hosts`. Route git over https
+instead, per process, with config injected through the environment
+(git >= 2.31), and let `gh` supply the token from the keychain:
+
+```sh
+GIT_TERMINAL_PROMPT=0
+GIT_CONFIG_COUNT=4
+GIT_CONFIG_KEY_0=url.https://github.com/.insteadOf   GIT_CONFIG_VALUE_0=git@github.com:
+GIT_CONFIG_KEY_1=url.https://github.com/.insteadOf   GIT_CONFIG_VALUE_1=ssh://git@github.com/
+GIT_CONFIG_KEY_2=credential.helper                   GIT_CONFIG_VALUE_2=
+GIT_CONFIG_KEY_3=credential.helper                   GIT_CONFIG_VALUE_3='!gh auth git-credential'
+```
+
+Two things bite without warning:
+
+- **The empty `credential.helper` is load-bearing.** Git runs every helper
+  configured at any level, and Homebrew ships `credential.helper osxkeychain`
+  in `/opt/homebrew/etc/gitconfig`. Inside the sandbox that helper hangs
+  waiting on a keychain prompt, so `git ls-remote` sits until your timeout
+  with no error text. The empty value resets the list; then only `gh` runs.
+- **The operator's `~/.gitconfig` may carry the opposite rewrite**
+  (`url.ssh://git@github.com/.insteadOf https://github.com/`, common for
+  people who push over ssh). The env entries win, so the https URL survives;
+  verify with `GIT_TRACE=1` that the transport is `http.c`, not `ssh`.
+
+`gh` keeps its token in the keychain, which seatbelt does not restrict, so
+`gh auth git-credential get` works inside the profile. Check
+`~/.config/gh/hosts.yml` does not contain `oauth_token:` -- on a host with no
+keychain `gh` writes the token there, and then that file is the secret.
+Verified: `git ls-remote` and an authenticated `git push --dry-run` inside the
+profile with `~/.ssh` fully denied.
+
+Same rule for AWS: `~/.aws/credentials` holds every profile's keys, so do not
+grant it; give a tenant its keys through its own environment.
+
+### 5. CI without macOS
 
 Stub the wrapper to `["/bin/sh", "-c", command]` when `shutil.which
 ("sandbox-exec")` is empty, so a Linux CI still exercises the exec path;
