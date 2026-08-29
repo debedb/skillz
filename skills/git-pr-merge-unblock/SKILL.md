@@ -12,10 +12,13 @@ description: |
   Encodes the non-obvious parts: bot approvals satisfy nothing CODEOWNERS checks,
   CODEOWNERS is matched per-path so a repo-wide "who owns this" answer is usually
   wrong, and the highest-yield reviewer is the changed file's recent author rather
-  than whoever the team picker offers first.
+  than whoever the team picker offers first. Also (6) `gh pr merge` fails with
+  `the base branch policy prohibits the merge` while every check is green - the
+  REST protection endpoint is 404 for non-admins, so read the effective rules via
+  GraphQL `refUpdateRule` and look for an unresolved review thread.
 author: Claude Code
-version: 1.2.1
-date: 2026-08-25
+version: 1.3.0
+date: 2026-08-29
 source: https://github.com/voitta-ai/skillz
 ---
 
@@ -172,6 +175,57 @@ GH_HOST=your-ghe.example.com gh api orgs/{org}/memberships/{username}
 # https://your-ghe.example.com/orgs/{org}/people?query={username}
 ```
 
+## Step 8: "the base branch policy prohibits the merge", every check green
+
+`gh pr merge` says only that; `mergeStateStatus` says only `BLOCKED`. The REST
+protection endpoint (`repos/{o}/{r}/branches/{b}/protection`) returns **404 to
+anyone who is not a repo admin** - indistinguishable from "not protected" - and
+`rules/branches/{b}` lists rulesets but not classic protection. The one view a
+write-only user gets is GraphQL:
+
+```bash
+gh api graphql -f query='query { repository(owner:"{org}", name:"{repo}") {
+  pullRequest(number:{PR}) { mergeStateStatus reviewDecision viewerCanMergeAsAdmin
+    reviewThreads(first:50) { nodes { id isResolved } }
+    baseRef { refUpdateRule { requiredApprovingReviewCount
+      requiresConversationResolution requiredStatusCheckContexts requiresLinearHistory } } } } }'
+```
+
+Read it in this order:
+
+1. `reviewThreads` with any `isResolved: false` **and** `requiresConversationResolution: true`
+   is the case the UI reports as `All comments must be resolved`. A reply does not
+   resolve a thread, and a review the author's own tooling posted counts. Resolve the
+   ones that were addressed - GraphQL only, no REST:
+   `mutation { resolveReviewThread(input:{threadId:"PRRT_..."}) { thread { isResolved } } }`
+2. `requiredApprovingReviewCount` above the approvals present, with the author unable
+   to approve their own PR, is Steps 3-5. `viewerCanMergeAsAdmin: false` rules out
+   `gh pr merge --admin` before you try it.
+3. `requiredStatusCheckContexts` names checks that must exist on the head commit -
+   a renamed workflow job leaves the old name required forever.
+
+**To date a rule you did not see appear**, compare the repo's `updated_at` with
+`pushed_at`: `gh api repos/{org}/{repo} --jq '{updated_at,pushed_at}'`. Pushes and
+merges move `pushed_at`; a settings edit moves `updated_at` alone, so an `updated_at`
+hours after the last push with no PR activity at that time is the moment. Bound it
+from the other side with a merge census - every PR merged since a date, with its
+approvals and threads:
+
+```bash
+gh search prs --owner {org} --merged --merged-at ">{ISO}" --limit 60 --json repository,number \
+  --jq '.[] | "\(.repository.name) \(.number)"' | while read -r repo num; do
+  gh api graphql -f query="query { repository(owner:\"{org}\", name:\"$repo\") {
+    pullRequest(number:$num) { mergedAt mergedBy { login } reviewDecision
+      reviews(first:20) { nodes { state author { login } } }
+      reviewThreads(first:1) { totalCount } } } }"
+done
+```
+
+PRs that merged with zero approvals under a `REVIEW_REQUIRED` decision were merged
+before the approval rule existed, or by someone on its bypass list; the last such
+merge is the lower bound. Naming the actor needs the org audit log (`read:audit_log`
+on an owner's token) - `repos/{o}/{r}/events` carries no protection changes.
+
 ## Verification
 
 ```bash
@@ -180,7 +234,7 @@ GH_HOST=your-ghe.example.com gh pr view {PR} --repo {org}/{repo} \
 ```
 
 `reviewDecision: APPROVED` **and** a `mergeStateStatus` that is not `BLOCKED` means it is
-genuinely clear. `reviewDecision` alone is the number to trust — not the count of green
+genuinely clear. `APPROVED` with `BLOCKED` is Step 8 - almost always an unresolved thread. `reviewDecision` alone is the number to trust — not the count of green
 ticks in the reviews list, for the reason in Step 2.
 
 ## Notes
