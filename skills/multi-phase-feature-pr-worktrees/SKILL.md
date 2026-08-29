@@ -15,7 +15,7 @@ description: |
   `<repo>.worktrees/<branch-name>/`. After each phase merge, rebase
   the next phase's worktree onto the updated umbrella branch.
 author: Claude Code
-version: 1.0.0
+version: 1.1.0
 date: 2026-05-08
 ---
 
@@ -249,3 +249,15 @@ gate.
 - GitHub stacked PR patterns (this is a low-tech version of
   what tools like Graphite / Sapling automate):
   https://graphite.dev/guides/stacked-prs
+
+## Related
+
+- `git-worktree-convention` — the sibling-worktree layout each phase's tree
+  follows, and the absolute-path rule that keeps a phase worktree from nesting
+  inside the repo.
+- `gh-pr-merge-delete-branch-closes-dependent-pr` — the trap that bites this
+  shape specifically: merging phase N with branch deletion closes phase N+1
+  rather than retargeting it.
+- `git-simulate-sequential-merges` — deciding which phases actually conflict
+  before merging any of them.
+- `work-on-pr` — the per-phase loop, once a phase has a PR.

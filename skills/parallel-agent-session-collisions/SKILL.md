@@ -21,7 +21,7 @@ description: |
   pre-flight check for each, and how to reconcile without losing the better
   version.
 author: Claude Code
-version: 1.2.0
+version: 1.3.0
 date: 2026-08-20
 ---
 
@@ -355,3 +355,16 @@ You have collided if any of these are true. Check before acting, not after:
 - Related: `github-api-list-endpoint-staleness-fresh-pr` (list endpoints can
   return `[]` for minutes on a fresh PR, so an empty result is not proof of
   absence).
+
+## Related
+
+- `agent-traffic-log` — the durable record of who asked whom what, which is how
+  a collision gets noticed by someone who was not watching at the time.
+- `cmux-cross-session-visibility` — the live view of the same traffic, for the
+  human deciding whether to intervene.
+- `claude-code-cross-session-messaging` — the addressing this skill's
+  "ask the live peers" step depends on.
+- `git-worktree-convention` — the layout whose derived paths make two sessions
+  choose the same worktree name from the same issue.
+- `claude-code-plugin-release-automation` — the shared-counter case in full,
+  including the merge mechanics that report success and do nothing.

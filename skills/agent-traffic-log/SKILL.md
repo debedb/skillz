@@ -18,7 +18,7 @@ description: |
   of a ten-message exchange with no agent calling `xs log`. Ships `scripts/xs`
   (log, tail, recent, status, prune) and `scripts/xs-hook`.
 author: Claude Code
-version: 1.3.0
+version: 1.4.0
 date: 2026-08-26
 source: https://github.com/voitta-ai/skillz
 source_file: skills/agent-traffic-log/SKILL.md
@@ -274,3 +274,15 @@ anyone's discipline. Without the hook, gaps mean what they always meant.
   message.
 - **`status` is a fold, so it inherits gaps.** An unlogged `answered` leaves a
   wait outstanding forever. Prefer logging `expired` over logging nothing.
+
+## Related
+
+- `cmux-cross-session-visibility` — the human-facing half of the same problem.
+  This skill is the durable event log; that one is the sidebar pill and message
+  envelope that make "who is blocked on whom" answerable at a glance.
+- `claude-code-cross-session-messaging` — how the messages this log records are
+  actually addressed and delivered.
+- `parallel-agent-session-collisions` — what the log is *for* in the end:
+  noticing that two sessions are converging before they collide.
+- `subagent-no-report-channel` — the failure this log cannot fix on its own, an
+  agent with a finding and nowhere to send it.

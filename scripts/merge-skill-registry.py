@@ -71,7 +71,12 @@ import subprocess
 import sys
 
 DEFAULT_BASE = "origin/master"
-PR_REF = "REBASE_HEAD"
+
+# The side being applied. A rebase exposes it as REBASE_HEAD, a merge as
+# MERGE_HEAD, and the shared indexes conflict in both - this script used to
+# demand a rebase and abort during a merge, which is the repo-health item at
+# the bottom of #206.
+PR_REFS = ("REBASE_HEAD", "MERGE_HEAD")
 
 REGISTRIES = [".claude-plugin/marketplace.json", ".codex-plugin/marketplace.json"]
 
@@ -177,10 +182,16 @@ def splice_readme(base_ref, added):
 def main():
     base_ref = sys.argv[1] if len(sys.argv) > 1 else DEFAULT_BASE
 
-    if show(PR_REF, "catalog.json") is None:
+    global PR_REF
+    PR_REF = next(
+        (ref for ref in PR_REFS if show(ref, "catalog.json") is not None), None
+    )
+    if PR_REF is None:
         print(
-            f"::error::cannot read {PR_REF} - this script expects a rebase in "
-            "progress (REBASE_HEAD is the commit being applied)",
+            "::error::cannot read REBASE_HEAD or MERGE_HEAD - this script "
+            "expects a rebase or a merge in progress (that ref is the side "
+            "being applied). Pass a commit explicitly to splice from it "
+            "instead.",
             file=sys.stderr,
         )
         return 1
